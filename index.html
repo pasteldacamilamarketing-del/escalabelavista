@@ -62,23 +62,18 @@ input{font-family:'Nunito',sans-serif;outline:none}
 
 /* ── LAYOUT PRINCIPAL ── */
 .main-layout{
-  display:flex;
-  height:calc(100vh - 58px);/* altura fixa para permitir scroll interno */
   position:relative;
-  overflow:hidden;
+  min-height:calc(100vh - 58px);
 }
 
 /* ── ÁREA DO CALENDÁRIO ── */
 .cal-area{
-  flex:1;
-  overflow-y:auto;/* calendário scrollável independente */
   padding:20px 18px 40px;
-  transition:width .3s ease, max-width .3s ease;
-  min-width:0;
+  transition:margin-right .3s ease;
 }
-/* Quando painel aberto: calendário ocupa o espaço restante */
+/* Quando painel aberto: empurra calendário pra esquerda */
 .cal-area.panel-open{
-  max-width:calc(100vw - var(--panel-w));
+  margin-right:var(--panel-w);
 }
 
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
@@ -108,7 +103,6 @@ input{font-family:'Nunito',sans-serif;outline:none}
   overflow:hidden;
 }
 /* Quando painel aberto, células ficam mais compactas */
-.panel-open ~ * .cal-cell,
 .cal-area.panel-open .cal-cell{min-height:80px;padding:6px 6px 4px}
 .cal-cell:hover{background:#FAFAFA}
 .cal-cell.empty{background:var(--g50);cursor:default}
@@ -141,12 +135,11 @@ input{font-family:'Nunito',sans-serif;outline:none}
 
 /* ── PAINEL LATERAL ── */
 .day-panel{
-  position:sticky;/* sticky dentro do flex, não fixed */
-  top:0;
+  position:fixed;
+  top:58px;
+  right:0;
+  bottom:0;
   width:var(--panel-w);
-  min-width:var(--panel-w);
-  max-width:var(--panel-w);
-  height:100%;/* ocupa toda a altura do main-layout */
   background:#fff;
   border-left:1px solid var(--g200);
   box-shadow:-8px 0 32px rgba(0,0,0,.08);
@@ -154,8 +147,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
   display:flex;
   flex-direction:column;
   animation:slideRight .25s ease;
-  overflow:hidden;/* impede vazamento lateral */
-  flex-shrink:0;
+  overflow:hidden;
 }
 .panel-head{
   background:var(--red);padding:16px 18px;
@@ -166,14 +158,14 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .panel-wd{font-size:11px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
 .panel-close{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0}
 .panel-body{
-  flex:1;/* ocupa todo espaço restante abaixo do header */
-  overflow-y:auto;/* SCROLL AQUI */
+  flex:1;
+  overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   padding:14px 16px 32px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
+  display:block;
 }
+.panel-body > *{margin-bottom:12px;}
+.panel-body > *:last-child{margin-bottom:0;}
 
 /* Turno dentro do painel */
 .shift-block{border-radius:12px;overflow:hidden}
@@ -281,25 +273,17 @@ input{font-family:'Nunito',sans-serif;outline:none}
   .topbar{height:54px;padding:0 12px}
   .brand-sub{display:none}
   .brand-logo{height:38px;width:38px}
-  /* No mobile o layout vira coluna e o painel cobre tudo */
-  .main-layout{
-    flex-direction:column;
-    height:auto;
-    overflow:visible;
-  }
-  .cal-area{
-    max-width:100%!important;
-    overflow-y:visible;
-    height:auto;
-  }
-  /* Painel vira fixed no mobile */
+  /* No mobile o painel cobre tudo - ajusta o top para a topbar menor */
   .day-panel{
-    position:fixed;
-    top:54px;left:0;right:0;bottom:0;
-    width:100%;min-width:0;max-width:100%;
-    height:calc(100vh - 54px);
+    top:54px;
+    left:0;
+    width:100%;
     animation:slideUp .25s ease;
     z-index:500;
+  }
+  /* No mobile o calendário não precisa de margin quando painel aberto */
+  .cal-area.panel-open{
+    margin-right:0;
   }
   .cal-cell{min-height:72px;padding:5px 5px 4px}
   .cal-day-num{font-size:14px;width:22px;height:22px}

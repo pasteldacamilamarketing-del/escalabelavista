@@ -188,8 +188,29 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .add-btn{display:block;width:100%;padding:9px;background:none;border:none;border-top:1.5px dashed var(--g200);font-size:13px;font-weight:700;color:var(--red);cursor:pointer;text-align:center;font-family:'Nunito',sans-serif}
 .add-btn:hover{background:var(--red-bg)}
 
-/* Cards de entrada no painel */
-.entry-cards{display:flex;flex-direction:column;gap:6px;padding:8px 10px 4px;background:#fff}
+/* Cards de entrada no painel — agrupados por pessoa */
+.entry-cards{display:flex;flex-direction:column;gap:8px;padding:8px 10px 4px;background:#fff}
+
+/* Card agrupado: uma pessoa, múltiplas funções */
+.person-card{
+  background:#fff;border:1px solid var(--g100);border-radius:12px;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;
+}
+.person-card-head{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 12px 6px;
+}
+.ec-name{font-size:14px;font-weight:800;color:var(--g900)}
+.person-card-roles{
+  display:flex;flex-wrap:wrap;gap:4px;
+  padding:0 12px 8px;
+}
+.person-card-foot{
+  padding:0 12px 9px;
+  display:flex;flex-direction:column;gap:3px;
+}
+
+/* Card individual (compatibilidade — modo edição) */
 .entry-card{
   display:flex;align-items:flex-start;gap:9px;
   background:#fff;border:1px solid var(--g100);border-radius:10px;
@@ -476,6 +497,26 @@ input{font-family:'Nunito',sans-serif;outline:none}
   font-size:13px;font-weight:700;color:var(--g700);
   font-family:'Barlow Condensed',sans-serif;
 }
+/* Função principal */
+.dp-funcao-principal{
+  display:inline-flex;align-items:center;
+  background:#FFF7ED;border:1.5px solid #F97316;
+  color:#C2410C;border-radius:8px;
+  padding:4px 12px;font-size:13px;font-weight:800;
+  margin-bottom:2px;
+}
+.dp-funcao-principal::before{content:'⭐ ';font-size:11px}
+
+/* Padrão do dia */
+.dp-padrao-dia{
+  display:inline-flex;align-items:center;
+  background:#EFF6FF;border:1.5px solid #BFDBFE;
+  color:#1D4ED8;border-radius:8px;
+  padding:4px 12px;font-size:12px;font-weight:700;
+  margin-bottom:2px;
+}
+.dp-padrao-dia::before{content:'📅 ';font-size:11px}
+
 /* Função hoje */
 .dp-funcao-hoje{
   display:inline-flex;align-items:center;
@@ -534,6 +575,33 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .dp-trans-atual{font-size:11px;color:#047857;font-weight:700;line-height:1.6}
 .dp-trans-futuro{font-size:11px;color:#B45309;font-weight:800;line-height:1.6}
 
+/* ── AJUSTE MANUAL NO CARD ── */
+.ec-ajuste-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#FFF7ED;border:1px solid #FED7AA;
+  color:#C2410C;border-radius:5px;
+  padding:2px 8px;font-size:10px;font-weight:700;
+  margin-bottom:3px;cursor:default;
+}
+.ec-btn-ajuste{
+  background:#F0F9FF;color:#0369A1;
+  border:1px solid #BAE6FD!important;
+}
+.ec-btn-ajuste:hover{background:#E0F2FE!important}
+
+/* ── AJUSTE NO POPUP ── */
+.dp-ajuste-bloco{
+  background:#FFF7ED;border:1px solid #FED7AA;
+  border-radius:8px;padding:10px 12px;
+}
+.dp-ajuste-tipo{
+  font-size:13px;font-weight:800;color:#C2410C;
+  display:block;margin-bottom:4px;
+}
+.dp-ajuste-desc{font-size:12px;color:#7C2D12;font-weight:600;margin-bottom:3px}
+.dp-ajuste-obs{font-size:11px;color:#92400E;font-style:italic}
+.dp-ajuste-apr{font-size:10px;color:#047857;font-weight:700;margin-top:4px}
+
 /* ── RESPONSABILIDADES NO CARD (RODADA 2) ── */
 /* Hierarquia visual: nome > função/horário > responsabilidade */
 .ec-resp-wrap{
@@ -582,6 +650,40 @@ input{font-family:'Nunito',sans-serif;outline:none}
   .ec-resp-chip{font-size:8px;padding:1px 5px}
   .ec-resp-mais{font-size:8px;padding:1px 5px}
   .ec-resp-label{font-size:8px}
+}
+
+/* Chips de função no card agrupado */
+.pc-role-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  border:1.5px solid;border-radius:6px;
+  padding:3px 8px;font-size:11px;font-weight:800;
+  cursor:default;white-space:nowrap;position:relative;
+}
+.pc-hor{font-size:10px;color:var(--g400);font-weight:600;display:block;margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;}
+/* Botões admin dentro do chip — ocultos até hover */
+.pc-chip-actions{
+  display:none;align-items:center;gap:2px;margin-left:2px;
+}
+.pc-role-editable:hover .pc-chip-actions,
+.pc-role-editable:active .pc-chip-actions{
+  display:inline-flex;
+}
+.pc-chip-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border:none;border-radius:4px;
+  font-size:10px;font-weight:800;cursor:pointer;padding:0;
+  background:rgba(0,0,0,.08);color:currentColor;
+  font-family:'Nunito',sans-serif;
+  transition:background .1s;
+}
+.pc-chip-btn:hover{background:rgba(0,0,0,.18)}
+.pc-chip-btn.danger{background:rgba(234,29,44,.15);color:var(--red)}
+.pc-chip-btn.danger:hover{background:rgba(234,29,44,.3)}
+.pc-chip-btn.warn{background:rgba(230,81,0,.15);color:#E65100}
+.pc-chip-btn.warn:hover{background:rgba(230,81,0,.3)}
+/* Mobile: sempre mostrar ações se logado (sem hover) */
+@media(max-width:640px){
+  .pc-chip-actions{display:inline-flex}
 }
 
 /* ── HISTÓRICO ── */
@@ -696,6 +798,41 @@ try{
     console.warn('Supabase SDK não carregado — modo offline')
   }
 }catch(e){ console.warn('Supabase init error:',e.message) }
+
+// ── Auth: login com Supabase ──
+async function loginSupabase(email, password){
+  if(!supa) return null
+  try{
+    const {data,error}=await supa.auth.signInWithPassword({email,password})
+    if(error) throw error
+    return data.user
+  }catch(e){
+    return null
+  }
+}
+
+// ── Auth: logout ──
+async function logoutSupabase(){
+  if(!supa) return
+  try{ await supa.auth.signOut() }catch(e){}
+}
+
+// ── Auth: restaurar sessão ativa ──
+async function restoreSession(){
+  if(!supa) return null
+  try{
+    const {data}=await supa.auth.getSession()
+    if(data?.session?.user){
+      const email=data.session.user.email
+      const profile=USER_PROFILES[email]
+      if(profile){
+        G.user={u:email,email,...profile}
+        return G.user
+      }
+    }
+  }catch(e){}
+  return null
+}
 
 // ── Carrega todos os dias do banco ──
 async function loadFromSupabase(){
@@ -814,7 +951,13 @@ function buildHistoricoFromArray(arr){
 // ===== BASE FIXA =====
 const RH='5511945461633'
 const SU='pdc_u', SD='pdc_d6'
-const USERS=[
+// Mapeamento email → perfil (sem senhas — autenticação via Supabase Auth)
+const USER_PROFILES={
+  'admin@pasteldacamila.com':  {role:'admin',  name:'Admin',  av:'AD',can:{edit:1,del:1,add:1}},
+  'vitoria@pasteldacamila.com':{role:'manager',name:'Vitória',av:'VI',can:{edit:1,del:1,add:1}},
+}
+// Fallback local (apenas para desenvolvimento sem Supabase)
+const USERS_DEV=[
   {u:'admin',  p:'2026',role:'admin',  name:'Admin',  av:'AD',can:{edit:1,del:1,add:1}},
   {u:'vitoria',p:'2026',role:'manager',name:'Vitória',av:'VI',can:{edit:1,del:1,add:1}},
 ]
@@ -865,13 +1008,10 @@ const HORARIOS={
 function getHorario(nome){
   if(!nome)return null
   // Normaliza: remove acentos, lowercase, pega só primeiro nome
-  const norm=s=>s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-  const primeiro=norm(nome.split(/\s+/)[0])
-  // Busca direta no índice (já normalizado)
+  const primeiro=normStr(nome.split(/\s+/)[0])
   if(HORARIOS_IDX[primeiro]) return HORARIOS_IDX[primeiro]
-  // Fallback com normalização
   return HORARIOS_LIST.find(p=>{
-    const pn=norm(p.nome.split(/\s+/)[0])
+    const pn=normStr(p.nome.split(/\s+/)[0])
     return pn===primeiro||pn.startsWith(primeiro)||primeiro.startsWith(pn)
   })||null
 }
@@ -957,11 +1097,12 @@ const FUNCOES_POR_PESSOA={
   },
   'wirislaine':{
     bloco:'Produção / Fluxo',
+    funcaoPrincipal:'Fritura',
     funcoes:['Fritura','Escorredeira','Limpeza do tacho'],
     detalhes:{
-      'Fritura':'Responsável pela fritura dos pastéis.',
-      'Escorredeira':'Operar a escorredeira.',
-      'Limpeza do tacho':'Completar óleo quando necessário. Limpeza da escorredeira inclusa.'
+      'Fritura':'Responsável pela fritura todos os dias. Controle da temperatura do tacho. Completar óleo. Limpeza da escorredeira.',
+      'Escorredeira':'Operar a escorredeira durante a produção.',
+      'Limpeza do tacho':'Limpeza completa do tacho. Completar óleo quando necessário.'
     }
   },
 
@@ -1030,21 +1171,16 @@ function isCritica(resp){
 // Helper: busca responsabilidades pelo primeiro nome normalizado
 function getResponsabilidades(nome){
   if(!nome)return null
-  const norm=s=>s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
-  const k=norm(nome.split(/\s+/)[0])
+  const k=normStr(nome.split(/\s+/)[0])
   return RESPONSABILIDADES[k]||null
 }
 
 // Helper: busca funções pelo primeiro nome (lowercase)
 function getFuncoes(nome){
   if(!nome)return null
-  const primeiro=nome.trim().split(/\s+/)[0].toLowerCase()
-  // Normaliza acentos para busca
-  const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
-  const chave=norm(primeiro)
-  return Object.keys(FUNCOES_POR_PESSOA).find(k=>norm(k)===chave||norm(k).startsWith(chave)||chave.startsWith(norm(k)))
-    ? FUNCOES_POR_PESSOA[Object.keys(FUNCOES_POR_PESSOA).find(k=>norm(k)===chave||norm(k).startsWith(chave)||chave.startsWith(norm(k)))]
-    : null
+  const chave=normStr(nome.split(/\s+/)[0])
+  const key=Object.keys(FUNCOES_POR_PESSOA).find(k=>normStr(k)===chave||normStr(k).startsWith(chave)||chave.startsWith(normStr(k)))
+  return key?FUNCOES_POR_PESSOA[key]:null
 }
 
 // ===== DADOS DA ESCALA =====
@@ -1086,6 +1222,8 @@ const G={user:null,days:null,selectedDate:null,menu:false,cr:false,viewYear:2026
 // viewMonth: 1=Jan ... 12=Dez
 
 // ===== HELPERS =====
+// Normaliza string para comparação: remove acentos, lowercase
+const normStr=s=>(s||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
 const esc=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''
 const clone=x=>JSON.parse(JSON.stringify(x))
 const save=()=>{
@@ -1104,6 +1242,19 @@ function toast(m,t='info'){
   }catch(e){}
 }
 
+// ===== AJUSTES MANUAIS =====
+const AJUSTE_TIPOS={
+  banco_horas: {label:'Banco de horas', icon:'⏱'},
+  folga:       {label:'Folga',          icon:'📅'},
+  atraso:      {label:'Atraso',         icon:'⏰'},
+  cobertura:   {label:'Cobertura',      icon:'🔄'},
+  outro:       {label:'Outro',          icon:'📝'},
+}
+
+function getAjusteMeta(tipo){
+  return AJUSTE_TIPOS[tipo]||{label:tipo||'Ajuste',icon:'📝'}
+}
+
 // ── Expande/colapsa responsabilidades extras no card ──
 function toggleResps(btn){
   const id=btn.dataset.mais
@@ -1115,8 +1266,11 @@ function toggleResps(btn){
 
 // ===== INIT =====
 async function init(){
-  // Restaurar sessão do usuário
-  try{const u=localStorage.getItem(SU);if(u)G.user=JSON.parse(u)}catch(e){localStorage.removeItem(SU)}
+  // Restaurar sessão — Supabase Auth primeiro, fallback localStorage
+  const sessionRestored = await restoreSession()
+  if(!sessionRestored){
+    try{const u=localStorage.getItem(SU);if(u)G.user=JSON.parse(u)}catch(e){localStorage.removeItem(SU)}
+  }
 
   // Setar visualização no mês/ano atual
   const _now=new Date()
@@ -1391,16 +1545,112 @@ function buildShiftPanel(day,shift){
   const m=shift==='manha'
   const entries=day[shift]
   const canAdd=G.user&&G.user.can&&G.user.can.add
+
+  // Agrupar entries por pessoa
+  const grupos={}
+  const ordemPessoas=[]
+  entries.forEach(e=>{
+    const nome=e.person||'—'
+    if(!grupos[nome]){grupos[nome]=[];ordemPessoas.push(nome)}
+    grupos[nome].push(e)
+  })
+
+  // Construir HTML agrupado
+  const cardsHtml=ordemPessoas.map(nome=>{
+    const entriesDaPessoa=grupos[nome]
+    // Se só uma função ou modo edição pendente, usar card normal
+    if(entriesDaPessoa.length===1){
+      return buildCard(day.date,shift,entriesDaPessoa[0])
+    }
+    // Agrupado: nome uma vez, funções listadas
+    return buildPersonCard(day.date,shift,nome,entriesDaPessoa)
+  }).join('')
+
+  const totalPessoas=ordemPessoas.length
+  const totalFuncoes=entries.length
+  const countLabel=totalPessoas===totalFuncoes
+    ?`${totalPessoas} pessoas`
+    :`${totalPessoas} pessoas · ${totalFuncoes} funções`
+
   return `<div class="shift-block ${m?'manha':'noite'}">
     <div class="shift-head">
       <span class="shift-head-icon">${m?'☀️':'🌙'}</span>
       <span class="shift-head-label">${m?'Manhã':'Noite'}</span>
-      <span class="shift-head-count">${entries.length} funções</span>
+      <span class="shift-head-count">${countLabel}</span>
     </div>
     <div class="entry-cards" id="cards-${day.date}-${shift}">
-      ${entries.map(e=>buildCard(day.date,shift,e)).join('')}
+      ${cardsHtml}
     </div>
     ${canAdd?`<button class="add-btn" data-add="${day.date}|${shift}">+ Adicionar</button>`:''}
+  </div>`
+}
+
+// ── Card agrupado: uma pessoa com múltiplas funções ──
+function buildPersonCard(date,shift,nome,entries){
+  const hor=getHorario(nome)
+  const resps=getResponsabilidades(nome)||[]
+  const func=getFuncoes(nome)
+  const temDetalhes=func!==null
+  const logado=G.user&&G.user.can&&G.user.can.edit
+
+  // Chips de função — cada um com seu status e data-k para edição
+  const roleChips=entries.map(e=>{
+    const st=ST[e.status]||ST.pending
+    const isFalta=e.status==='absent'
+    const k=`${date}|${shift}|${e.id}`
+    const cor=isFalta?'var(--abs)':st.c
+    const bg=isFalta?'var(--abs-bg)':st.c+'22'
+    return `<span class="pc-role-chip" data-k="${k}" style="border-color:${cor};color:${cor};background:${bg}"
+      title="${esc(e.role)}${e.obs?' — '+e.obs:''}">${esc(e.role||'—')}${isFalta?' ✕':''}</span>`
+  }).join('')
+
+  // Horário
+  const horHtml=hor&&hor.horario
+    ?`<span class="pc-hor">${esc(hor.horario)} · 🍽 ${esc(hor.almoco)}</span>`
+    :''
+
+  // Responsabilidades (máx 2 + ver mais)
+  let respHtml=''
+  if(resps.length){
+    const vis=resps.slice(0,2)
+    const ext=resps.slice(2)
+    const chips=vis.map(r=>`<span class="ec-resp-chip">${esc(r)}</span>`).join('')
+    const maisBtn=ext.length?`<button class="ec-resp-mais" data-mais="${esc(entries[0].id)}" onclick="toggleResps(this)">+${ext.length}</button>`:''
+    const extHtml=ext.length?`<div class="ec-resp-extras" id="extras-${esc(entries[0].id)}" style="display:none">${ext.map(r=>`<span class="ec-resp-chip ec-resp-extra">${esc(r)}</span>`).join('')}</div>`:''
+    respHtml=`<div class="ec-resp-wrap"><span class="ec-resp-label">Resp.</span>${chips}${maisBtn}${extHtml}</div>`
+  }
+
+  const detalheBtn=temDetalhes
+    ?`<button class="ec-detalhe-btn" data-det-nome="${esc(nome)}" data-det-role="${esc(entries[0].role||'')}">📋 Ver funções</button>`
+    :''
+
+  // Chips de função — quando logado, cada chip tem botões inline ocultos que aparecem no hover
+  const roleChipsHtml=entries.map(e=>{
+    const st=ST[e.status]||ST.pending
+    const isFalta=e.status==='absent'
+    const k=`${date}|${shift}|${e.id}`
+    const cor=isFalta?'var(--abs)':st.c
+    const bg=isFalta?'var(--abs-bg)':st.c+'22'
+    const adminBtns=logado?`<span class="pc-chip-actions">
+      <button class="pc-chip-btn" data-ed="${k}" title="Editar">✏</button>
+      <button class="pc-chip-btn danger" data-dl="${k}" title="Excluir">✕</button>
+      ${!isFalta?`<button class="pc-chip-btn warn" data-falta="${k}" title="Falta">!</button>`:''}
+    </span>`:''
+    return `<span class="pc-role-chip${logado?' pc-role-editable':''}" style="border-color:${cor};color:${cor};background:${bg}">
+      ${esc(e.role||'—')}${isFalta?' ✕':''}${adminBtns}
+    </span>`
+  }).join('')
+
+  return `<div class="person-card">
+    <div class="person-card-head">
+      <div class="ec-right" style="flex:1;min-width:0">
+        <div class="ec-name">${esc(nome)}</div>
+        ${horHtml}
+        ${respHtml}
+      </div>
+      ${detalheBtn}
+    </div>
+    <div class="person-card-roles">${roleChipsHtml}</div>
   </div>`
 }
 
@@ -1475,16 +1725,35 @@ function buildCard(date,shift,e,editing){
     ?`<button class="ec-detalhe-btn" data-det-nome="${esc(e.person)}" data-det-role="${esc(e.role||'')}">📋 Ver funções</button>`
     :''
 
+  // Ajuste manual: indicador no card + botão para admin
+  const aj=e.ajuste||null
+  let ajusteHtml=''
+  if(aj&&aj.tipo){
+    const meta=getAjusteMeta(aj.tipo)
+    ajusteHtml=`<div class="ec-ajuste-badge" data-aj="${esc(k)}" title="${esc(aj.descricao||'')}">
+      ${meta.icon} ${meta.label}
+    </div>`
+  }
+  const ajusteBtn=logado
+    ?`<button class="ec-btn ec-btn-ajuste" data-ajuste="${esc(k)}">${aj?'✏️ Ajuste':'+ Ajuste'}</button>`
+    :''
+
   return `<div class="entry-card${isFalta?' falta':''}" data-k="${k}">
     <span class="ec-role">${esc(e.role||'—')}</span>
     <div class="ec-right">
       <div class="ec-name">${esc(e.person||'—')}</div>
       ${horHtml}
+      ${ajusteHtml}
       ${respHtml}
       ${e.obs?`<div class="ec-obs">${esc(e.obs)}</div>`:''}
       ${statusHtml}
       ${detalheBtn}
-      ${acoes}
+      <div class="ec-actions">
+        ${logado?`<button class="ec-btn edit" data-ed="${k}">✏️ Editar</button>`:''}
+        ${logado?`<button class="ec-btn del" data-dl="${k}">🗑️</button>`:''}
+        ${logado&&!isFalta?`<button class="ec-btn falta-btn" data-falta="${k}">⚠ Falta</button>`:''}
+        ${ajusteBtn}
+      </div>
     </div>
   </div>`
 }
@@ -1532,7 +1801,8 @@ function bindAll(){
     localStorage.removeItem(SD);G.days=clone(BASE);G.days.forEach(d=>dayMap[d.date]=d)
     G.cr=false;G.menu=false;G.selectedDate=null;toast('Escala resetada.','info');render()
   }
-  const dout=document.getElementById('dout');if(dout)dout.onclick=()=>{
+  const dout=document.getElementById('dout');if(dout)dout.onclick=async()=>{
+    await logoutSupabase()
     G.user=null;localStorage.removeItem(SU);G.menu=false;toast('Sessão encerrada.','info');render()
   }
   const bhorarios=document.getElementById('btn-horarios');if(bhorarios)bhorarios.onclick=showHorariosModal
@@ -1561,6 +1831,7 @@ function bindAll(){
     if(ev.key!=='Escape')return
     if(document.getElementById('dmodal'))  {document.getElementById('dmodal').remove();return}
     if(document.getElementById('det-popup')) {document.getElementById('det-popup').remove();return}
+    if(document.getElementById('ajmodal')) {document.getElementById('ajmodal').remove();return}
     if(document.getElementById('hmodal'))  {document.getElementById('hmodal').remove();return}
     if(document.getElementById('lmodal'))  {document.getElementById('lmodal').remove();return}
     if(document.getElementById('fmodal'))  {document.getElementById('fmodal').remove();return}
@@ -1604,6 +1875,11 @@ function bindPanel(){
   })
   // Carregar histórico remoto do dia selecionado (sem bloquear UI)
   if(G.selectedDate) loadHistoricoRemoto(G.selectedDate)
+
+  // Botão ajuste manual
+  document.querySelectorAll('[data-ajuste]').forEach(b=>{
+    b.onclick=ev=>{ev.stopPropagation();showAjusteModal(b.dataset.ajuste)}
+  })
 
   document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
     requireAuth(()=>{
@@ -1698,7 +1974,13 @@ function requireAuth(fn){
 
 function showLoginModal(onSuccess){
   document.getElementById('lmodal')?.remove()
+  const useSupaAuth = !!supa
   const m=document.createElement('div');m.id='lmodal'
+  // Campo de email (Supabase) ou usuário (fallback local)
+  const inputLabel = useSupaAuth ? 'E-mail' : 'Usuário'
+  const inputPlaceholder = useSupaAuth ? 'seu@email.com' : 'admin ou vitoria'
+  const inputType = useSupaAuth ? 'email' : 'text'
+
   m.innerHTML=`<div class="modal-bg" id="lmbg">
     <div class="modal-card" style="max-width:360px">
       <div class="card-top">
@@ -1709,8 +1991,17 @@ function showLoginModal(onSuccess){
       <div class="card-body">
         <div class="l-title">Identificação necessária</div>
         <div class="l-sub">Edição e exclusão exigem login</div>
-        <div class="field"><label>Usuário</label><input class="inp" id="mu" type="text" placeholder="admin ou vitoria" autocomplete="username"/></div>
-        <div class="field"><label>Senha</label><div class="inp-wr"><input class="inp" id="mp" type="password" placeholder="••••••"/><button class="eye" id="meye">👁</button></div></div>
+        <div class="field">
+          <label>${inputLabel}</label>
+          <input class="inp" id="mu" type="${inputType}" placeholder="${inputPlaceholder}" autocomplete="username"/>
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <div class="inp-wr">
+            <input class="inp" id="mp" type="password" placeholder="••••••"/>
+            <button class="eye" id="meye">👁</button>
+          </div>
+        </div>
         <div class="l-err" id="merr"></div>
         <div style="display:flex;gap:9px">
           <button class="l-btn" id="mcancel" style="background:var(--g200);color:var(--g700);flex:0 0 auto;width:auto;padding:12px 16px">Cancelar</button>
@@ -1719,6 +2010,7 @@ function showLoginModal(onSuccess){
       </div>
     </div>
   </div>`
+
   document.body.appendChild(m)
   document.getElementById('mu').focus()
   document.getElementById('meye').onclick=()=>{const p=document.getElementById('mp');p.type=p.type==='password'?'text':'password'}
@@ -1727,21 +2019,45 @@ function showLoginModal(onSuccess){
   document.getElementById('mp').onkeydown=ev=>{if(ev.key==='Enter')tryLogin()}
   document.getElementById('mu').onkeydown=ev=>{if(ev.key==='Enter')document.getElementById('mp').focus()}
   document.getElementById('mlogin').onclick=tryLogin
-  function tryLogin(){
+
+  async function tryLogin(){
     const u=(document.getElementById('mu').value||'').trim()
     const p=document.getElementById('mp').value||''
-    const err=document.getElementById('merr');const btn=document.getElementById('mlogin')
-    if(!u){err.textContent='⚠ Informe o usuário.';err.style.display='block';return}
+    const err=document.getElementById('merr')
+    const btn=document.getElementById('mlogin')
+    if(!u){err.textContent='⚠ Informe o '+inputLabel.toLowerCase()+'.';err.style.display='block';return}
+    if(!p){err.textContent='⚠ Informe a senha.';err.style.display='block';return}
     btn.innerHTML='<span class="spinner"></span>';btn.disabled=true
-    setTimeout(()=>{
-      const f=USERS.find(x=>x.u.toLowerCase()===u.toLowerCase())
-      if(!f){show('Usuário não encontrado.');return}
-      if(p!==f.p){show('Senha incorreta.');return}
-      G.user={u:f.u,role:f.role,name:f.name,av:f.av,can:f.can}
-      localStorage.setItem(SU,JSON.stringify(G.user))
-      m.remove();toast('Olá, '+G.user.name+'!','success');render()
-      if(onSuccess)onSuccess()
-    },350)
+
+    if(useSupaAuth){
+      // ── Login via Supabase Auth ──
+      const supaUser = await loginSupabase(u, p)
+      if(supaUser){
+        const profile=USER_PROFILES[u]||USER_PROFILES[supaUser.email]
+        if(profile){
+          G.user={u:supaUser.email,email:supaUser.email,...profile}
+          localStorage.setItem(SU,JSON.stringify(G.user))
+          m.remove();toast('Olá, '+G.user.name+'! ✓','success');render()
+          if(onSuccess)onSuccess()
+        } else {
+          show('Usuário sem permissão de acesso.')
+          await logoutSupabase()
+        }
+      } else {
+        show('E-mail ou senha incorretos.')
+      }
+    } else {
+      // ── Fallback: login local (modo offline/dev) ──
+      setTimeout(()=>{
+        const f=USERS_DEV.find(x=>x.u.toLowerCase()===u.toLowerCase())
+        if(!f){show('Usuário não encontrado.');return}
+        if(p!==f.p){show('Senha incorreta.');return}
+        G.user={u:f.u,role:f.role,name:f.name,av:f.av,can:f.can}
+        localStorage.setItem(SU,JSON.stringify(G.user))
+        m.remove();toast('Olá, '+G.user.name+'!','success');render()
+        if(onSuccess)onSuccess()
+      },350)
+    }
     function show(msg){err.textContent='⚠ '+msg;err.style.display='block';btn.innerHTML='Entrar';btn.disabled=false}
   }
 }
@@ -1765,12 +2081,28 @@ function showDetalhes(nome, funcaoAtual){
       </div>
     </div>`:''
 
-  // 3. Função do dia
-  const funcDiaSection=funcaoAtual?`
+  // 3. Função principal + padrão do dia + função de hoje
+  const funcPrincipal=func?.funcaoPrincipal||null
+  const padraoDia=func?.padraoDia||null
+  // Descobrir o dia da semana do painel aberto
+  const wdAtual=G.selectedDate?dayMap[G.selectedDate]?.wd:null
+  const padraoHoje=padraoDia&&wdAtual?padraoDia[wdAtual]:null
+
+  const funcDiaSection=`
     <div class="dp-section">
-      <div class="dp-section-label">Função hoje</div>
-      <span class="dp-funcao-hoje">${esc(funcaoAtual)}</span>
-    </div>`:''
+      ${funcPrincipal?`
+        <div class="dp-section-label">Função principal</div>
+        <span class="dp-funcao-principal">${esc(funcPrincipal)}</span>
+      `:''}
+      ${padraoHoje?`
+        <div class="dp-section-label" style="margin-top:8px">Padrão de hoje (${esc(wdAtual)})</div>
+        <span class="dp-padrao-dia">${esc(padraoHoje)}</span>
+      `:''}
+      ${funcaoAtual&&funcaoAtual!==funcPrincipal?`
+        <div class="dp-section-label" style="margin-top:8px">Função escalada agora</div>
+        <span class="dp-funcao-hoje">${esc(funcaoAtual)}</span>
+      `:''}
+    </div>`
 
   // 4. Funções possíveis
   let funcSection=''
@@ -1813,6 +2145,30 @@ function showDetalhes(nome, funcaoAtual){
       <div class="dp-obs">${esc(obsText)}</div>
     </div>`:''
 
+  // 7b. Ajuste do dia (se houver) — busca no dayMap
+  let ajusteSection=''
+  if(G.selectedDate){
+    const day=dayMap[G.selectedDate]
+    if(day){
+      const allE=[...day.manha,...day.noite]
+      const entry=allE.find(x=>normStr(x.person||'').startsWith(normStr(nome||'').split(' ')[0]))
+      const aj=entry&&entry.ajuste&&entry.ajuste.tipo?entry.ajuste:null
+      if(aj){
+        const meta=getAjusteMeta(aj.tipo)
+        ajusteSection=`
+          <div class="dp-section">
+            <div class="dp-section-label">Ajuste do dia</div>
+            <div class="dp-ajuste-bloco">
+              <span class="dp-ajuste-tipo">${meta.icon} ${meta.label}</span>
+              ${aj.descricao?`<div class="dp-ajuste-desc">${esc(aj.descricao)}</div>`:''}
+              ${aj.observacao?`<div class="dp-ajuste-obs">${esc(aj.observacao)}</div>`:''}
+              ${aj.aprovadoPor?`<div class="dp-ajuste-apr">✓ Aprovado por ${esc(aj.aprovadoPor)}</div>`:''}
+            </div>
+          </div>`
+      }
+    }
+  }
+
   // 8. Regra do dia
   const regraSection=`
     <div class="dp-regra">
@@ -1844,6 +2200,7 @@ function showDetalhes(nome, funcaoAtual){
           ${funcSection}
           ${respSection}
           ${obsSection}
+          ${ajusteSection}
           ${regraSection}
           ${transSection}
         </div>
@@ -1852,6 +2209,95 @@ function showDetalhes(nome, funcaoAtual){
 
   document.body.appendChild(m)
   document.getElementById('dp-overlay').onclick=ev=>{if(ev.target.id==='dp-overlay')m.remove()}
+}
+
+// ── MODAL DE AJUSTE MANUAL ──
+function showAjusteModal(k){
+  const [date,shift,id]=k.split('|')
+  const day=dayMap[date];if(!day)return
+  const e=day[shift]&&day[shift].find(x=>x.id===id);if(!e)return
+  const aj=e.ajuste||{}
+
+  document.getElementById('ajmodal')?.remove()
+  const m=document.createElement('div');m.id='ajmodal'
+  const opts=Object.entries(AJUSTE_TIPOS).map(([v,{label,icon}])=>
+    `<option value="${v}"${aj.tipo===v?' selected':''}>${icon} ${label}</option>`
+  ).join('')
+
+  m.innerHTML=`<div class="modal-bg" id="ajbg">
+    <div class="modal-card" style="max-width:380px">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">📝 Ajuste manual</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px">${esc(e.person)} · ${esc(e.role)}</div>
+        </div>
+        <button class="modal-close" id="ajclose">✕</button>
+      </div>
+      <div class="modal-body" style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px">
+        <div class="field">
+          <label>Tipo</label>
+          <select class="inp" id="aj-tipo" style="padding:10px">
+            <option value="">Selecione...</option>
+            ${opts}
+          </select>
+        </div>
+        <div class="field">
+          <label>Descrição</label>
+          <input class="inp" id="aj-desc" type="text" value="${esc(aj.descricao||'')}" placeholder="Ex: Saiu 1h antes por consulta"/>
+        </div>
+        <div class="field">
+          <label>Observação <span style="font-weight:400;color:var(--g300)">(opcional)</span></label>
+          <input class="inp" id="aj-obs" type="text" value="${esc(aj.observacao||'')}" placeholder="Detalhes adicionais..."/>
+        </div>
+        <div class="field">
+          <label>Aprovado por <span style="font-weight:400;color:var(--g300)">(opcional)</span></label>
+          <input class="inp" id="aj-apr" type="text" value="${esc(aj.aprovadoPor||'')}" placeholder="Nome do responsável"/>
+        </div>
+        <div style="display:flex;gap:8px">
+          ${aj.tipo?`<button class="l-btn" id="aj-remover" style="background:var(--red-bg);color:var(--red);flex:0 0 auto;padding:12px 14px;font-size:13px">🗑 Remover</button>`:''}
+          <button class="l-btn" id="aj-salvar">✓ Salvar ajuste</button>
+        </div>
+      </div>
+    </div>
+  </div>`
+
+  document.body.appendChild(m)
+  document.getElementById('ajclose').onclick=()=>m.remove()
+  document.getElementById('ajbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
+
+  document.getElementById('aj-salvar').onclick=()=>{
+    const tipo=document.getElementById('aj-tipo').value
+    if(!tipo){toast('Selecione um tipo.','error');return}
+    const desc=document.getElementById('aj-desc').value.trim()
+    if(!desc){toast('Informe uma descrição.','error');return}
+    const antes=e.ajuste?getAjusteMeta(e.ajuste.tipo).label:'—'
+    e.ajuste={
+      tipo,
+      descricao:desc,
+      observacao:document.getElementById('aj-obs').value.trim(),
+      aprovadoPor:document.getElementById('aj-apr').value.trim()
+    }
+    save()
+    saveDay(date)
+    registrarHistorico(e.person,
+      `Ajuste: ${antes}`,
+      `Ajuste: ${getAjusteMeta(tipo).label} — ${desc}`,
+      'ajuste manual')
+    toast(`Ajuste registrado para ${e.person}.`,'success')
+    m.remove()
+    rebuildPanel();rebuildCell(date)
+  }
+
+  const remBtn=document.getElementById('aj-remover')
+  if(remBtn)remBtn.onclick=()=>{
+    const antes=getAjusteMeta(e.ajuste?.tipo||'').label
+    delete e.ajuste
+    save();saveDay(date)
+    registrarHistorico(e.person,`Ajuste: ${antes}`,'Ajuste removido','remoção de ajuste')
+    toast('Ajuste removido.','info')
+    m.remove()
+    rebuildPanel();rebuildCell(date)
+  }
 }
 
 // ── HORÁRIOS ──

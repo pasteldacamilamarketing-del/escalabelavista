@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>Pastel da Camila – Escala Abril</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet"/>
 <style>
 /*
@@ -204,6 +205,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .ec-right{flex:1;min-width:0}
 .ec-name{font-size:14px;font-weight:800;color:var(--g900);margin-bottom:2px}
 .ec-obs{font-size:11px;color:var(--g400);font-style:italic;margin-bottom:4px}
+.ec-hor{font-size:10px;color:var(--g400);font-weight:600;margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px}
 .ec-status{display:inline-flex;align-items:center;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700}
 .ec-actions{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
 .ec-btn{display:inline-flex;align-items:center;gap:3px;border:none;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;min-height:30px}
@@ -266,6 +268,333 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .falta-btn.injust{background:#B71C1C}
 .falta-btn.cancel{background:var(--g100);color:var(--g700)}
 
+/* ── CARD: horário automático e botão detalhes ── */
+.ec-hor{
+  font-size:11px;color:var(--g400);font-weight:600;
+  margin-bottom:3px;letter-spacing:.2px;
+}
+.ec-hor-empty{
+  font-size:10px;color:var(--g300);font-style:italic;margin-bottom:3px;
+}
+.ec-detalhe-btn{
+  display:inline-flex;align-items:center;gap:3px;
+  background:none;border:1px solid var(--g200);border-radius:6px;
+  padding:3px 8px;font-size:10px;font-weight:700;
+  color:var(--g400);cursor:pointer;margin-top:4px;
+  transition:all .15s;font-family:'Nunito',sans-serif;
+}
+.ec-detalhe-btn:hover{background:var(--g50);border-color:var(--g300);color:var(--g700)}
+
+/* ── POPUP DE DETALHES DA PESSOA ── */
+.detalhe-popup{
+  position:fixed;inset:0;z-index:800;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;background:rgba(0,0,0,.5);
+  animation:fadeIn .2s ease;
+}
+.detalhe-card{
+  background:#fff;border-radius:18px;
+  box-shadow:0 12px 48px rgba(0,0,0,.22);
+  width:100%;max-width:420px;
+  max-height:80vh;display:flex;flex-direction:column;
+  overflow:hidden;animation:slideUp .2s ease;
+}
+.detalhe-head{
+  background:var(--g900);padding:16px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.detalhe-nome{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px;font-weight:700;color:#fff;letter-spacing:.3px;
+}
+.detalhe-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px;font-weight:600;}
+.detalhe-close{
+  background:rgba(255,255,255,.15);border:none;color:#fff;
+  border-radius:8px;padding:6px 12px;font-size:13px;
+  font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;
+}
+.detalhe-body{
+  flex:1;overflow-y:auto;padding:16px 18px 24px;
+  -webkit-overflow-scrolling:touch;
+}
+.detalhe-section{margin-bottom:16px;}
+.detalhe-section:last-child{margin-bottom:0;}
+.detalhe-section-title{
+  font-size:10px;font-weight:800;color:var(--g400);
+  text-transform:uppercase;letter-spacing:.7px;
+  margin-bottom:8px;
+}
+.detalhe-hor-row{
+  display:flex;align-items:center;gap:8px;
+  background:var(--g50);border-radius:10px;padding:10px 12px;
+  margin-bottom:6px;
+}
+.detalhe-hor-icon{font-size:16px;}
+.detalhe-hor-info{flex:1;}
+.detalhe-hor-label{font-size:10px;color:var(--g400);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.detalhe-hor-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--g900);}
+.detalhe-funcao-item{
+  border:1px solid var(--g100);border-radius:10px;
+  padding:10px 12px;margin-bottom:8px;
+}
+.detalhe-funcao-nome{
+  font-size:13px;font-weight:800;color:var(--g900);margin-bottom:4px;
+  display:flex;align-items:center;gap:6px;
+}
+.detalhe-funcao-desc{
+  font-size:12px;color:var(--g700);line-height:1.6;
+  white-space:pre-line;
+}
+.detalhe-bloco-badge{
+  font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;
+  background:var(--g100);color:var(--g400);text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:10px;display:inline-block;
+}
+.detalhe-bloco{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:600;letter-spacing:.3px}
+.det-hor-box{background:var(--g50);border-radius:10px;padding:10px 13px;margin-bottom:12px}
+.det-hor-row{font-size:12px;color:var(--g700);font-weight:600;margin-bottom:3px;display:flex;gap:6px;align-items:center}
+.det-hor-row:last-child{margin-bottom:0}
+.det-hor-row span{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--g900)}
+.det-role-badge{display:flex;flex-direction:column;gap:2px;background:var(--g900);border-radius:10px;padding:10px 13px;margin-bottom:12px}
+.det-role-label{font-size:9px;font-weight:800;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.7px}
+.det-role-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:.3px}
+.det-func-detalhe{background:var(--manha-bg);border:1px solid var(--manha-b);border-radius:10px;padding:12px 13px;margin-bottom:12px}
+.det-func-titulo{font-size:11px;font-weight:800;color:#795500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.det-func-texto{font-size:13px;color:var(--g700);line-height:1.65;white-space:pre-line}
+.det-section{margin-bottom:4px}
+.det-section-title{font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+.det-func-item{border:1px solid var(--g100);border-radius:9px;padding:9px 12px;margin-bottom:6px}
+.det-func-item:last-child{margin-bottom:0}
+.det-func-nome{font-size:13px;font-weight:800;color:var(--g900);margin-bottom:3px}
+.det-func-desc{font-size:11px;color:var(--g400);line-height:1.55;white-space:pre-line}
+
+/* ── MODAL HORÁRIOS ── */
+.hor-section{margin-bottom:20px}
+.hor-section:last-child{margin-bottom:0}
+.hor-section-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;
+  padding:8px 14px;border-radius:8px;margin-bottom:10px;
+  display:flex;align-items:center;gap:8px
+}
+.hor-section-title.manha{background:var(--manha-bg);color:#795500}
+.hor-section-title.noite{background:var(--noite-bg);color:#311B92}
+.hor-section-title.est{background:var(--g100);color:var(--g700)}
+.hor-table{width:100%;border-collapse:collapse}
+.hor-table th{
+  font-size:10px;font-weight:800;color:var(--g400);
+  text-transform:uppercase;letter-spacing:.5px;
+  padding:5px 10px;text-align:left;border-bottom:1px solid var(--g100)
+}
+.hor-table td{
+  padding:10px 10px;font-size:14px;border-bottom:1px solid var(--g100);
+  vertical-align:middle
+}
+.hor-table tr:last-child td{border-bottom:none}
+.hor-table tr:hover td{background:var(--g50)}
+.hor-nome{font-weight:800;color:var(--g900)}
+.hor-time{
+  font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  color:var(--g700);white-space:nowrap
+}
+.hor-almoco{
+  font-size:12px;color:var(--g400);font-weight:600;white-space:nowrap
+}
+.hor-badge{
+  display:inline-block;font-size:10px;font-weight:800;
+  padding:2px 7px;border-radius:20px;
+}
+
+/* ── REGRAS OPERACIONAIS NO PAINEL (RODADA 3) ── */
+.regras-block{
+  background:linear-gradient(135deg,#F0FDF4,#EFF6FF);
+  border:1px solid #BBF7D0;border-radius:10px;
+  padding:10px 14px;margin-bottom:10px;
+}
+.regras-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.regra-item{
+  font-size:11px;font-weight:700;color:#166534;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.transicao-row{display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid #BBF7D0;padding-top:6px;margin-top:2px}
+.trans-atual{font-size:10px;color:#047857;font-weight:600}
+.trans-futuro{font-size:10px;color:#B45309;font-weight:700}
+
+/* ── POPUP OPERACIONAL (RODADA 3) ── */
+.dp-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:2000;display:flex;align-items:flex-end;justify-content:center;
+  animation:fadeIn .2s ease;
+}
+@media(min-width:480px){
+  .dp-overlay{align-items:center}
+  .dp-card{border-radius:18px!important;max-height:85vh}
+}
+.dp-card{
+  background:#fff;width:100%;max-width:480px;
+  border-radius:18px 18px 0 0;
+  max-height:90vh;display:flex;flex-direction:column;
+  animation:slideUp .22s ease;overflow:hidden;
+}
+.dp-head{
+  background:var(--red);padding:16px 18px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+  flex-shrink:0;
+}
+.dp-nome{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px;font-weight:700;color:#fff;line-height:1;
+}
+.dp-turno{font-size:11px;color:rgba(255,255,255,.75);font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+.dp-close{
+  background:rgba(255,255,255,.2);border:none;color:#fff;
+  border-radius:8px;padding:6px 11px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0;margin-top:2px;
+}
+.dp-body{
+  flex:1;overflow-y:auto;padding:14px 16px 28px;
+  display:flex;flex-direction:column;gap:0;
+  -webkit-overflow-scrolling:touch;
+}
+/* Seções */
+.dp-section{
+  padding:10px 0 10px;
+  border-bottom:1px solid var(--g100);
+}
+.dp-section:last-of-type{border-bottom:none}
+.dp-section-label{
+  font-size:9px;font-weight:800;color:var(--g300);
+  text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;
+}
+/* Horário */
+.dp-hor-row{display:flex;gap:8px;flex-wrap:wrap}
+.dp-hor-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--g50);border:1px solid var(--g200);
+  border-radius:7px;padding:4px 10px;
+  font-size:13px;font-weight:700;color:var(--g700);
+  font-family:'Barlow Condensed',sans-serif;
+}
+/* Função hoje */
+.dp-funcao-hoje{
+  display:inline-flex;align-items:center;
+  background:var(--red-bg);border:1.5px solid var(--red);
+  color:var(--red);border-radius:8px;
+  padding:4px 12px;font-size:13px;font-weight:800;
+}
+/* Funções possíveis */
+.dp-bloco-badge{
+  display:inline-flex;background:var(--g100);color:var(--g700);
+  border-radius:5px;padding:2px 8px;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;
+}
+.dp-func-item{
+  border:1px solid var(--g100);border-radius:8px;
+  padding:8px 11px;margin-bottom:5px;
+  background:#fff;
+}
+.dp-func-hoje{border-color:var(--red)!important;background:var(--red-bg)!important}
+.dp-func-nome{font-size:13px;font-weight:700;color:var(--g900);line-height:1.3}
+.dp-func-desc{font-size:11px;color:var(--g400);margin-top:3px;line-height:1.5}
+.dp-hoje-tag{
+  font-size:9px;background:var(--red);color:#fff;
+  padding:1px 6px;border-radius:10px;font-weight:700;vertical-align:middle;margin-left:4px;
+}
+/* Responsabilidades */
+.dp-resp-list{display:flex;flex-wrap:wrap;gap:6px}
+.dp-resp-chip{
+  display:inline-flex;align-items:center;gap:3px;
+  background:var(--g50);border:1px solid var(--g200);
+  color:var(--g600,#616161);border-radius:6px;
+  padding:4px 9px;font-size:11px;font-weight:700;
+}
+/* Crítica: destaque visual */
+.dp-resp-critica{
+  background:#FFF7ED;border-color:#FED7AA;
+  color:#C2410C;font-weight:800;
+}
+/* Obs */
+.dp-obs{
+  font-size:12px;color:var(--g700);line-height:1.6;
+  background:var(--g50);border-radius:7px;padding:8px 10px;
+}
+/* Regra do dia */
+.dp-regra{
+  background:linear-gradient(135deg,#F0FDF4,#EFF6FF);
+  border:1px solid #BBF7D0;border-radius:8px;
+  padding:9px 12px;margin-top:10px;
+}
+.dp-regra-item{font-size:11px;font-weight:700;color:#166534;line-height:1.7}
+/* Transição */
+.dp-trans{
+  background:#FFFBEB;border:1px solid #FDE68A;
+  border-radius:8px;padding:9px 12px;margin-top:8px;
+}
+.dp-trans-atual{font-size:11px;color:#047857;font-weight:700;line-height:1.6}
+.dp-trans-futuro{font-size:11px;color:#B45309;font-weight:800;line-height:1.6}
+
+/* ── RESPONSABILIDADES NO CARD (RODADA 2) ── */
+/* Hierarquia visual: nome > função/horário > responsabilidade */
+.ec-resp-wrap{
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:4px;margin:4px 0 3px;
+}
+.ec-resp-label{
+  font-size:9px;font-weight:800;
+  color:var(--g300);text-transform:uppercase;
+  letter-spacing:.6px;margin-right:1px;flex-shrink:0;
+}
+.ec-resp-chip{
+  display:inline-flex;align-items:center;
+  background:var(--g50);border:1px solid var(--g200);
+  color:var(--g400);border-radius:4px;
+  padding:1px 6px;font-size:9px;font-weight:700;
+  white-space:nowrap;letter-spacing:.1px;
+  line-height:1.4;
+}
+/* Chip extra (oculto inicialmente) */
+.ec-resp-extra{
+  background:#EEF2FF;border-color:#C7D2FE;color:#4F46E5;
+}
+/* Botão +N */
+.ec-resp-mais{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:none;border:1px dashed var(--g300);border-radius:4px;
+  color:var(--g400);font-size:9px;font-weight:800;
+  padding:1px 6px;cursor:pointer;
+  font-family:'Nunito',sans-serif;line-height:1.4;
+  transition:background .12s,color .12s,border-color .12s;
+}
+.ec-resp-mais:hover,.ec-resp-mais:active{
+  background:var(--g100);border-color:var(--g400);color:var(--g700);
+}
+/* Bloco de extras expandido */
+.ec-resp-extras{
+  display:none;width:100%;
+  flex-wrap:wrap;gap:4px;
+  padding-top:3px;
+}
+.ec-resp-extras.aberto{display:flex!important;}
+
+/* Mobile: chips menores para não estoura */
+@media(max-width:640px){
+  .ec-resp-chip{font-size:8px;padding:1px 5px}
+  .ec-resp-mais{font-size:8px;padding:1px 5px}
+  .ec-resp-label{font-size:8px}
+}
+
+/* ── HISTÓRICO ── */
+.hist-block{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:12px 14px;margin-top:4px}
+.hist-title{font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.hist-item{font-size:11px;color:var(--g700);padding:5px 0;border-bottom:1px solid var(--g100);line-height:1.5}
+.hist-item:last-child{border-bottom:none}
+.hist-time{font-weight:800;color:var(--g900);font-family:'Barlow Condensed',sans-serif;font-size:13px}
+.hist-editor{font-weight:700;color:var(--red)}
+.hist-pessoa{font-weight:700}
+.hist-change{color:var(--g400);display:block;font-size:10px}
+.hist-motivo{color:var(--ok);font-weight:700;font-size:10px;display:block}
+
 /* TOAST */
 .toast-stack{position:fixed;bottom:16px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
 .toast{padding:10px 15px;border-radius:10px;font-size:13px;font-weight:700;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.18);animation:slideUp .3s ease;max-width:280px}
@@ -324,11 +653,165 @@ input{font-family:'Nunito',sans-serif;outline:none}
 <div class="toast-stack" id="toasts"></div>
 
 <script>
+/*
+=======================================================
+ALTERAÇÕES RODADA 1:
+1. Reorganização do código em blocos comentados
+2. Horário automático exibido abaixo do nome no card
+3. Base FUNCOES_POR_PESSOA estruturada
+4. Motivo obrigatório ao salvar edição no admin
+5. Histórico simples de alterações no painel do dia
+
+ALTERAÇÕES RODADA 2:
+6. Base RESPONSABILIDADES por pessoa
+7. Chips de responsabilidade no card (máx 2 visíveis + "ver mais")
+8. CSS refinado para leitura rápida: nome > função > horário > responsabilidade
+9. Expansão inline discreta do card
+10. Responsividade garantida no mobile
+
+ALTERAÇÕES RODADA 3:
+11. Popup "Ver funções" evoluído para painel operacional completo
+12. Responsabilidades críticas com destaque visual
+13. Regra operacional global (checklist obrigatório) no painel e popup
+14. Transição checklist: impresso/digital → somente digital (maio)
+15. CSS e UX refinados para leitura em 5 segundos
+=======================================================
+*/
+
 window.onerror=function(msg,src,line){
   try{document.getElementById('app').innerHTML='<div style="padding:32px;font-family:\'Nunito\',sans-serif;text-align:center"><div style="background:#FFF0F1;border:2px solid #FFCDD2;border-radius:12px;padding:16px;color:#C0121F;font-size:13px;margin-bottom:14px"><b>Erro:</b> '+msg+'</div><button onclick="hardReset()" style="background:#EA1D2C;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:800;cursor:pointer;font-family:\'Nunito\',sans-serif">🔄 Limpar cache e recarregar</button></div>'}catch(e){}
   return true
 }
 
+// ===== SUPABASE =====
+const SUPA_URL = 'https://ddpmpykacorlmchumhjr.supabase.co'
+const SUPA_KEY = 'sb_publishable_xZwA54EKg_7QekmPvsJEVA_vcioMP0u'
+// Inicializa cliente Supabase — gracioso se SDK não carregou (offline/local)
+let supa = null
+try{
+  if(typeof supabase !== 'undefined'){
+    supa = supabase.createClient(SUPA_URL, SUPA_KEY)
+    console.log('Supabase conectado')
+  } else {
+    console.warn('Supabase SDK não carregado — modo offline')
+  }
+}catch(e){ console.warn('Supabase init error:',e.message) }
+
+// ── Carrega todos os dias do banco ──
+async function loadFromSupabase(){
+  if(!supa)return false
+  try{
+    const {data,error}=await supa.from('escala_dias').select('*').order('date')
+    if(error)throw error
+    if(!data||data.length===0)return false
+    // Converter formato banco → formato app
+    G.days=data.map(row=>({
+      date:row.date,
+      wd:row.wd,
+      jsDay:row.js_day,
+      manha:row.manha||[],
+      noite:row.noite||[]
+    }))
+    G.days.forEach(d=>dayMap[d.date]=d)
+    return true
+  }catch(e){
+    console.warn('Supabase load falhou:',e.message)
+    return false
+  }
+}
+
+// ── Salva um dia no banco ──
+async function saveDay(dateStr){
+  if(!supa)return
+  try{
+    const day=dayMap[dateStr];if(!day)return
+    const {error}=await supa.from('escala_dias').upsert({
+      date:day.date,
+      wd:day.wd,
+      js_day:day.jsDay,
+      manha:day.manha,
+      noite:day.noite
+    },{onConflict:'date'})
+    if(error)throw error
+  }catch(e){
+    console.warn('Supabase save falhou:',e.message)
+    // Fallback: continua com localStorage
+    save()
+  }
+}
+
+// ── Salva entrada de histórico no banco ──
+async function saveHistoricoRemoto(h){
+  if(!supa)return
+  try{
+    await supa.from('escala_historico').insert({
+      editor:h.editor,
+      pessoa:h.pessoa,
+      antes:h.antes,
+      depois:h.depois,
+      motivo:h.motivo,
+      date_ref:G.selectedDate||null
+    })
+  }catch(e){
+    console.warn('Histórico remoto falhou:',e.message)
+  }
+}
+
+// ── Carrega histórico do banco para o dia selecionado ──
+async function loadHistoricoRemoto(dateStr){
+  if(!supa)return
+  try{
+    const {data,error}=await supa
+      .from('escala_historico')
+      .select('*')
+      .eq('date_ref',dateStr)
+      .order('created_at',{ascending:false})
+      .limit(20)
+    if(error)throw error
+    if(data&&data.length){
+      // Mescla com histórico local da sessão
+      const remotos=data.map(h=>({
+        at:new Date(h.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+        editor:h.editor,
+        pessoa:h.pessoa,
+        antes:h.antes||'',
+        depois:h.depois||'',
+        motivo:h.motivo,
+        remoto:true
+      }))
+      // Exibir no painel sem duplicar os locais
+      const pb=document.getElementById('panel-body')
+      if(pb){
+        const histExist=pb.querySelector('.hist-block')
+        const allHist=[...HISTORICO.filter(h=>!h.remoto),...remotos]
+        const novoHtml=buildHistoricoFromArray(allHist)
+        if(histExist)histExist.outerHTML=novoHtml
+        else pb.insertAdjacentHTML('beforeend',novoHtml)
+      }
+    }
+  }catch(e){
+    console.warn('loadHistoricoRemoto falhou:',e.message)
+  }
+}
+
+// ── buildHistorico aceita array externo ──
+function buildHistoricoFromArray(arr){
+  if(!arr.length)return''
+  const itens=arr.map(h=>`
+    <div class="hist-item">
+      <span class="hist-time">${esc(h.at)}</span>
+      <span class="hist-editor">${esc(h.editor)}</span> alterou
+      <span class="hist-pessoa">${esc(h.pessoa)}</span>
+      <span class="hist-change">${esc(h.antes)} → ${esc(h.depois)}</span>
+      <span class="hist-motivo">motivo: ${esc(h.motivo)}</span>
+    </div>`).join('')
+  return`<div class="hist-block">
+    <div class="hist-title">📋 Alterações${arr.some(h=>h.remoto)?' · sincronizado':''}</div>
+    ${itens}
+  </div>`
+}
+
+// ===== BASE FIXA =====
 const RH='5511945461633'
 const SU='pdc_u', SD='pdc_d6'
 const USERS=[
@@ -336,38 +819,262 @@ const USERS=[
   {u:'vitoria',p:'2026',role:'manager',name:'Vitória',av:'VI',can:{edit:1,del:1,add:1}},
 ]
 const RL={admin:'Admin',manager:'Gerente'}
-const ST={pending:{l:'Aguardando',c:'#F39C12',bg:'#FFF8E1'},confirmed:{l:'Confirmado',c:'#27AE60',bg:'#E8F5E9'},absent:{l:'Falta',c:'#E74C3C',bg:'#FFEBEE'}}
+const ST={
+  pending:  {l:'Aguardando', c:'#F39C12', bg:'#FFF8E1'},
+  confirmed:{l:'Confirmado',  c:'#27AE60', bg:'#E8F5E9'},
+  absent:   {l:'Falta',       c:'#E74C3C', bg:'#FFEBEE'}
+}
 
-// ── DADOS ──
+// ── HORÁRIOS (indexado por primeiro nome em lowercase para busca rápida) ──
+const HORARIOS_LIST=[
+  // MANHÃ
+  {nome:'Gabi',      horario:'09:00–18:00', almoco:'11:00–12:00', turno:'manha'},
+  {nome:'Íris',      horario:'09:00–18:00', almoco:'14:00–15:00', turno:'manha'},
+  {nome:'Letícia',   horario:'09:00–18:00', almoco:'12:00–13:00', turno:'manha'},
+  {nome:'Luis',      horario:'10:00–17:00', almoco:'14:00–15:00', turno:'manha'},
+  {nome:'Iolete',    horario:'09:00–18:00', almoco:'12:00–13:00', turno:'manha'},
+  {nome:'Wirislaine',horario:'09:00–18:00', almoco:'13:00–14:00', turno:'manha'},
+  // NOITE
+  {nome:'Derik',    horario:'14:00–23:00', almoco:'18:00–19:00', turno:'noite'},
+  {nome:'Julia',    horario:'13:00–22:00', almoco:'16:00–17:00', turno:'noite'},
+  {nome:'Larissa',  horario:'13:00–22:00', almoco:'17:00–18:00', turno:'noite'},
+  {nome:'Lucca',    horario:'13:00–22:00', almoco:'16:30–17:30', turno:'noite'},
+  {nome:'Victor',   horario:'14:00–23:00', almoco:'18:00–19:00', turno:'noite'},
+  {nome:'Vitória',  horario:'14:00–23:00', almoco:'17:30–18:30', turno:'noite'},
+  {nome:'Táis',     horario:'13:00–22:00', almoco:'16:00–17:00', turno:'noite'},
+  {nome:'Vinícius', horario:'14:00–23:00', almoco:'17:30–18:30', turno:'noite'},
+  // ESTAGIÁRIOS
+  {nome:'David',    horario:'15:00–22:00', almoco:'18:00–19:00', turno:'estagiario'},
+  {nome:'Isabelly', horario:'15:00–22:00', almoco:'18:00–19:00', turno:'estagiario'},
+  // SEM HORÁRIO DEFINIDO (placeholder)
+  {nome:'Bruna',  horario:null, almoco:null, turno:'noite'},
+  {nome:'Túlio',  horario:null, almoco:null, turno:'noite'},
+  {nome:'Suelen', horario:null, almoco:null, turno:'manha'},
+]
+// Índice rápido: lowercase -> objeto
+const HORARIOS_IDX={}
+HORARIOS_LIST.forEach(p=>{ HORARIOS_IDX[p.nome.toLowerCase()]=p })
+
+// Manter compatibilidade com showHorariosModal
+const HORARIOS={
+  manha:   HORARIOS_LIST.filter(p=>p.turno==='manha'   && p.horario),
+  noite:   HORARIOS_LIST.filter(p=>p.turno==='noite'   && p.horario),
+  estagiarios: HORARIOS_LIST.filter(p=>p.turno==='estagiario' && p.horario),
+}
+// ── HELPER: busca horário pelo primeiro nome (usa índice para O(1)) ──
+function getHorario(nome){
+  if(!nome)return null
+  // Normaliza: remove acentos, lowercase, pega só primeiro nome
+  const norm=s=>s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  const primeiro=norm(nome.split(/\s+/)[0])
+  // Busca direta no índice (já normalizado)
+  if(HORARIOS_IDX[primeiro]) return HORARIOS_IDX[primeiro]
+  // Fallback com normalização
+  return HORARIOS_LIST.find(p=>{
+    const pn=norm(p.nome.split(/\s+/)[0])
+    return pn===primeiro||pn.startsWith(primeiro)||primeiro.startsWith(pn)
+  })||null
+}
+
+// ===== FUNÇÕES POR PESSOA (BASE OPERACIONAL) =====
+// Fonte: documento de funções operacionais.
+// NÃO altera operação. NÃO bloqueia seleção. Preparado para uso futuro (popup de detalhes).
+const FUNCOES_POR_PESSOA={
+
+  // ── BLOCO 1: FINALIZAÇÃO / ATENDIMENTO ──
+  'david':{
+    bloco:'Finalização / Atendimento',
+    funcoes:['Embalador','Suporte ao salão'],
+    detalhes:{
+      'Embalador':'Embalar pastéis com atenção à apresentação e qualidade.',
+      'Suporte ao salão':'Limpeza e atendimento no salão conforme demanda.'
+    }
+  },
+  'lucca':{
+    bloco:'Finalização / Atendimento',
+    funcoes:['Caixa Salão','Embalador'],
+    detalhes:{
+      'Caixa Salão':'Operar o caixa do salão. Responsável por limpeza e atendimento.',
+      'Embalador':'Apoio na embalagem quando necessário.'
+    }
+  },
+  'isabelly':{
+    bloco:'Finalização / Atendimento',
+    funcoes:['Louça','Delivery','Geladeira do delivery','Contagem no fechamento'],
+    detalhes:{
+      'Louça':'Lavar e organizar louças durante o turno.',
+      'Delivery':'Separar e conferir pedidos delivery.',
+      'Geladeira do delivery':'Manter geladeira do delivery organizada e abastecida.',
+      'Contagem no fechamento':'Realizar contagem final no fechamento do dia.'
+    }
+  },
+  'táis':{
+    bloco:'Finalização / Atendimento',
+    funcoes:['Caixa Delivery','Registro de perdas','Produção de molho verde'],
+    detalhes:{
+      'Caixa Delivery':'Operar caixa do delivery.',
+      'Registro de perdas':'Registrar perdas para controle financeiro oculto.',
+      'Produção de molho verde':'Produzir molho verde conforme receita padrão.'
+    }
+  },
+
+  // ── BLOCO 2: PRODUÇÃO / FLUXO ──
+  'victor':{
+    bloco:'Produção / Fluxo',
+    funcoes:['Marcação','Gaveteiro','Controle de gavetas'],
+    detalhes:{
+      'Marcação':'Marcar pastéis para produção conforme fluxo.',
+      'Gaveteiro':'Organizar e controlar gavetas de produção.',
+      'Controle de gavetas':'Monitorar fluxo das gavetas durante todo o turno.'
+    }
+  },
+  'larissa':{
+    bloco:'Produção / Fluxo',
+    funcoes:['Embalador','Pré-pico','Marcação'],
+    detalhes:{
+      'Embalador':'Embalar pastéis. Manter limpeza da mesa.',
+      'Pré-pico':'Preparar toda a estação antes do horário de pico.',
+      'Marcação':'Apoio na marcação quando necessário.'
+    }
+  },
+  'letícia':{
+    bloco:'Produção / Fluxo',
+    funcoes:['Salão','Escorredeira','Mesa'],
+    detalhes:{
+      'Salão':'Atendimento e organização do salão.',
+      'Escorredeira':'Operar a escorredeira durante produção.',
+      'Mesa':'Organizar e limpar as mesas.'
+    }
+  },
+  'íris':{
+    bloco:'Produção / Fluxo',
+    funcoes:['Mesa','Controle de recheio','FIFO'],
+    detalhes:{
+      'Mesa':'Limpeza e contagem da mesa. ⚠️ REGRA: sexta-feira → prioridade é produção de pastel (não travar a noite).',
+      'Controle de recheio':'Todo dia de manhã olhar e mandar a lista. Cozinha etiqueta a tampa. Ao chegar na loja, Íris etiqueta a lateral e guarda com etiqueta pra frente.',
+      'FIFO':'Aplicar FIFO (First In, First Out) em todos os recheios. Validade controlada diariamente.'
+    }
+  },
+  'wirislaine':{
+    bloco:'Produção / Fluxo',
+    funcoes:['Fritura','Escorredeira','Limpeza do tacho'],
+    detalhes:{
+      'Fritura':'Responsável pela fritura dos pastéis.',
+      'Escorredeira':'Operar a escorredeira.',
+      'Limpeza do tacho':'Completar óleo quando necessário. Limpeza da escorredeira inclusa.'
+    }
+  },
+
+  // ── BLOCO 3: SUPORTE / BASE ──
+  'luis':{
+    bloco:'Suporte / Base',
+    funcoes:['Suporte delivery','Salada','Limpeza do freezer'],
+    detalhes:{
+      'Suporte delivery':'Apoio ao setor de delivery conforme demanda.',
+      'Salada':'⏰ Todos os dias das 14h às 15h.',
+      'Limpeza do freezer':'📅 Toda quarta-feira.'
+    }
+  },
+
+  // ── BLOCO 4: GESTÃO ──
+  'bruna':{
+    bloco:'Gestão',
+    funcoes:['Processos','Apoio à gerência'],
+    detalhes:{
+      'Processos':'Responsável por processos operacionais.',
+      'Apoio à gerência':'Suporte direto à gerência nas decisões do dia.'
+    }
+  },
+}
+
+// ===== RESPONSABILIDADES POR PESSOA (RODADA 2) =====
+// Objeto fixo — editar aqui para atualizar a escala.
+// Chave: primeiro nome em lowercase (sem acento).
+const RESPONSABILIDADES={
+  'victor':    ['Pesagem das gavetas','Controle do gaveteiro'],
+  'leticia':   ['Ar-condicionado (manhã)','Kit salão'],
+  'lucca':     ['Ar-condicionado (noite)','Fechamento','Lixo'],
+  'david':     ['Apoio geral','Lixo'],
+  'wirislaine':['Temperatura do tacho','Controle da fritura'],
+  'isabelly':  ['Temperatura geladeiras (delivery)'],
+  'tais':      ['Temperatura geladeiras (caixa)','Perdas'],
+  'luis':      ['Temperatura geladeiras','Lixo','Limpeza'],
+}
+
+// ── REGRA OPERACIONAL GLOBAL ──
+const REGRA_OPERACIONAL={
+  titulo:'Regra de Execução Diária',
+  itens:[
+    '✔ Checklist obrigatório todos os dias',
+    '✔ Subgerência e gerência validam todos os dias'
+  ]
+}
+
+// ── TRANSIÇÃO CHECKLIST ──
+const TRANSICAO_CHECKLIST={
+  atual:'✔ Hoje: pode ser impresso ou digital',
+  futuro:'⚠ A partir de maio: somente digital'
+}
+
+// ── RESPONSABILIDADES CRÍTICAS (destacar visualmente) ──
+const RESP_CRITICAS=[
+  'temperatura do tacho','temperatura das geladeiras',
+  'temperatura geladeiras','perdas','pesagem das gavetas',
+  'ar-condicionado','kit salão','lixo','fechamento'
+]
+function isCritica(resp){
+  const r=resp.toLowerCase()
+  return RESP_CRITICAS.some(k=>r.includes(k))
+}
+
+// Helper: busca responsabilidades pelo primeiro nome normalizado
+function getResponsabilidades(nome){
+  if(!nome)return null
+  const norm=s=>s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+  const k=norm(nome.split(/\s+/)[0])
+  return RESPONSABILIDADES[k]||null
+}
+
+// Helper: busca funções pelo primeiro nome (lowercase)
+function getFuncoes(nome){
+  if(!nome)return null
+  const primeiro=nome.trim().split(/\s+/)[0].toLowerCase()
+  // Normaliza acentos para busca
+  const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
+  const chave=norm(primeiro)
+  return Object.keys(FUNCOES_POR_PESSOA).find(k=>norm(k)===chave||norm(k).startsWith(chave)||chave.startsWith(norm(k)))
+    ? FUNCOES_POR_PESSOA[Object.keys(FUNCOES_POR_PESSOA).find(k=>norm(k)===chave||norm(k).startsWith(chave)||chave.startsWith(norm(k)))]
+    : null
+}
+
+// ===== DADOS DA ESCALA =====
 let _id=0
 const mk=(r,p,o)=>({id:'e'+(++_id),role:r,person:p,obs:o||'',status:'pending',confirmedAt:null,faltaTipo:null})
 const BASE=[
-  {date:'2025-04-01',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
-  {date:'2025-04-02',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
-  {date:'2025-04-03',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vinicius'),mk('Escorredeira','David'),mk('Fritando','Larissa'),mk('Embalando','David'),mk('Mesa','Julia'),mk('Salão','Bruna')]},
-  {date:'2025-04-04',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Embalando','Bruna'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
-  {date:'2025-04-05',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Bruna'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
-  {date:'2025-04-06',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Íris'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Mesa','Julia')]},
-  {date:'2025-04-08',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
-  {date:'2025-04-09',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
-  {date:'2025-04-10',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vinicius'),mk('Escorredeira','David'),mk('Fritando','Larissa'),mk('Embalando','David'),mk('Mesa','Julia'),mk('Salão','Bruna')]},
-  {date:'2025-04-11',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Embalando','Bruna'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
-  {date:'2025-04-12',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Bruna'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
-  {date:'2025-04-13',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Gabi'),mk('Fritando','Wirislaine'),mk('Embalando','Gabi'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Íris')],noite:[mk('Delivery','Isabelly'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Túlio'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte / salão'),mk('Mesa','Julia')]},
-  {date:'2025-04-15',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
-  {date:'2025-04-16',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
-  {date:'2025-04-17',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vinicius'),mk('Escorredeira','David'),mk('Fritando','Larissa'),mk('Embalando','David'),mk('Mesa','Julia'),mk('Salão','Bruna')]},
-  {date:'2025-04-18',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Embalando','Bruna'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
-  {date:'2025-04-19',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Bruna'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
-  {date:'2025-04-20',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Gabi'),mk('Fritando','Wirislaine'),mk('Embalando','Gabi'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Fritando','Larissa'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','David'),mk('Mesa','Vinicius')]},
-  {date:'2025-04-22',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
-  {date:'2025-04-23',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
-  {date:'2025-04-24',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vinicius'),mk('Escorredeira','David'),mk('Fritando','Larissa'),mk('Embalando','David'),mk('Mesa','Julia'),mk('Salão','Bruna')]},
-  {date:'2025-04-25',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Embalando','Bruna'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
-  {date:'2025-04-26',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Bruna'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
-  {date:'2025-04-27',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Íris'),mk('Escorredeira','Gabi','horário de pico'),mk('Fritando','Íris'),mk('Embalando','Gabi','no horário de pico'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Caldo','Gabi'),mk('Salada','Íris')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vinicius'),mk('Escorredeira','Túlio'),mk('Embalando','Lucca'),mk('Caixa salão','David'),mk('Mesa','Julia')]},
-  {date:'2025-04-29',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
-  {date:'2025-04-30',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
+  {date:'2026-04-07',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
+  {date:'2026-04-01',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
+  {date:'2026-04-02',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vinicius'),mk('Escorredeira','David'),mk('Fritando','Larissa'),mk('Embalando','David'),mk('Mesa','Julia'),mk('Salão','Bruna')]},
+  {date:'2026-04-03',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Embalando','Bruna'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
+  {date:'2026-04-04',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Bruna'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
+  {date:'2026-04-05',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Íris'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Mesa','Julia')]},
+  {date:'2026-04-14',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
+  {date:'2026-04-08',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
+  {date:'2026-04-09',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vinicius'),mk('Escorredeira','David'),mk('Fritando','Larissa'),mk('Embalando','David'),mk('Mesa','Julia'),mk('Salão','Bruna')]},
+  {date:'2026-04-10',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Embalando','Bruna'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
+  {date:'2026-04-11',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Bruna'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
+  {date:'2026-04-12',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Gabi'),mk('Fritando','Wirislaine'),mk('Embalando','Gabi'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Íris')],noite:[mk('Delivery','Isabelly'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Túlio'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte / salão'),mk('Mesa','Julia')]},
+  {date:'2026-04-21',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
+  {date:'2026-04-15',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
+  {date:'2026-04-16',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vinicius'),mk('Escorredeira','David'),mk('Fritando','Larissa'),mk('Embalando','David'),mk('Mesa','Julia'),mk('Salão','Bruna')]},
+  {date:'2026-04-17',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Embalando','Bruna'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
+  {date:'2026-04-18',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Bruna'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
+  {date:'2026-04-19',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Gabi'),mk('Fritando','Wirislaine'),mk('Embalando','Gabi'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Fritando','Larissa'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','David'),mk('Mesa','Vinicius')]},
+  {date:'2026-04-28',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius')]},
+  {date:'2026-04-22',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
+  {date:'2026-04-23',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vinicius'),mk('Escorredeira','David'),mk('Fritando','Larissa'),mk('Embalando','David'),mk('Mesa','Julia'),mk('Salão','Bruna')]},
+  {date:'2026-04-24',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Embalando','Bruna'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
+  {date:'2026-04-25',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Bruna'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Salada','Bruna'),mk('Fracionar batata','Bruna')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia')]},
+  {date:'2026-04-26',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Íris'),mk('Escorredeira','Gabi','horário de pico'),mk('Fritando','Íris'),mk('Embalando','Gabi','no horário de pico'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Caldo','Gabi'),mk('Salada','Íris')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vinicius'),mk('Escorredeira','Túlio'),mk('Embalando','Lucca'),mk('Caixa salão','David'),mk('Mesa','Julia')]},  {date:'2026-04-29',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris')],noite:[mk('Gaveteiro','Vitória'),mk('Fritando','Larissa'),mk('Escorredeira','Túlio'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly')]},
 ]
 
 // Mapeia data -> dia
@@ -375,11 +1082,17 @@ const dayMap={}
 BASE.forEach(d=>dayMap[d.date]=d)
 
 // ── ESTADO ──
-const G={user:null,days:null,selectedDate:null,menu:false,cr:false}
+const G={user:null,days:null,selectedDate:null,menu:false,cr:false,viewYear:2026,viewMonth:4}
+// viewMonth: 1=Jan ... 12=Dez
 
+// ===== HELPERS =====
 const esc=s=>s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''
 const clone=x=>JSON.parse(JSON.stringify(x))
-const save=()=>{try{localStorage.setItem(SD,JSON.stringify(G.days))}catch(e){}}
+const save=()=>{
+  try{localStorage.setItem(SD,JSON.stringify(G.days))}catch(e){}
+  // Sync para Supabase em background (não bloqueia UI)
+  if(G.selectedDate) saveDay(G.selectedDate)
+}
 function hardReset(){localStorage.clear();location.reload()}
 function toast(m,t='info'){
   try{
@@ -391,20 +1104,60 @@ function toast(m,t='info'){
   }catch(e){}
 }
 
-// ── INIT ──
-function init(){
+// ── Expande/colapsa responsabilidades extras no card ──
+function toggleResps(btn){
+  const id=btn.dataset.mais
+  const bloco=document.getElementById('extras-'+id)
+  if(!bloco)return
+  const aberto=bloco.classList.toggle('aberto')
+  btn.textContent=aberto?'−':'+'+btn.textContent.replace(/[^0-9]/g,'')
+}
+
+// ===== INIT =====
+async function init(){
+  // Restaurar sessão do usuário
   try{const u=localStorage.getItem(SU);if(u)G.user=JSON.parse(u)}catch(e){localStorage.removeItem(SU)}
-  try{
-    const d=localStorage.getItem(SD)
-    if(d){const p=JSON.parse(d);if(Array.isArray(p)&&p.length>0&&p[0].date)G.days=p;else throw 0}
-    else G.days=clone(BASE)
-  }catch(e){localStorage.removeItem(SD);G.days=clone(BASE)}
-  // Rebuilds dayMap from loaded days
-  G.days.forEach(d=>dayMap[d.date]=d)
+
+  // Setar visualização no mês/ano atual
+  const _now=new Date()
+  G.viewYear=_now.getFullYear()
+  G.viewMonth=_now.getMonth()+1
+
+  // Tentar carregar do Supabase primeiro
+  const loaded=await loadFromSupabase()
+
+  if(!loaded){
+    // Fallback: localStorage ou BASE hardcoded
+    try{
+      const d=localStorage.getItem(SD)
+      if(d){const p=JSON.parse(d);if(Array.isArray(p)&&p.length>0&&p[0].date)G.days=p;else throw 0}
+      else G.days=clone(BASE)
+    }catch(e){localStorage.removeItem(SD);G.days=clone(BASE)}
+    G.days.forEach(d=>dayMap[d.date]=d)
+    // Primeira vez: popular o banco com os dados do BASE
+    populateSupabase()
+  }
+
   // Seleciona hoje se existir na escala
   const today=new Date().toISOString().split('T')[0]
   if(dayMap[today])G.selectedDate=today
   render()
+}
+
+// ── Popula o banco com os dados do BASE (apenas primeira vez) ──
+async function populateSupabase(){
+  if(!supa)return
+  try{
+    const rows=BASE.map(d=>({
+      date:d.date,wd:d.wd,js_day:d.jsDay,
+      manha:d.manha,noite:d.noite
+    }))
+    const {error}=await supa.from('escala_dias').upsert(rows,{onConflict:'date',ignoreDuplicates:true})
+    if(error)throw error
+    console.log('Base populada no Supabase')
+  }catch(e){
+    console.warn('populateSupabase falhou:',e.message)
+  }
 }
 
 // ── RENDER ──
@@ -417,8 +1170,20 @@ function render(){
   }
 }
 
-// ── PAGE ──
+// ===== RENDER =====
 function buildPage(){
+  // Pré-calcular meta do calendário ANTES de montar o template
+  {
+    const yr=G.viewYear,mo=G.viewMonth
+    const MESES_LONG=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+    const MESES_SHORT=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+    const daysThisMonth=G.days.filter(d=>d.date.startsWith(`${yr}-${String(mo).padStart(2,'0')}`))
+    G._calMeta={
+      monthLabel:MESES_LONG[mo-1]+' '+yr,
+      shortLabel:MESES_SHORT[mo-1].charAt(0).toUpperCase()+MESES_SHORT[mo-1].slice(1)+' '+yr,
+      daysCount:daysThisMonth.length
+    }
+  }
   const topRight=G.user
     ?`<div class="av">${esc(G.user.av)}</div><span>${esc(G.user.name)}</span><span style="font-size:10px;opacity:.7">${G.menu?'▲':'▼'}</span>`
     :'🔒 Entrar'
@@ -431,8 +1196,9 @@ function buildPage(){
       <img class="brand-logo" src="logo.png" alt="Logo" onerror="this.style.display='none'"/>
       <div><div class="brand-name">Pastel da Camila</div><div class="brand-sub">Bela Vista</div></div>
     </div>
-    <div class="topbar-mid">Escala · <b>Abril 2025</b></div>
+    <div class="topbar-mid">Escala · <b>${G._calMeta?G._calMeta.shortLabel:''}</b></div>
     <div class="top-actions">
+      <button class="tbtn-white" id="btn-horarios">🕐<span class="btn-folgas-txt"> Horários</span></button>
       <button class="tbtn-white" id="btn-folgas">📅<span class="btn-folgas-txt"> Folgas Dom</span></button>
       <div style="position:relative">
         <button class="tbtn-white" id="mbtn">${topRight}</button>
@@ -445,11 +1211,14 @@ function buildPage(){
     <div class="cal-area${panelOpen?' panel-open':''}" id="cal-area">
       <div class="cal-header">
         <div>
-          <div class="cal-title">Abril 2025</div>
-          <div class="cal-sub">${G.days.length} dias com escala · clique numa data para ver os turnos</div>
+          <div class="cal-title">${G._calMeta?G._calMeta.monthLabel:''}</div>
+          <div class="cal-sub">${G._calMeta?G._calMeta.daysCount+' dias com escala · clique numa data para ver os turnos':''}</div>
         </div>
         <div class="cal-actions">
+          <button class="cta-btn" id="btn-prev">◀</button>
           <button class="cta-btn" id="btn-today">📍 Hoje</button>
+          <button class="cta-btn" id="btn-next">▶</button>
+          <button class="cta-btn" id="btn-period" style="font-size:12px">📆 Ir para...</button>
         </div>
       </div>
       ${buildCalendar()}
@@ -472,17 +1241,22 @@ function buildDropdown(){
 // ── CALENDÁRIO ──
 function buildCalendar(){
   const today=new Date().toISOString().split('T')[0]
-  // Abril 2025 começa na Terça (jsDay=2). Preenche células vazias antes.
-  // 01/04/2025 = dia da semana 2 (Ter), grid começa no Dom (0)
-  const firstDay=2 // Terça
-  const daysInMonth=30
+  const yr=G.viewYear, mo=G.viewMonth
+  const firstDay=new Date(yr,mo-1,1).getDay()// 0=Dom
+  const daysInMonth=new Date(yr,mo,0).getDate()
+  const MESES_LONG=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const MESES_SHORT=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+  const monthLabel=MESES_LONG[mo-1]+' '+yr
+
+  // Contar dias com escala neste mês (para o subtítulo)
+  const daysThisMonth=G.days.filter(d=>d.date.startsWith(`${yr}-${String(mo).padStart(2,'0')}`))
+  G._calMeta={monthLabel,shortLabel:MESES_SHORT[mo-1].charAt(0).toUpperCase()+MESES_SHORT[mo-1].slice(1)+' '+yr,daysCount:daysThisMonth.length}
 
   let cells=''
-  // Células vazias antes do dia 1
   for(let i=0;i<firstDay;i++) cells+=`<div class="cal-cell empty"></div>`
 
   for(let d=1;d<=daysInMonth;d++){
-    const dateStr=`2025-04-${String(d).padStart(2,'0')}`
+    const dateStr=`${yr}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`
     const dayData=dayMap[dateStr]
     const isToday=dateStr===today
     const isSel=dateStr===G.selectedDate
@@ -520,24 +1294,96 @@ function buildCalendar(){
   </div>`
 }
 
+// ── MODAL IR PARA MÊS/ANO ──
+function showPeriodModal(){
+  document.getElementById('pmodal')?.remove()
+  const m=document.createElement('div');m.id='pmodal'
+  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const moOpts=MESES.map((n,i)=>`<option value="${i+1}"${G.viewMonth===i+1?' selected':''}>${n}</option>`).join('')
+  m.innerHTML=`<div class="modal-bg" id="pmbg">
+    <div class="modal-card" style="max-width:320px">
+      <div class="modal-head"><div class="modal-title">📆 Ir para período</div><button class="modal-close" id="pclose">✕</button></div>
+      <div class="modal-body" style="padding:20px">
+        <div style="display:flex;gap:10px;margin-bottom:18px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px">Mês</label>
+            <select id="p-mes" class="inp" style="padding:10px">${moOpts}</select>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+            <label style="font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px">Ano</label>
+            <input id="p-ano" class="inp" type="number" value="${G.viewYear}" min="2020" max="2099"/>
+          </div>
+        </div>
+        <button class="l-btn" id="p-ok">Ir para este período</button>
+      </div>
+    </div>
+  </div>`
+  document.body.appendChild(m)
+  document.getElementById('pclose').onclick=()=>m.remove()
+  document.getElementById('pmbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
+  document.getElementById('p-ok').onclick=()=>{
+    const mo=parseInt(document.getElementById('p-mes').value)
+    const yr=parseInt(document.getElementById('p-ano').value)
+    if(yr>=2020&&yr<=2099&&mo>=1&&mo<=12){
+      G.viewYear=yr;G.viewMonth=mo;G.selectedDate=null
+      m.remove();render()
+    }
+  }
+  document.getElementById('p-ano').onkeydown=ev=>{if(ev.key==='Enter')document.getElementById('p-ok').click()}
+}
+
 // ── PAINEL DO DIA ──
 function buildDayPanel(dateStr){
   const day=dayMap[dateStr];if(!day)return''
   const d=parseInt(dateStr.split('-')[2])
   const MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
-  const title=`${String(d).padStart(2,'0')} abr 2025`
+  const parts=dateStr.split('-')
+  const title=`${String(d).padStart(2,'0')} ${MESES[parseInt(parts[1])-1]} ${parts[0]}`
   return `<div class="day-panel" id="day-panel">
     <div class="panel-head">
       <div>
         <div class="panel-date">${title}</div>
         <div class="panel-wd">${day.wd} · ${day.manha.length} manhã · ${day.noite.length} noite</div>
       </div>
-      <button class="panel-close" id="panel-close">✕ Fechar</button>
+      <button class="panel-close" id="panel-close" onclick="G.selectedDate=null;render()">✕ Fechar</button>
     </div>
     <div class="panel-body" id="panel-body">
+      ${buildRegrasPanel()}
       ${day.manha.length?buildShiftPanel(day,'manha'):''}
       ${day.noite.length?buildShiftPanel(day,'noite'):''}
+      ${buildHistoricoPanel(dateStr)}
     </div>
+  </div>`
+}
+
+// ── BLOCO DE REGRAS OPERACIONAIS (topo do painel do dia) ──
+function buildRegrasPanel(){
+  return`<div class="regras-block">
+    <div class="regras-row">
+      ${REGRA_OPERACIONAL.itens.map(i=>`<span class="regra-item">${esc(i)}</span>`).join('')}
+    </div>
+    <div class="transicao-row">
+      <span class="trans-atual">${esc(TRANSICAO_CHECKLIST.atual)}</span>
+      <span class="trans-futuro">${esc(TRANSICAO_CHECKLIST.futuro)}</span>
+    </div>
+  </div>`
+}
+
+// Histórico simples: exibe as alterações do dia selecionado
+function buildHistoricoPanel(dateStr){
+  // Filtra só as do dia atual (simplificado: mostra todos quando painel aberto)
+  if(!HISTORICO.length)return''
+  const itens=HISTORICO.map(h=>`
+    <div class="hist-item">
+      <span class="hist-time">${esc(h.at)}</span>
+      <span class="hist-editor">${esc(h.editor)}</span> alterou
+      <span class="hist-pessoa">${esc(h.pessoa)}</span>
+      <span class="hist-change">${esc(h.antes)} → ${esc(h.depois)}</span>
+      <span class="hist-motivo">motivo: ${esc(h.motivo)}</span>
+    </div>`).join('')
+  return`<div class="hist-block">
+    <div class="hist-title">📋 Alterações desta sessão</div>
+    ${itens}
   </div>`
 }
 
@@ -574,6 +1420,21 @@ function buildCard(date,shift,e,editing){
           <button class="ec-save" data-sv="${k}">✓ Salvar</button>
           <button class="ec-cancel" data-cx="${k}">Cancelar</button>
         </div>
+        <div class="ec-motivo-wrap" id="motivo-${k}" style="display:none;margin-top:8px">
+          <div style="font-size:10px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">⚠ Motivo obrigatório</div>
+          <select class="ec-inp" id="motivo-sel-${k}" style="margin-bottom:6px">
+            <option value="">Selecione o motivo...</option>
+            <option value="falta">Falta</option>
+            <option value="cobertura">Cobertura</option>
+            <option value="troca">Troca</option>
+            <option value="ajuste">Ajuste</option>
+            <option value="folga">Folga</option>
+            <option value="erro">Correção de erro</option>
+            <option value="outro">Outro...</option>
+          </select>
+          <input class="ec-inp" id="motivo-txt-${k}" placeholder="Descreva o motivo..." style="display:none;margin-bottom:6px"/>
+          <button class="ec-save" id="motivo-ok-${k}" style="width:100%">✓ Confirmar e salvar</button>
+        </div>
       </div>
     </div>`
   }
@@ -588,12 +1449,41 @@ function buildCard(date,shift,e,editing){
     ${!isFalta?`<button class="ec-btn falta-btn" data-falta="${k}">⚠ Falta</button>`:''}
   </div>`:''
 
+  // Horário automático: busca na base fixa, não editável
+  const hor=getHorario(e.person)
+  const horHtml=hor&&hor.horario?`<div class="ec-hor">${esc(hor.horario)} · 🍽 ${esc(hor.almoco)}</div>`:''
+
+  // Responsabilidades: máx 2 visíveis + botão "ver mais" se houver mais
+  const resps=getResponsabilidades(e.person)||[]
+  let respHtml=''
+  if(resps.length){
+    const visiveis=resps.slice(0,2)
+    const extras=resps.slice(2)
+    const chips=visiveis.map(r=>`<span class="ec-resp-chip">${esc(r)}</span>`).join('')
+    const maisBtn=extras.length
+      ?`<button class="ec-resp-mais" data-mais="${esc(e.id)}" onclick="toggleResps(this)" aria-label="Ver mais responsabilidades">+${extras.length}</button>`
+      :''
+    const extrasHtml=extras.length
+      ?`<div class="ec-resp-extras" id="extras-${esc(e.id)}" style="display:none">${extras.map(r=>`<span class="ec-resp-chip ec-resp-extra">${esc(r)}</span>`).join('')}</div>`
+      :''
+    respHtml=`<div class="ec-resp-wrap"><span class="ec-resp-label">Resp.</span>${chips}${maisBtn}${extrasHtml}</div>`
+  }
+
+  // Botão de detalhes (se a pessoa tiver funções cadastradas)
+  const temDetalhes=getFuncoes(e.person)!==null
+  const detalheBtn=temDetalhes
+    ?`<button class="ec-detalhe-btn" data-det-nome="${esc(e.person)}" data-det-role="${esc(e.role||'')}">📋 Ver funções</button>`
+    :''
+
   return `<div class="entry-card${isFalta?' falta':''}" data-k="${k}">
     <span class="ec-role">${esc(e.role||'—')}</span>
     <div class="ec-right">
       <div class="ec-name">${esc(e.person||'—')}</div>
+      ${horHtml}
+      ${respHtml}
       ${e.obs?`<div class="ec-obs">${esc(e.obs)}</div>`:''}
       ${statusHtml}
+      ${detalheBtn}
       ${acoes}
     </div>
   </div>`
@@ -605,7 +1495,7 @@ function rebuildPanel(){
   const body=document.getElementById('panel-body')
   if(!body)return
   const day=dayMap[G.selectedDate];if(!day)return
-  body.innerHTML=(day.manha.length?buildShiftPanel(day,'manha'):'')+(day.noite.length?buildShiftPanel(day,'noite'):'')
+  body.innerHTML=buildRegrasPanel()+(day.manha.length?buildShiftPanel(day,'manha'):'')+(day.noite.length?buildShiftPanel(day,'noite'):'')+buildHistoricoPanel(G.selectedDate)
   bindPanel()
 }
 
@@ -627,7 +1517,7 @@ function rebuildCell(dateStr){
   })
 }
 
-// ── BIND GERAL ──
+// ===== EDIÇÃO ADMIN =====
 function bindAll(){
   // Topbar
   const mb=document.getElementById('mbtn')
@@ -645,20 +1535,37 @@ function bindAll(){
   const dout=document.getElementById('dout');if(dout)dout.onclick=()=>{
     G.user=null;localStorage.removeItem(SU);G.menu=false;toast('Sessão encerrada.','info');render()
   }
+  const bhorarios=document.getElementById('btn-horarios');if(bhorarios)bhorarios.onclick=showHorariosModal
   const bfolgas=document.getElementById('btn-folgas');if(bfolgas)bfolgas.onclick=showFolgasModal
   const btoday=document.getElementById('btn-today');if(btoday)btoday.onclick=()=>{
-    const today=new Date().toISOString().split('T')[0]
-    if(dayMap[today]){G.selectedDate=today;render()}
+    const now=new Date()
+    G.viewYear=now.getFullYear();G.viewMonth=now.getMonth()+1
+    const today=now.toISOString().split('T')[0]
+    G.selectedDate=dayMap[today]?today:null
+    render()
   }
+  const bprev=document.getElementById('btn-prev');if(bprev)bprev.onclick=()=>{
+    G.viewMonth--;if(G.viewMonth<1){G.viewMonth=12;G.viewYear--}
+    G.selectedDate=null;render()
+  }
+  const bnext=document.getElementById('btn-next');if(bnext)bnext.onclick=()=>{
+    G.viewMonth++;if(G.viewMonth>12){G.viewMonth=1;G.viewYear++}
+    G.selectedDate=null;render()
+  }
+  const bperiod=document.getElementById('btn-period');if(bperiod)bperiod.onclick=showPeriodModal
   // Painel fechar
   const pc=document.getElementById('panel-close');if(pc)pc.onclick=()=>{G.selectedDate=null;render()}
 
   // ESC fecha qualquer modal aberto ou painel
   document.onkeydown=ev=>{
     if(ev.key!=='Escape')return
+    if(document.getElementById('dmodal'))  {document.getElementById('dmodal').remove();return}
+    if(document.getElementById('det-popup')) {document.getElementById('det-popup').remove();return}
+    if(document.getElementById('hmodal'))  {document.getElementById('hmodal').remove();return}
     if(document.getElementById('lmodal'))  {document.getElementById('lmodal').remove();return}
     if(document.getElementById('fmodal'))  {document.getElementById('fmodal').remove();return}
     if(document.getElementById('ftmodal')) {document.getElementById('ftmodal').remove();return}
+    if(document.getElementById('pmodal'))  {document.getElementById('pmodal').remove();return}
     if(G.selectedDate){G.selectedDate=null;render()}
   }
 
@@ -686,11 +1593,18 @@ function bindAll(){
 
 function bindPanel(){
   const pc=document.getElementById('panel-close');if(pc)pc.onclick=()=>{G.selectedDate=null;render()}
-  // Scroll indicator: adiciona sombra no topo quando o usuário rolou
+  // Scroll indicator
   const pb=document.getElementById('panel-body')
   if(pb){
     pb.onscroll=()=>pb.classList.toggle('scrolled',pb.scrollTop>10)
   }
+  // Bind botões "Ver funções" → popup operacional completo
+  document.querySelectorAll('.ec-detalhe-btn').forEach(b=>{
+    b.onclick=ev=>{ev.stopPropagation();showDetalhes(b.dataset.detNome,b.dataset.detRole)}
+  })
+  // Carregar histórico remoto do dia selecionado (sem bloquear UI)
+  if(G.selectedDate) loadHistoricoRemoto(G.selectedDate)
+
   document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
     requireAuth(()=>{
       const[date,shift]=b.dataset.add.split('|')
@@ -733,17 +1647,50 @@ function bindEdit(date,shift,id){
   })
   const sv=document.querySelector(`[data-sv="${k}"]`)
   if(sv)sv.onclick=()=>{
-    document.querySelectorAll(`[data-k="${k}"] [data-f]`).forEach(i=>{e[i.dataset.f]=i.value})
-    save();toast('Salvo ✓','success')
-    sv.closest('[data-k]').outerHTML=buildCard(date,shift,e)
-    bindPanel();rebuildCell(date)
+    // Fase 4: exigir motivo antes de salvar
+    const wrap=document.getElementById(`motivo-${k}`)
+    if(wrap)wrap.style.display='block'
+    sv.style.display='none'
+    // Mostrar/ocultar input de texto quando "outro"
+    const sel=document.getElementById(`motivo-sel-${k}`)
+    const txt=document.getElementById(`motivo-txt-${k}`)
+    if(sel&&txt) sel.onchange=()=>{txt.style.display=sel.value==='outro'?'block':'none'}
+    // Botão confirmar
+    const ok=document.getElementById(`motivo-ok-${k}`)
+    if(ok)ok.onclick=()=>{
+      const motivo=sel&&sel.value?( sel.value==='outro'?(txt&&txt.value.trim()||'outro')  :sel.value )  :''
+      if(!motivo){toast('Selecione um motivo.','error');return}
+      // Capturar antes/depois para histórico
+      const antes=`${e.role} — ${e.person}`
+      document.querySelectorAll(`[data-k="${k}"] [data-f]`).forEach(i=>{e[i.dataset.f]=i.value})
+      const depois=`${e.role} — ${e.person}`
+      // Fase 5: registrar no histórico
+      registrarHistorico(e.person,antes,depois,motivo)
+      save();toast('Salvo ✓ — motivo: '+motivo,'success')
+      rebuildPanel();rebuildCell(date)
+    }
   }
   const cx=document.querySelector(`[data-cx="${k}"]`)
   if(cx)cx.onclick=()=>{cx.closest('[data-k]').outerHTML=buildCard(date,shift,e);bindPanel()}
   document.querySelector(`[data-k="${k}"] input`)?.focus()
 }
 
-// ── AUTH ──
+// ===== HISTÓRICO =====
+// Registra cada alteração feita pelo admin
+let HISTORICO=[]
+function registrarHistorico(pessoa,antes,depois,motivo){
+  const entrada={
+    at: new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+    editor: G.user?G.user.name:'?',
+    pessoa,antes,depois,motivo
+  }
+  HISTORICO.push(entrada)
+  if(HISTORICO.length>100) HISTORICO=HISTORICO.slice(-100)
+  // Salvar no Supabase em background
+  saveHistoricoRemoto(entrada)
+}
+
+// ===== AUTH =====
 function requireAuth(fn){
   if(G.user&&G.user.can&&G.user.can.edit){fn();return}
   showLoginModal(fn)
@@ -799,6 +1746,154 @@ function showLoginModal(onSuccess){
   }
 }
 
+// ── POPUP DETALHES DA PESSOA — PAINEL OPERACIONAL COMPLETO ──
+function showDetalhes(nome, funcaoAtual){
+  document.getElementById('dmodal')?.remove()
+  const hor=getHorario(nome)
+  const func=getFuncoes(nome)
+  const resps=getResponsabilidades(nome)||[]
+  const m=document.createElement('div');m.id='dmodal'
+  m.className='detalhe-popup'
+
+  // 2. Horário
+  const horSection=hor&&hor.horario?`
+    <div class="dp-section">
+      <div class="dp-section-label">Horário</div>
+      <div class="dp-hor-row">
+        <span class="dp-hor-badge">🕐 ${esc(hor.horario)}</span>
+        <span class="dp-hor-badge">🍽 ${esc(hor.almoco)}</span>
+      </div>
+    </div>`:''
+
+  // 3. Função do dia
+  const funcDiaSection=funcaoAtual?`
+    <div class="dp-section">
+      <div class="dp-section-label">Função hoje</div>
+      <span class="dp-funcao-hoje">${esc(funcaoAtual)}</span>
+    </div>`:''
+
+  // 4. Funções possíveis
+  let funcSection=''
+  if(func&&func.funcoes.length){
+    const itens=func.funcoes.map(f=>{
+      const isCurr=funcaoAtual&&f.toLowerCase()===funcaoAtual.toLowerCase()
+      const desc=func.detalhes[f]||''
+      return`<div class="dp-func-item${isCurr?' dp-func-hoje':''}">
+        <div class="dp-func-nome">${isCurr?'🔴 ':''}${esc(f)}${isCurr?' <span class="dp-hoje-tag">HOJE</span>':''}</div>
+        ${desc?`<div class="dp-func-desc">${esc(desc)}</div>`:''}
+      </div>`
+    }).join('')
+    funcSection=`
+      <div class="dp-section">
+        <div class="dp-section-label">Funções</div>
+        <div class="dp-bloco-badge">${esc(func.bloco)}</div>
+        ${itens}
+      </div>`
+  }
+
+  // 5+6. Responsabilidades operacionais (com destaque para críticas)
+  let respSection=''
+  if(resps.length){
+    const chips=resps.map(r=>{
+      const crit=isCritica(r)
+      return`<span class="dp-resp-chip${crit?' dp-resp-critica':''}">${crit?'⚡ ':''}${esc(r)}</span>`
+    }).join('')
+    respSection=`
+      <div class="dp-section">
+        <div class="dp-section-label">Responsabilidades</div>
+        <div class="dp-resp-list">${chips}</div>
+      </div>`
+  }
+
+  // 7. Obs operacionais (vem de func.detalhes da função atual se houver)
+  const obsText=func&&funcaoAtual&&func.detalhes[funcaoAtual]?func.detalhes[funcaoAtual]:''
+  const obsSection=obsText?`
+    <div class="dp-section">
+      <div class="dp-section-label">Obs. operacional</div>
+      <div class="dp-obs">${esc(obsText)}</div>
+    </div>`:''
+
+  // 8. Regra do dia
+  const regraSection=`
+    <div class="dp-regra">
+      ${REGRA_OPERACIONAL.itens.map(i=>`<div class="dp-regra-item">${esc(i)}</div>`).join('')}
+    </div>`
+
+  // 9. Transição checklist
+  const transSection=`
+    <div class="dp-trans">
+      <div class="dp-trans-atual">${esc(TRANSICAO_CHECKLIST.atual)}</div>
+      <div class="dp-trans-futuro">${esc(TRANSICAO_CHECKLIST.futuro)}</div>
+    </div>`
+
+  const turnoLabel=hor?(hor.turno==='manha'?'☀️ Manhã':hor.turno==='estagiario'?'📋 Estagiário':'🌙 Noite'):''
+
+  m.innerHTML=`
+    <div class="dp-overlay" id="dp-overlay">
+      <div class="dp-card">
+        <div class="dp-head">
+          <div>
+            <div class="dp-nome">${esc(nome)}</div>
+            ${turnoLabel?`<div class="dp-turno">${turnoLabel}</div>`:''}
+          </div>
+          <button class="dp-close" onclick="document.getElementById('dmodal').remove()">✕</button>
+        </div>
+        <div class="dp-body">
+          ${horSection}
+          ${funcDiaSection}
+          ${funcSection}
+          ${respSection}
+          ${obsSection}
+          ${regraSection}
+          ${transSection}
+        </div>
+      </div>
+    </div>`
+
+  document.body.appendChild(m)
+  document.getElementById('dp-overlay').onclick=ev=>{if(ev.target.id==='dp-overlay')m.remove()}
+}
+
+// ── HORÁRIOS ──
+function showHorariosModal(){
+  document.getElementById('hmodal')?.remove()
+  function buildRows(arr){
+    return arr.map(p=>`
+      <tr>
+        <td><span class="hor-nome">${esc(p.nome)}</span></td>
+        <td><span class="hor-time">${esc(p.horario)}</span></td>
+        <td><span class="hor-almoco">🍽 ${esc(p.almoco)}</span></td>
+      </tr>`).join('')
+  }
+  function buildSection(label,cls,icon,arr){
+    return`<div class="hor-section">
+      <div class="hor-section-title ${cls}">${icon} ${label} <span style="margin-left:auto;font-size:12px;opacity:.7">${arr.length} pessoas</span></div>
+      <table class="hor-table">
+        <thead><tr><th>Nome</th><th>Horário</th><th>Intervalo</th></tr></thead>
+        <tbody>${buildRows(arr)}</tbody>
+      </table>
+    </div>`
+  }
+  const m=document.createElement('div');m.id='hmodal'
+  m.innerHTML=`<div class="modal-bg" id="hmbg">
+    <div class="modal-card" style="max-width:500px">
+      <div class="modal-head">
+        <div class="modal-title">🕐 Horários da Equipe</div>
+        <button class="modal-close" id="hclose">✕ Fechar</button>
+      </div>
+      <div class="modal-body">
+        ${buildSection('Turno da Manhã','manha','☀️',HORARIOS.manha)}
+        ${buildSection('Turno da Noite','noite','🌙',HORARIOS.noite)}
+        ${buildSection('Estagiários','est','📋',HORARIOS.estagiarios)}
+      </div>
+    </div>
+  </div>`
+  document.body.appendChild(m)
+  document.getElementById('hclose').onclick=()=>m.remove()
+  document.getElementById('hmbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
+}
+
+// ── DETALHES DA PESSOA ──
 // ── FOLGAS ──
 function showFolgasModal(){
   document.getElementById('fmodal')?.remove()
@@ -809,8 +1904,9 @@ function showFolgasModal(){
     const trab=new Set([...dom.manha,...dom.noite].map(e=>e.person).filter(Boolean))
     const folg=[...todos].filter(p=>!trab.has(p)).sort()
     const dn=parseInt(dom.date.split('-')[2])
+    const domParts=dom.date.split('-')
     return`<div class="folga-dom">
-      <div class="folga-dom-title">Domingo ${String(dn).padStart(2,'0')}/04/2025</div>
+      <div class="folga-dom-title">Domingo ${String(dn).padStart(2,'0')}/${domParts[1]}/${domParts[0]}</div>
       <div class="folga-section"><div class="folga-lbl">Trabalhando (${trab.size})</div>${[...trab].sort().map(p=>`<span class="folga-pill" style="background:#E8F5E9;color:#1B5E20">✓ ${esc(p)}</span>`).join('')}</div>
       <div class="folga-section"><div class="folga-lbl">De folga (${folg.length})</div>${folg.length?folg.map(p=>`<span class="folga-pill" style="background:var(--g100);color:var(--g700)">🌴 ${esc(p)}</span>`).join(''):'<span style="font-size:12px;color:var(--g300);font-style:italic">Todos escalados</span>'}</div>
     </div>`
@@ -838,7 +1934,7 @@ function showFaltaModal(date,shift,e){
     <div class="modal-card" style="max-width:380px">
       <div class="modal-head" style="background:#B71C1C"><div class="modal-title">⚠ Registrar Falta</div><button class="modal-close" id="ftclose">✕</button></div>
       <div class="modal-body">
-        <div class="falta-info"><b>${esc(e.person)}</b><br/>${esc(e.role)} · ${turno} · ${String(dn).padStart(2,'0')}/04/2025</div>
+        <div class="falta-info"><b>${esc(e.person)}</b><br/>${esc(e.role)} · ${turno} · ${String(dn).padStart(2,'0')}/${date.split('-')[1]}/${date.split('-')[0]}</div>
         <div class="falta-btns">
           <button class="falta-btn just" id="ft-just">📋 Falta Justificada — Enviar ao RH</button>
           <button class="falta-btn injust" id="ft-injust">🚨 Falta Injustificada — Enviar ao RH</button>
@@ -861,7 +1957,7 @@ function registrarFalta(date,shift,entry,tipo,dn,turno){
     e.status='absent';e.faltaTipo=tipo;e.faltaAt=Date.now()
     save()
     rebuildPanel();rebuildCell(date)
-    const data=String(dn).padStart(2,'0')+'/04/2025'
+    const data=String(dn).padStart(2,'0')+'/'+date.split('-')[1]+'/'+date.split('-')[0]
     const texto=tipo==='just'
       ?`📋 *Comunicado de Falta — Pastel da Camila*\n\n*Colaborador:* ${e.person}\n*Função:* ${e.role}\n*Turno:* ${turno}\n*Data:* ${data}\n*Tipo:* Falta JUSTIFICADA\n\nFavor registrar em folha de ponto e solicitar atestado.`
       :`🚨 *Comunicado de Falta — Pastel da Camila*\n\n*Colaborador:* ${e.person}\n*Função:* ${e.role}\n*Turno:* ${turno}\n*Data:* ${data}\n*Tipo:* Falta NÃO JUSTIFICADA ⚠\n\nFavor registrar em folha de ponto para desconto conforme CLT.`

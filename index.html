@@ -1215,6 +1215,18 @@ const FUNCOES_POR_PESSOA={
       'Limpeza de baldes':'Limpeza e organização dos baldes de recheio.'
     }
   },
+  'julia':{
+    bloco:'Produção / Fluxo',
+    funcoes:['Mesa','Contagem de recheio','Envio da lista','Contagem de massa','Limpeza de baldes','Escorredeira'],
+    detalhes:{
+      'Mesa':'Limpeza e organização da mesa de trabalho.',
+      'Contagem de recheio':'Todo dia de manhã: olhar os recheios e mandar a lista. Cozinha etiqueta a tampa. Guardar com etiqueta para frente (FIFO).',
+      'Envio da lista':'Enviar lista de recheios toda manhã para controle de produção.',
+      'Contagem de massa':'Realizar contagem de massa disponível para o turno.',
+      'Limpeza de baldes':'Limpeza e organização dos baldes de recheio.',
+      'Escorredeira':'Operar a escorredeira durante a produção.'
+    }
+  },
   'wirislaine':{
     bloco:'Produção / Fluxo',
     funcaoPrincipal:'Fritura',
@@ -1736,6 +1748,18 @@ function buildPersonCard(date,shift,nome,entries){
     respHtml=`<div class="ec-resp-wrap"><span class="ec-resp-label">Resp.</span>${chips}${maisBtn}${extHtml}</div>`
   }
 
+  // Status: só mostrar quando é confirmado ou falta — aguardando some
+  const statusRelevante=entries.filter(e=>e.status!=='pending')
+  const statusHtml=statusRelevante.length
+    ?statusRelevante.map(e=>{
+        const st=ST[e.status]||ST.pending
+        const isFalta=e.status==='absent'
+        return isFalta
+          ?`<span class="ec-status" style="background:var(--abs-bg);color:var(--abs)">✕ ${e.faltaTipo==='injust'?'Injustificada':'Justificada'} — ${esc(e.role)}</span>`
+          :`<span class="ec-status" style="background:${st.c}22;color:${st.c}">✓ ${esc(e.role)}</span>`
+      }).join('')
+    :''
+
   const detalheBtn=temDetalhes
     ?`<button class="ec-detalhe-btn" data-det-nome="${esc(nome)}" data-det-role="${esc(entries[0].role||'')}">📋 Ver funções</button>`
     :''
@@ -1777,6 +1801,7 @@ function buildPersonCard(date,shift,nome,entries){
       ${detalheBtn}
     </div>
     <div class="person-card-roles">${roleChipsHtml}</div>
+    ${statusHtml?`<div style="padding:0 12px 6px;display:flex;flex-wrap:wrap;gap:4px">${statusHtml}</div>`:''}
     ${faltaBtnsHtml}
   </div>`
 }
@@ -1816,9 +1841,12 @@ function buildCard(date,shift,e,editing){
     </div>`
   }
 
+  // Status: só mostrar confirmado ou falta — aguardando some
   const statusHtml=isFalta
     ?`<span class="ec-status" style="background:var(--abs-bg);color:var(--abs)">✕ ${e.faltaTipo==='injust'?'Injustificada':'Justificada'}</span>`
-    :`<span class="ec-status" style="background:${st.c}22;color:${st.c}">${st.l}</span>`
+    :e.status==='confirmed'
+      ?`<span class="ec-status" style="background:${st.c}22;color:${st.c}">${st.l}</span>`
+      :''
 
   const acoes=logado?`<div class="ec-actions">
     <button class="ec-btn edit" data-ed="${k}">✏️ Editar</button>

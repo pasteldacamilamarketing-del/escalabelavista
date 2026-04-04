@@ -759,6 +759,34 @@ input{font-family:'Nunito',sans-serif;outline:none}
   .cal-title{font-size:22px}
 }
 
+/* ── MODAL TEMPERATURAS ── */
+.temp-bloco{padding:14px 18px;border-bottom:1px solid var(--g100)}
+.temp-bloco:last-child{border-bottom:none}
+.temp-blue{background:#F0F7FF}
+.temp-orange{background:#FFFBF0}
+.temp-gray{background:#F7F7F7}
+.temp-bloco-titulo{font-size:14px;font-weight:800;color:var(--g900);margin-bottom:10px}
+.temp-sub-titulo{font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.temp-linha-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:7px;margin-bottom:10px}
+.temp-faixa{border-radius:8px;padding:8px 10px;text-align:center;border:1px solid transparent}
+.temp-ok{background:#E8F5E9;border-color:#A5D6A7}
+.temp-warn{background:#FFF8E1;border-color:#FFE082}
+.temp-crit{background:#FFEBEE;border-color:#FFCDD2}
+.temp-pre{background:#FFF3E0;border-color:#FFCC80}
+.temp-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;color:var(--g400)}
+.temp-valor{font-size:14px;font-weight:800;color:var(--g900);font-family:'Barlow Condensed',sans-serif}
+.temp-hint{font-size:9px;color:var(--g400);margin-top:2px}
+.temp-regras{display:flex;flex-direction:column;gap:4px}
+.temp-regra{font-size:11px;color:var(--g700);line-height:1.5;padding:2px 0}
+.temp-regra strong{font-weight:800;color:var(--g900)}
+.temp-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.temp-table tr{border-bottom:1px solid var(--g100)}
+.temp-table td{padding:6px 4px;vertical-align:middle;color:var(--g700)}
+.temp-t-ok{color:#2E7D32;font-weight:800;white-space:nowrap}
+.temp-t-warn{color:#F57F17;font-weight:800;white-space:nowrap}
+.temp-t-crit{color:#C62828;font-weight:800;white-space:nowrap}
+.temp-principio{margin-top:10px;background:#E8EAF6;border-radius:8px;padding:10px 12px;font-size:12px;font-weight:700;color:#3949AB;line-height:1.5}
+
 /* ── MODAL MANUAL DE USO ── */
 .man-intro{
   padding:14px 20px;font-size:13px;color:var(--g700);
@@ -1178,11 +1206,13 @@ const FUNCOES_POR_PESSOA={
   },
   'íris':{
     bloco:'Produção / Fluxo',
-    funcoes:['Mesa','Controle de recheio','FIFO'],
+    funcoes:['Mesa','Contagem de recheio','Envio da lista','Contagem de massa','Limpeza de baldes'],
     detalhes:{
-      'Mesa':'Limpeza e contagem da mesa. ⚠️ REGRA: sexta-feira → prioridade é produção de pastel (não travar a noite).',
-      'Controle de recheio':'Todo dia de manhã olhar e mandar a lista. Cozinha etiqueta a tampa. Ao chegar na loja, Íris etiqueta a lateral e guarda com etiqueta pra frente.',
-      'FIFO':'Aplicar FIFO (First In, First Out) em todos os recheios. Validade controlada diariamente.'
+      'Mesa':'Limpeza e organização da mesa. ⚠️ Sexta-feira: prioridade é produção de pastel — não travar a noite.',
+      'Contagem de recheio':'Todo dia de manhã: olhar os recheios e mandar a lista. Cozinha etiqueta a tampa. Íris etiqueta a lateral e guarda com etiqueta para frente (FIFO).',
+      'Envio da lista':'Enviar lista de recheios toda manhã para controle de produção.',
+      'Contagem de massa':'Realizar contagem de massa disponível para o turno.',
+      'Limpeza de baldes':'Limpeza e organização dos baldes de recheio.'
     }
   },
   'wirislaine':{
@@ -1439,6 +1469,7 @@ function buildPage(){
     <div class="topbar-mid">Escala · <b>${G._calMeta?G._calMeta.shortLabel:''}</b></div>
     <div class="top-actions">
       <button class="tbtn-white" id="btn-manual" title="Manual de Uso">📖<span class="tbtn-txt"> Manual</span></button>
+      <button class="tbtn-white" id="btn-temp" title="Padrão de Temperaturas">🌡️<span class="tbtn-txt"> Temp.</span></button>
       <button class="tbtn-white" id="btn-horarios" title="Horários da Equipe">🕐<span class="tbtn-txt"> Horários</span></button>
       <button class="tbtn-white" id="btn-folgas" title="Folgas de Domingo">📅<span class="tbtn-txt"> Folgas Dom</span></button>
       <div style="position:relative">
@@ -1645,14 +1676,9 @@ function buildShiftPanel(day,shift){
     grupos[nome].push(e)
   })
 
-  // Construir HTML agrupado
+  // Construir HTML agrupado — sempre usa buildPersonCard para layout consistente
   const cardsHtml=ordemPessoas.map(nome=>{
     const entriesDaPessoa=grupos[nome]
-    // Se só uma função ou modo edição pendente, usar card normal
-    if(entriesDaPessoa.length===1){
-      return buildCard(day.date,shift,entriesDaPessoa[0])
-    }
-    // Agrupado: nome uma vez, funções listadas
     return buildPersonCard(day.date,shift,nome,entriesDaPessoa)
   }).join('')
 
@@ -1716,17 +1742,17 @@ function buildPersonCard(date,shift,nome,entries){
 
   // Chips de função — quando logado, cada chip tem botões inline ocultos que aparecem no hover
   const roleChipsHtml=entries.map(e=>{
-    const st=ST[e.status]||ST.pending
     const isFalta=e.status==='absent'
     const k=`${date}|${shift}|${e.id}`
-    const cor=isFalta?'var(--abs)':st.c
-    const bg=isFalta?'var(--abs-bg)':st.c+'22'
+    const chipStyle=isFalta
+      ?'border-color:var(--abs);color:var(--abs);background:var(--abs-bg)'
+      :'border-color:var(--g200);color:var(--g700);background:#fff'
     const adminBtns=logado?`<span class="pc-chip-actions">
       <button class="pc-chip-btn" data-ed="${k}" title="Editar ${esc(e.role)}">✏</button>
       <button class="pc-chip-btn danger" data-dl="${k}" title="Excluir">✕</button>
       ${!isFalta?`<button class="pc-chip-btn warn" data-falta="${k}" title="Registrar falta">⚠</button>`:''}
     </span>`:''
-    return `<span class="pc-role-chip${logado?' pc-role-editable':''}" style="border-color:${cor};color:${cor};background:${bg}">
+    return `<span class="pc-role-chip${logado?' pc-role-editable':''}" style="${chipStyle}">
       ${esc(e.role||'—')}${isFalta?' ✕':''}${adminBtns}
     </span>`
   }).join('')
@@ -1907,6 +1933,7 @@ function bindAll(){
     G.user=null;localStorage.removeItem(SU);G.menu=false;toast('Sessão encerrada.','info');render()
   }
   const bmanual=document.getElementById('btn-manual');if(bmanual)bmanual.onclick=showManualModal
+  const btemp=document.getElementById('btn-temp');if(btemp)btemp.onclick=showTempModal
   const bhorarios=document.getElementById('btn-horarios');if(bhorarios)bhorarios.onclick=showHorariosModal
   const bfolgas=document.getElementById('btn-folgas');if(bfolgas)bfolgas.onclick=showFolgasModal
   const btoday=document.getElementById('btn-today');if(btoday)btoday.onclick=()=>{
@@ -1935,6 +1962,7 @@ function bindAll(){
     if(document.getElementById('det-popup')) {document.getElementById('det-popup').remove();return}
     if(document.getElementById('ajmodal')) {document.getElementById('ajmodal').remove();return}
     if(document.getElementById('mmanual')) {document.getElementById('mmanual').remove();return}
+    if(document.getElementById('tmodal'))  {document.getElementById('tmodal').remove();return}
     if(document.getElementById('hmodal'))  {document.getElementById('hmodal').remove();return}
     if(document.getElementById('lmodal'))  {document.getElementById('lmodal').remove();return}
     if(document.getElementById('fmodal'))  {document.getElementById('fmodal').remove();return}
@@ -2400,6 +2428,89 @@ function showAjusteModal(k){
     m.remove()
     rebuildPanel();rebuildCell(date)
   }
+}
+
+// ── MODAL TEMPERATURAS ──
+function showTempModal(){
+  document.getElementById('tmodal')?.remove()
+  const m=document.createElement('div');m.id='tmodal'
+  m.innerHTML=`<div class="modal-bg" id="tmbg">
+    <div class="modal-card" style="max-width:500px">
+      <div class="modal-head" style="flex-direction:column;align-items:flex-start;gap:3px;padding:18px 22px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+          <div class="modal-title">🌡️ Padrão de Temperaturas</div>
+          <button class="modal-close" id="tmclose">✕ Fechar</button>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:600">Pastel da Camila · Operação de Alto Volume</div>
+      </div>
+      <div class="modal-body" style="padding:0">
+
+        <div class="temp-bloco temp-blue">
+          <div class="temp-bloco-titulo">❄️ Geladeira (bebidas e insumos)</div>
+          <div class="temp-linha-grid">
+            <div class="temp-faixa temp-ok"><div class="temp-label">Ideal</div><div class="temp-valor">0°C a 4°C</div></div>
+            <div class="temp-faixa temp-warn"><div class="temp-label">Alerta</div><div class="temp-valor">5°C a 6°C</div></div>
+            <div class="temp-faixa temp-crit"><div class="temp-label">Crítico</div><div class="temp-valor">≥ 7°C</div></div>
+          </div>
+          <div class="temp-regras">
+            <div class="temp-regra">🥤 Bebida deve sair gelada de verdade — quanto mais próximo de 0°C, melhor</div>
+            <div class="temp-regra">🚪 Porta aberta constante → monitorar com atenção</div>
+          </div>
+        </div>
+
+        <div class="temp-bloco temp-blue">
+          <div class="temp-bloco-titulo">🧊 Freezer</div>
+          <div class="temp-linha-grid">
+            <div class="temp-faixa temp-ok"><div class="temp-label">Ideal</div><div class="temp-valor">-18°C a -22°C</div></div>
+            <div class="temp-faixa temp-warn"><div class="temp-label">Aceitável</div><div class="temp-valor">-15°C</div></div>
+            <div class="temp-faixa temp-crit"><div class="temp-label">Crítico</div><div class="temp-valor">≥ -12°C</div></div>
+          </div>
+          <div class="temp-regras">
+            <div class="temp-regra">❄️ Deve trabalhar mais frio que o mínimo em operação grande</div>
+            <div class="temp-regra">⚠️ Oscilação = risco de perda invisível</div>
+          </div>
+        </div>
+
+        <div class="temp-bloco temp-orange">
+          <div class="temp-bloco-titulo">🛢️ Tacho / Fritadeira</div>
+          <div class="temp-sub-titulo">Fases de operação:</div>
+          <div class="temp-linha-grid">
+            <div class="temp-faixa temp-pre"><div class="temp-label">Pré-aquecimento</div><div class="temp-valor">190°C – 200°C</div><div class="temp-hint">antes de fritar</div></div>
+            <div class="temp-faixa temp-ok"><div class="temp-label">Fritura ideal</div><div class="temp-valor">175°C – 185°C</div><div class="temp-hint">durante produção</div></div>
+          </div>
+          <div class="temp-sub-titulo" style="margin-top:10px">Limites operacionais:</div>
+          <table class="temp-table">
+            <tr><td class="temp-t-crit">❌ &lt;170°C</td><td>Pastel encharcado / pesado — não fritar</td></tr>
+            <tr><td class="temp-t-warn">⚠️ 170–175°C</td><td>Começa a perder padrão</td></tr>
+            <tr><td class="temp-t-ok">✅ 175–185°C</td><td>Faixa ideal de produção</td></tr>
+            <tr><td class="temp-t-warn">⚠️ 185–200°C</td><td>Pico controlado (antes de fritar)</td></tr>
+            <tr><td class="temp-t-crit">❌ &gt;205°C</td><td>Queima rápido / degrada o óleo</td></tr>
+          </table>
+          <div class="temp-regras">
+            <div class="temp-regra">🔥 Tacho deve chegar a 200°C <strong>antes</strong> de fritar</div>
+            <div class="temp-regra">✅ Durante fritura: trabalhar entre 175°C e 185°C</div>
+            <div class="temp-regra">📉 Queda ao colocar pastel é normal — deve estabilizar</div>
+            <div class="temp-regra">🚫 Nunca fritar abaixo de 170°C</div>
+          </div>
+        </div>
+
+        <div class="temp-bloco temp-gray">
+          <div class="temp-bloco-titulo">⚠️ Regras gerais — todas as áreas</div>
+          <div class="temp-regras">
+            <div class="temp-regra">📋 Temperatura deve ser conferida: <strong>início do turno · pré-pico · durante o pico</strong></div>
+            <div class="temp-regra">⚡ Qualquer desvio deve ser corrigido imediatamente</div>
+          </div>
+          <div class="temp-principio">
+            🧠 Temperatura não é número fixo. É controle contínuo da operação.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>`
+  document.body.appendChild(m)
+  document.getElementById('tmclose').onclick=()=>m.remove()
+  document.getElementById('tmbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
 }
 
 // ── MANUAL DE USO ──

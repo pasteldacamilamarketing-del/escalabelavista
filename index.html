@@ -25,7 +25,7 @@
   --panel-w:420px;
 }
 html,body{min-height:100vh;background:var(--g50);color:var(--g900)}
-body{font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased}
+body{font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased;font-size:16px}
 button{font-family:'Nunito',sans-serif;cursor:pointer;border:none;outline:none}
 input{font-family:'Nunito',sans-serif;outline:none}
 #app{min-height:100vh}
@@ -38,22 +38,22 @@ input{font-family:'Nunito',sans-serif;outline:none}
 /* ── TOPBAR ── */
 .topbar{
   position:sticky;top:0;z-index:200;
-  height:58px;background:var(--red);
+  height:68px;background:var(--red);
   display:flex;align-items:center;padding:0 18px;gap:14px;
   box-shadow:0 2px 16px rgba(234,29,44,.35)
 }
 .brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .brand-logo{height:42px;width:42px;object-fit:contain;filter:drop-shadow(0 1px 6px rgba(0,0,0,.3))}
-.brand-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;line-height:1.1}
-.brand-sub{font-size:10px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:1px;text-transform:uppercase}
-.topbar-mid{flex:1;text-align:center;font-size:13px;color:rgba(255,255,255,.85);font-weight:700}
+.brand-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:#fff;line-height:1.1}
+.brand-sub{font-size:13px;color:rgba(255,255,255,.6);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.topbar-mid{flex:1;text-align:center;font-size:17px;color:rgba(255,255,255,.85);font-weight:700}
 .topbar-mid b{color:#fff}
 .top-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.tbtn-white{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:6px 12px;color:#fff;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;transition:background .15s}
+.tbtn-white{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:8px 14px;color:#fff;font-size:17px;font-weight:700;white-space:nowrap;cursor:pointer;transition:background .15s}
 .tbtn-white:hover,.tbtn-white:active{background:rgba(255,255,255,.28)}
-.av{width:27px;height:27px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+.av{width:27px;height:27px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
 .dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.15);min-width:200px;padding:6px;z-index:400;animation:fadeIn .2s ease}
-.ddi{display:flex;align-items:center;gap:8px;width:100%;padding:11px 14px;border-radius:8px;background:none;border:none;font-size:14px;font-weight:700;color:var(--g700);cursor:pointer;text-align:left;font-family:'Nunito',sans-serif}
+.ddi{display:flex;align-items:center;gap:8px;width:100%;padding:11px 14px;border-radius:8px;background:none;border:none;font-size:18px;font-weight:700;color:var(--g700);cursor:pointer;text-align:left;font-family:'Nunito',sans-serif}
 .ddi:hover{background:var(--g50)}
 .ddi.danger{color:var(--red);background:var(--red-bg)}
 .ddi.red{color:var(--red)}
@@ -63,7 +63,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 /* ── LAYOUT PRINCIPAL ── */
 .main-layout{
   position:relative;
-  min-height:calc(100vh - 58px);
+  min-height:calc(100vh - 68px);
 }
 
 /* ── ÁREA DO CALENDÁRIO ── */
@@ -77,10 +77,10 @@ input{font-family:'Nunito',sans-serif;outline:none}
 }
 
 .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
-.cal-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--g900);letter-spacing:.3px}
-.cal-sub{font-size:13px;color:var(--g400);font-weight:600;margin-top:2px}
+.cal-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:var(--g900);letter-spacing:.3px}
+.cal-sub{font-size:17px;color:var(--g400);font-weight:600;margin-top:2px}
 .cal-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.cta-btn{padding:7px 14px;border-radius:20px;border:1.5px solid var(--g200);background:#fff;font-size:13px;font-weight:700;color:var(--g700);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;white-space:nowrap}
+.cta-btn{padding:7px 14px;border-radius:20px;border:1.5px solid var(--g200);background:#fff;font-size:17px;font-weight:700;color:var(--g700);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;white-space:nowrap}
 .cta-btn:hover{border-color:var(--red);color:var(--red)}
 .cta-btn.red{background:var(--red);border-color:var(--red);color:#fff}
 .cta-btn.red:hover{background:var(--red2)}
@@ -88,7 +88,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 /* ── GRID CALENDÁRIO ── */
 .cal-grid-wrap{background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,.07);overflow:hidden;border:1px solid var(--g200)}
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);background:var(--g900)}
-.cal-wd{padding:8px 4px;text-align:center;font-size:11px;font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px}
+.cal-wd{padding:8px 4px;text-align:center;font-size:14px;font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px}
 .cal-wd:first-child{color:#FF6B6B}/* Dom vermelho */
 .cal-wd:last-child{color:#FF6B6B}/* Sáb vermelho */
 
@@ -96,14 +96,14 @@ input{font-family:'Nunito',sans-serif;outline:none}
 
 /* Célula do dia */
 .cal-cell{
-  background:#fff;min-height:100px;padding:8px 8px 6px;
+  background:#fff;min-height:110px;padding:8px 8px 6px;
   cursor:pointer;position:relative;
   transition:background .15s;
   display:flex;flex-direction:column;gap:4px;
   overflow:hidden;
 }
 /* Quando painel aberto, células ficam mais compactas */
-.cal-area.panel-open .cal-cell{min-height:80px;padding:6px 6px 4px}
+.cal-area.panel-open .cal-cell{min-height:90px;padding:6px 6px 4px}
 .cal-cell:hover{background:#FAFAFA}
 .cal-cell.empty{background:var(--g50);cursor:default}
 .cal-cell.selected{background:#FFF0F1;outline:2px solid var(--red);outline-offset:-2px;z-index:1}
@@ -113,7 +113,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 
 .cal-day-num{
   font-family:'Barlow Condensed',sans-serif;
-  font-size:18px;font-weight:700;color:var(--g700);
+  font-size:23px;font-weight:700;color:var(--g700);
   line-height:1;margin-bottom:4px;
   display:inline-flex;align-items:center;justify-content:center;
   width:26px;height:26px
@@ -125,19 +125,19 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .cal-chips{display:flex;flex-direction:column;gap:3px}
 .cal-chip{
   display:flex;align-items:center;gap:4px;
-  border-radius:5px;padding:2px 6px;font-size:10px;font-weight:800;
+  border-radius:5px;padding:2px 6px;font-size:13px;font-weight:800;
   white-space:nowrap;overflow:hidden
 }
 .chip-m{background:var(--manha-bg);color:#795500}
 .chip-n{background:var(--noite-bg);color:#311B92}
 .chip-f{background:var(--abs-bg);color:var(--abs)}
-.cal-wd-label{font-size:9px;font-weight:700;color:var(--g300);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
-.cal-closed-lbl{font-size:9px;font-weight:700;color:var(--g300);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.cal-wd-label{font-size:12px;font-weight:700;color:var(--g300);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.cal-closed-lbl{font-size:12px;font-weight:700;color:var(--g300);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 
 /* ── PAINEL LATERAL ── */
 .day-panel{
   position:fixed;
-  top:58px;
+  top:68px;
   right:0;
   bottom:0;
   width:var(--panel-w);
@@ -151,13 +151,13 @@ input{font-family:'Nunito',sans-serif;outline:none}
   overflow:hidden;
 }
 .panel-head{
-  background:var(--red);padding:16px 18px;
+  background:var(--red);padding:18px 20px;
   display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;/* cabeçalho não encolhe */
+  flex-shrink:0;
 }
-.panel-date{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:.3px}
-.panel-wd{font-size:11px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
-.panel-close{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0}
+.panel-date{font-family:'Barlow Condensed',sans-serif;font-size:29px;font-weight:700;color:#fff;letter-spacing:.3px}
+.panel-wd{font-size:14px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+.panel-close{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 13px;font-size:17px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0}
 .panel-body{
   flex:1;
   overflow-y:auto;
@@ -179,35 +179,53 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .shift-head{display:flex;align-items:center;gap:8px;padding:9px 14px}
 .shift-block.manha .shift-head{background:var(--manha)}
 .shift-block.noite .shift-head{background:var(--noite)}
-.shift-head-icon{font-size:14px}
-.shift-head-label{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#fff;flex:1}
-.shift-head-count{font-size:11px;color:rgba(255,255,255,.8);font-weight:600}
+.shift-head-icon{font-size:18px}
+.shift-head-label{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#fff;flex:1}
+.shift-head-count{font-size:14px;color:rgba(255,255,255,.8);font-weight:600}
 
 /* Botão adicionar */
-.add-btn{display:block;width:100%;padding:9px;background:none;border:none;border-top:1.5px dashed var(--g200);font-size:13px;font-weight:700;color:var(--red);cursor:pointer;text-align:center;font-family:'Nunito',sans-serif}
+.add-btn{display:block;width:100%;padding:9px;background:none;border:none;border-top:1.5px dashed var(--g200);font-size:17px;font-weight:700;color:var(--red);cursor:pointer;text-align:center;font-family:'Nunito',sans-serif}
 .add-btn:hover{background:var(--red-bg)}
 
 /* Cards de entrada no painel — agrupados por pessoa */
-.entry-cards{display:flex;flex-direction:column;gap:8px;padding:8px 10px 4px;background:#fff}
+.entry-cards{display:flex;flex-direction:column;gap:0;padding:0;background:#fff}
 
 /* Card agrupado: uma pessoa, múltiplas funções */
 .person-card{
-  background:#fff;border:1px solid var(--g100);border-radius:12px;
-  box-shadow:0 1px 4px rgba(0,0,0,.05);overflow:hidden;
+  background:#fff;
+  border-bottom:1px solid var(--g100);
+  padding:14px 16px 12px;
+  transition:background .12s;
+  position:relative;
 }
+.person-card:last-child{border-bottom:none}
+.person-card:hover{background:var(--g50)}
+
+/* Cabeçalho do card: avatar + nome + horário + botão */
 .person-card-head{
-  display:flex;align-items:center;gap:9px;
-  padding:9px 12px 6px;
+  display:flex;align-items:flex-start;gap:12px;
+  margin-bottom:10px;
 }
-.ec-name{font-size:14px;font-weight:800;color:var(--g900)}
-.person-card-roles{
-  display:flex;flex-wrap:wrap;gap:4px;
-  padding:0 12px 8px;
+
+/* Avatar com iniciais */
+.pc-avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:17px;font-weight:700;
+  flex-shrink:0;
 }
-.person-card-foot{
-  padding:0 12px 9px;
-  display:flex;flex-direction:column;gap:3px;
-}
+.pc-avatar.manha{background:#FFF9C4;color:#795500;border:2px solid #F9A825}
+.pc-avatar.noite{background:#EDE7F6;color:#311B92;border:2px solid #5E35B1}
+.pc-avatar.absent{background:var(--abs-bg);color:var(--abs);border:2px solid var(--abs)}
+
+.ec-name{font-size:20px;font-weight:900;color:var(--g900);line-height:1.15;margin-bottom:4px;letter-spacing:-.2px}
+.pc-info{flex:1;min-width:0}
+.pc-hor-line{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.pc-hor-badge{display:inline-flex;align-items:center;gap:4px;background:var(--g50);border:1px solid var(--g200);border-radius:6px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--g700);letter-spacing:.3px}
+.pc-almoco-badge{display:inline-flex;align-items:center;gap:4px;background:#FFF8E1;border:1px solid #FFE082;border-radius:6px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#795500;letter-spacing:.3px}
+.person-card-roles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.person-card-foot{padding:0;display:flex;flex-direction:column;gap:4px}
 
 /* Card individual (compatibilidade — modo edição) */
 .entry-card{
@@ -220,15 +238,15 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .ec-role{
   background:var(--g100);color:var(--g700);
   border-radius:6px;padding:3px 8px;
-  font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:1px
+  font-size:14px;font-weight:800;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:1px
 }
 .ec-right{flex:1;min-width:0}
-.ec-name{font-size:14px;font-weight:800;color:var(--g900);margin-bottom:2px}
-.ec-obs{font-size:11px;color:var(--g400);font-style:italic;margin-bottom:4px}
-.ec-hor{font-size:10px;color:var(--g400);font-weight:600;margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px}
-.ec-status{display:inline-flex;align-items:center;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700}
+.ec-name{font-size:18px;font-weight:800;color:var(--g900);margin-bottom:2px}
+.ec-obs{font-size:14px;color:var(--g400);font-style:italic;margin-bottom:4px}
+.ec-hor{font-size:13px;color:var(--g400);font-weight:600;margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.3px}
+.ec-status{display:inline-flex;align-items:center;border-radius:20px;padding:2px 8px;font-size:13px;font-weight:700}
 .ec-actions{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
-.ec-btn{display:inline-flex;align-items:center;gap:3px;border:none;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;min-height:30px}
+.ec-btn{display:inline-flex;align-items:center;gap:3px;border:none;border-radius:7px;padding:5px 10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;min-height:30px}
 .ec-btn.edit{background:#E3F2FD;color:#1565C0}
 .ec-btn.del{background:var(--red-bg);color:var(--red)}
 .ec-btn.falta-btn{background:#FFF3E0;color:#E65100}
@@ -236,38 +254,38 @@ input{font-family:'Nunito',sans-serif;outline:none}
 /* Edição inline no card */
 .ec-inputs{display:flex;flex-direction:column;gap:6px;flex:1}
 .ec-inp-row{display:flex;flex-direction:column;gap:2px}
-.ec-inp-label{font-size:9px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px}
-.ec-inp{border:1.5px solid var(--g200);border-radius:7px;padding:7px 9px;font-size:13px;color:var(--g900);background:#fff;font-family:'Nunito',sans-serif;width:100%}
+.ec-inp-label{font-size:12px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px}
+.ec-inp{border:1.5px solid var(--g200);border-radius:7px;padding:7px 9px;font-size:17px;color:var(--g900);background:#fff;font-family:'Nunito',sans-serif;width:100%}
 .ec-inp:focus{border-color:var(--red);outline:none}
 .ec-save-row{display:flex;gap:7px;margin-top:3px}
-.ec-save{background:var(--ok);color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;flex:1}
-.ec-cancel{background:var(--g100);color:var(--g700);border:none;border-radius:7px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+.ec-save{background:var(--ok);color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;flex:1}
+.ec-cancel{background:var(--g100);color:var(--g700);border:none;border-radius:7px;padding:8px 10px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
 
 /* ── MODAIS ── */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s ease}
 .modal-card{background:#fff;border-radius:20px;box-shadow:0 8px 48px rgba(0,0,0,.2);width:100%;overflow:hidden;animation:fadeIn .25s ease}
 .modal-head{background:var(--red);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#fff;letter-spacing:.3px}
-.modal-close{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:#fff;letter-spacing:.3px}
+.modal-close{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:17px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0}
 .modal-body{padding:18px 20px 22px;max-height:75vh;overflow-y:auto}
 
 /* Login */
 .card-top{background:var(--red);padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center}
 .card-top img{width:110px;height:110px;object-fit:contain;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
-.card-top .fallback{font-size:48px;line-height:1}
-.card-top-sub{font-size:10px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-top:7px}
+.card-top .fallback{font-size:62px;line-height:1}
+.card-top-sub{font-size:13px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-top:7px}
 .card-body{padding:20px 22px 24px}
-.l-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--g700);text-align:center;margin-bottom:3px}
-.l-sub{font-size:12px;color:var(--g400);font-weight:600;text-align:center;margin-bottom:16px}
+.l-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--g700);text-align:center;margin-bottom:3px}
+.l-sub{font-size:16px;color:var(--g400);font-weight:600;text-align:center;margin-bottom:16px}
 .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
-.field label{font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px}
-.inp{border:2px solid var(--g200);border-radius:10px;padding:10px 13px;font-size:15px;color:var(--g900);background:#FAFAFA;width:100%;transition:border-color .2s;font-family:'Nunito',sans-serif}
+.field label{font-size:13px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px}
+.inp{border:2px solid var(--g200);border-radius:10px;padding:10px 13px;font-size:20px;color:var(--g900);background:#FAFAFA;width:100%;transition:border-color .2s;font-family:'Nunito',sans-serif}
 .inp:focus{border-color:var(--red);background:#fff;outline:none}
 .inp-wr{position:relative}
 .inp-wr .inp{padding-right:40px}
-.eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--g300);cursor:pointer;font-size:15px;padding:4px}
-.l-err{background:var(--red-bg);border:1px solid #FFCDD2;border-radius:8px;padding:9px 13px;font-size:13px;color:#C0121F;font-weight:700;margin-bottom:12px;display:none}
-.l-btn{background:var(--red);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;transition:background .2s;font-family:'Nunito',sans-serif}
+.eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--g300);cursor:pointer;font-size:20px;padding:4px}
+.l-err{background:var(--red-bg);border:1px solid #FFCDD2;border-radius:8px;padding:9px 13px;font-size:17px;color:#C0121F;font-weight:700;margin-bottom:12px;display:none}
+.l-btn{background:var(--red);color:#fff;border:none;border-radius:10px;padding:13px;font-size:20px;font-weight:800;cursor:pointer;width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;transition:background .2s;font-family:'Nunito',sans-serif}
 .l-btn:hover{background:var(--red2)}
 .l-btn:disabled{opacity:.6;cursor:not-allowed}
 .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
@@ -275,35 +293,36 @@ input{font-family:'Nunito',sans-serif;outline:none}
 /* Folgas */
 .folga-dom{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--g100)}
 .folga-dom:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.folga-dom-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--red);margin-bottom:10px}
+.folga-dom-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--red);margin-bottom:10px}
 .folga-section{margin-bottom:7px}
-.folga-lbl{font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.folga-pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;margin:2px}
+.folga-lbl{font-size:13px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.folga-pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:16px;font-weight:700;margin:2px}
 
 /* Falta */
-.falta-info{background:#FFF3E0;border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:14px;color:var(--g700);line-height:1.7}
+.falta-info{background:#FFF3E0;border-radius:10px;padding:11px 14px;margin-bottom:14px;font-size:18px;color:var(--g700);line-height:1.7}
 .falta-btns{display:flex;flex-direction:column;gap:9px}
-.falta-btn{border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#fff;display:flex;align-items:center;gap:8px}
+.falta-btn{border:none;border-radius:10px;padding:12px;font-size:18px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#fff;display:flex;align-items:center;gap:8px}
 .falta-btn.just{background:#E65100}
 .falta-btn.injust{background:#B71C1C}
 .falta-btn.cancel{background:var(--g100);color:var(--g700)}
 
 /* ── CARD: horário automático e botão detalhes ── */
 .ec-hor{
-  font-size:11px;color:var(--g400);font-weight:600;
+  font-size:14px;color:var(--g400);font-weight:600;
   margin-bottom:3px;letter-spacing:.2px;
 }
 .ec-hor-empty{
-  font-size:10px;color:var(--g300);font-style:italic;margin-bottom:3px;
+  font-size:13px;color:var(--g300);font-style:italic;margin-bottom:3px;
 }
 .ec-detalhe-btn{
-  display:inline-flex;align-items:center;gap:3px;
-  background:none;border:1px solid var(--g200);border-radius:6px;
-  padding:3px 8px;font-size:10px;font-weight:700;
-  color:var(--g400);cursor:pointer;margin-top:4px;
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--g50);border:1.5px solid var(--g200);border-radius:10px;
+  padding:7px 14px;font-size:13px;font-weight:800;
+  color:var(--g700);cursor:pointer;
   transition:all .15s;font-family:'Nunito',sans-serif;
+  white-space:nowrap;flex-shrink:0;
 }
-.ec-detalhe-btn:hover{background:var(--g50);border-color:var(--g300);color:var(--g700)}
+.ec-detalhe-btn:hover{background:var(--red-bg);border-color:var(--red);color:var(--red)}
 
 /* ── POPUP DE DETALHES DA PESSOA ── */
 .detalhe-popup{
@@ -326,12 +345,12 @@ input{font-family:'Nunito',sans-serif;outline:none}
 }
 .detalhe-nome{
   font-family:'Barlow Condensed',sans-serif;
-  font-size:20px;font-weight:700;color:#fff;letter-spacing:.3px;
+  font-size:26px;font-weight:700;color:#fff;letter-spacing:.3px;
 }
-.detalhe-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px;font-weight:600;}
+.detalhe-sub{font-size:14px;color:rgba(255,255,255,.6);margin-top:2px;font-weight:600;}
 .detalhe-close{
   background:rgba(255,255,255,.15);border:none;color:#fff;
-  border-radius:8px;padding:6px 12px;font-size:13px;
+  border-radius:8px;padding:6px 12px;font-size:17px;
   font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;
 }
 .detalhe-body{
@@ -341,7 +360,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .detalhe-section{margin-bottom:16px;}
 .detalhe-section:last-child{margin-bottom:0;}
 .detalhe-section-title{
-  font-size:10px;font-weight:800;color:var(--g400);
+  font-size:13px;font-weight:800;color:var(--g400);
   text-transform:uppercase;letter-spacing:.7px;
   margin-bottom:8px;
 }
@@ -350,50 +369,50 @@ input{font-family:'Nunito',sans-serif;outline:none}
   background:var(--g50);border-radius:10px;padding:10px 12px;
   margin-bottom:6px;
 }
-.detalhe-hor-icon{font-size:16px;}
+.detalhe-hor-icon{font-size:21px;}
 .detalhe-hor-info{flex:1;}
-.detalhe-hor-label{font-size:10px;color:var(--g400);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
-.detalhe-hor-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--g900);}
+.detalhe-hor-label{font-size:13px;color:var(--g400);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.detalhe-hor-val{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:var(--g900);}
 .detalhe-funcao-item{
   border:1px solid var(--g100);border-radius:10px;
   padding:10px 12px;margin-bottom:8px;
 }
 .detalhe-funcao-nome{
-  font-size:13px;font-weight:800;color:var(--g900);margin-bottom:4px;
+  font-size:17px;font-weight:800;color:var(--g900);margin-bottom:4px;
   display:flex;align-items:center;gap:6px;
 }
 .detalhe-funcao-desc{
-  font-size:12px;color:var(--g700);line-height:1.6;
+  font-size:16px;color:var(--g700);line-height:1.6;
   white-space:pre-line;
 }
 .detalhe-bloco-badge{
-  font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;
+  font-size:12px;font-weight:800;padding:2px 7px;border-radius:20px;
   background:var(--g100);color:var(--g400);text-transform:uppercase;letter-spacing:.5px;
   margin-bottom:10px;display:inline-block;
 }
-.detalhe-bloco{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:600;letter-spacing:.3px}
+.detalhe-bloco{font-size:14px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:600;letter-spacing:.3px}
 .det-hor-box{background:var(--g50);border-radius:10px;padding:10px 13px;margin-bottom:12px}
-.det-hor-row{font-size:12px;color:var(--g700);font-weight:600;margin-bottom:3px;display:flex;gap:6px;align-items:center}
+.det-hor-row{font-size:16px;color:var(--g700);font-weight:600;margin-bottom:3px;display:flex;gap:6px;align-items:center}
 .det-hor-row:last-child{margin-bottom:0}
-.det-hor-row span{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--g900)}
+.det-hor-row span{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--g900)}
 .det-role-badge{display:flex;flex-direction:column;gap:2px;background:var(--g900);border-radius:10px;padding:10px 13px;margin-bottom:12px}
-.det-role-label{font-size:9px;font-weight:800;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.7px}
-.det-role-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:.3px}
+.det-role-label{font-size:12px;font-weight:800;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.7px}
+.det-role-name{font-family:'Barlow Condensed',sans-serif;font-size:23px;font-weight:700;color:#fff;letter-spacing:.3px}
 .det-func-detalhe{background:var(--manha-bg);border:1px solid var(--manha-b);border-radius:10px;padding:12px 13px;margin-bottom:12px}
-.det-func-titulo{font-size:11px;font-weight:800;color:#795500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-.det-func-texto{font-size:13px;color:var(--g700);line-height:1.65;white-space:pre-line}
+.det-func-titulo{font-size:14px;font-weight:800;color:#795500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.det-func-texto{font-size:17px;color:var(--g700);line-height:1.65;white-space:pre-line}
 .det-section{margin-bottom:4px}
-.det-section-title{font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+.det-section-title{font-size:13px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
 .det-func-item{border:1px solid var(--g100);border-radius:9px;padding:9px 12px;margin-bottom:6px}
 .det-func-item:last-child{margin-bottom:0}
-.det-func-nome{font-size:13px;font-weight:800;color:var(--g900);margin-bottom:3px}
-.det-func-desc{font-size:11px;color:var(--g400);line-height:1.55;white-space:pre-line}
+.det-func-nome{font-size:17px;font-weight:800;color:var(--g900);margin-bottom:3px}
+.det-func-desc{font-size:14px;color:var(--g400);line-height:1.55;white-space:pre-line}
 
 /* ── MODAL HORÁRIOS ── */
 .hor-section{margin-bottom:20px}
 .hor-section:last-child{margin-bottom:0}
 .hor-section-title{
-  font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;
   letter-spacing:.5px;text-transform:uppercase;
   padding:8px 14px;border-radius:8px;margin-bottom:10px;
   display:flex;align-items:center;gap:8px
@@ -403,26 +422,26 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .hor-section-title.est{background:var(--g100);color:var(--g700)}
 .hor-table{width:100%;border-collapse:collapse}
 .hor-table th{
-  font-size:10px;font-weight:800;color:var(--g400);
+  font-size:13px;font-weight:800;color:var(--g400);
   text-transform:uppercase;letter-spacing:.5px;
   padding:5px 10px;text-align:left;border-bottom:1px solid var(--g100)
 }
 .hor-table td{
-  padding:10px 10px;font-size:14px;border-bottom:1px solid var(--g100);
+  padding:10px 10px;font-size:18px;border-bottom:1px solid var(--g100);
   vertical-align:middle
 }
 .hor-table tr:last-child td{border-bottom:none}
 .hor-table tr:hover td{background:var(--g50)}
 .hor-nome{font-weight:800;color:var(--g900)}
 .hor-time{
-  font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;
   color:var(--g700);white-space:nowrap
 }
 .hor-almoco{
-  font-size:12px;color:var(--g400);font-weight:600;white-space:nowrap
+  font-size:16px;color:var(--g400);font-weight:600;white-space:nowrap
 }
 .hor-badge{
-  display:inline-block;font-size:10px;font-weight:800;
+  display:inline-block;font-size:13px;font-weight:800;
   padding:2px 7px;border-radius:20px;
 }
 
@@ -434,12 +453,12 @@ input{font-family:'Nunito',sans-serif;outline:none}
 }
 .regras-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
 .regra-item{
-  font-size:11px;font-weight:700;color:#166534;
+  font-size:14px;font-weight:700;color:#166534;
   display:inline-flex;align-items:center;gap:4px;
 }
 .transicao-row{display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid #BBF7D0;padding-top:6px;margin-top:2px}
-.trans-atual{font-size:10px;color:#047857;font-weight:600}
-.trans-futuro{font-size:10px;color:#B45309;font-weight:700}
+.trans-atual{font-size:13px;color:#047857;font-weight:600}
+.trans-futuro{font-size:13px;color:#B45309;font-weight:700}
 
 /* ── POPUP OPERACIONAL (RODADA 3) ── */
 .dp-overlay{
@@ -464,12 +483,12 @@ input{font-family:'Nunito',sans-serif;outline:none}
 }
 .dp-nome{
   font-family:'Barlow Condensed',sans-serif;
-  font-size:26px;font-weight:700;color:#fff;line-height:1;
+  font-size:34px;font-weight:700;color:#fff;line-height:1;
 }
-.dp-turno{font-size:11px;color:rgba(255,255,255,.75);font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+.dp-turno{font-size:14px;color:rgba(255,255,255,.75);font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
 .dp-close{
   background:rgba(255,255,255,.2);border:none;color:#fff;
-  border-radius:8px;padding:6px 11px;font-size:13px;font-weight:700;
+  border-radius:8px;padding:6px 11px;font-size:17px;font-weight:700;
   cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0;margin-top:2px;
 }
 .dp-body{
@@ -484,7 +503,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 }
 .dp-section:last-of-type{border-bottom:none}
 .dp-section-label{
-  font-size:9px;font-weight:800;color:var(--g300);
+  font-size:12px;font-weight:800;color:var(--g300);
   text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;
 }
 /* Horário */
@@ -493,7 +512,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
   display:inline-flex;align-items:center;gap:4px;
   background:var(--g50);border:1px solid var(--g200);
   border-radius:7px;padding:4px 10px;
-  font-size:13px;font-weight:700;color:var(--g700);
+  font-size:17px;font-weight:700;color:var(--g700);
   font-family:'Barlow Condensed',sans-serif;
 }
 /* Função principal */
@@ -501,32 +520,32 @@ input{font-family:'Nunito',sans-serif;outline:none}
   display:inline-flex;align-items:center;
   background:#FFF7ED;border:1.5px solid #F97316;
   color:#C2410C;border-radius:8px;
-  padding:4px 12px;font-size:13px;font-weight:800;
+  padding:4px 12px;font-size:17px;font-weight:800;
   margin-bottom:2px;
 }
-.dp-funcao-principal::before{content:'⭐ ';font-size:11px}
+.dp-funcao-principal::before{content:'⭐ ';font-size:14px}
 
 /* Padrão do dia */
 .dp-padrao-dia{
   display:inline-flex;align-items:center;
   background:#EFF6FF;border:1.5px solid #BFDBFE;
   color:#1D4ED8;border-radius:8px;
-  padding:4px 12px;font-size:12px;font-weight:700;
+  padding:4px 12px;font-size:16px;font-weight:700;
   margin-bottom:2px;
 }
-.dp-padrao-dia::before{content:'📅 ';font-size:11px}
+.dp-padrao-dia::before{content:'📅 ';font-size:14px}
 
 /* Função hoje */
 .dp-funcao-hoje{
   display:inline-flex;align-items:center;
   background:var(--red-bg);border:1.5px solid var(--red);
   color:var(--red);border-radius:8px;
-  padding:4px 12px;font-size:13px;font-weight:800;
+  padding:4px 12px;font-size:17px;font-weight:800;
 }
 /* Funções possíveis */
 .dp-bloco-badge{
   display:inline-flex;background:var(--g100);color:var(--g700);
-  border-radius:5px;padding:2px 8px;font-size:10px;font-weight:800;
+  border-radius:5px;padding:2px 8px;font-size:13px;font-weight:800;
   text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;
 }
 .dp-func-item{
@@ -535,10 +554,10 @@ input{font-family:'Nunito',sans-serif;outline:none}
   background:#fff;
 }
 .dp-func-hoje{border-color:var(--red)!important;background:var(--red-bg)!important}
-.dp-func-nome{font-size:13px;font-weight:700;color:var(--g900);line-height:1.3}
-.dp-func-desc{font-size:11px;color:var(--g400);margin-top:3px;line-height:1.5}
+.dp-func-nome{font-size:17px;font-weight:700;color:var(--g900);line-height:1.3}
+.dp-func-desc{font-size:14px;color:var(--g400);margin-top:3px;line-height:1.5}
 .dp-hoje-tag{
-  font-size:9px;background:var(--red);color:#fff;
+  font-size:12px;background:var(--red);color:#fff;
   padding:1px 6px;border-radius:10px;font-weight:700;vertical-align:middle;margin-left:4px;
 }
 /* Responsabilidades */
@@ -547,7 +566,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
   display:inline-flex;align-items:center;gap:3px;
   background:var(--g50);border:1px solid var(--g200);
   color:var(--g600,#616161);border-radius:6px;
-  padding:4px 9px;font-size:11px;font-weight:700;
+  padding:4px 9px;font-size:14px;font-weight:700;
 }
 /* Crítica: destaque visual */
 .dp-resp-critica{
@@ -556,7 +575,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 }
 /* Obs */
 .dp-obs{
-  font-size:12px;color:var(--g700);line-height:1.6;
+  font-size:16px;color:var(--g700);line-height:1.6;
   background:var(--g50);border-radius:7px;padding:8px 10px;
 }
 /* Regra do dia */
@@ -565,21 +584,21 @@ input{font-family:'Nunito',sans-serif;outline:none}
   border:1px solid #BBF7D0;border-radius:8px;
   padding:9px 12px;margin-top:10px;
 }
-.dp-regra-item{font-size:11px;font-weight:700;color:#166534;line-height:1.7}
+.dp-regra-item{font-size:14px;font-weight:700;color:#166534;line-height:1.7}
 /* Transição */
 .dp-trans{
   background:#FFFBEB;border:1px solid #FDE68A;
   border-radius:8px;padding:9px 12px;margin-top:8px;
 }
-.dp-trans-atual{font-size:11px;color:#047857;font-weight:700;line-height:1.6}
-.dp-trans-futuro{font-size:11px;color:#B45309;font-weight:800;line-height:1.6}
+.dp-trans-atual{font-size:14px;color:#047857;font-weight:700;line-height:1.6}
+.dp-trans-futuro{font-size:14px;color:#B45309;font-weight:800;line-height:1.6}
 
 /* ── AJUSTE MANUAL NO CARD ── */
 .ec-ajuste-badge{
   display:inline-flex;align-items:center;gap:4px;
   background:#FFF7ED;border:1px solid #FED7AA;
   color:#C2410C;border-radius:5px;
-  padding:2px 8px;font-size:10px;font-weight:700;
+  padding:2px 8px;font-size:13px;font-weight:700;
   margin-bottom:3px;cursor:default;
 }
 .ec-btn-ajuste{
@@ -594,12 +613,12 @@ input{font-family:'Nunito',sans-serif;outline:none}
   border-radius:8px;padding:10px 12px;
 }
 .dp-ajuste-tipo{
-  font-size:13px;font-weight:800;color:#C2410C;
+  font-size:17px;font-weight:800;color:#C2410C;
   display:block;margin-bottom:4px;
 }
-.dp-ajuste-desc{font-size:12px;color:#7C2D12;font-weight:600;margin-bottom:3px}
-.dp-ajuste-obs{font-size:11px;color:#92400E;font-style:italic}
-.dp-ajuste-apr{font-size:10px;color:#047857;font-weight:700;margin-top:4px}
+.dp-ajuste-desc{font-size:16px;color:#7C2D12;font-weight:600;margin-bottom:3px}
+.dp-ajuste-obs{font-size:14px;color:#92400E;font-style:italic}
+.dp-ajuste-apr{font-size:13px;color:#047857;font-weight:700;margin-top:4px}
 
 /* ── RESPONSABILIDADES NO CARD (RODADA 2) ── */
 /* Hierarquia visual: nome > função/horário > responsabilidade */
@@ -608,7 +627,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
   gap:4px;margin:4px 0 3px;
 }
 .ec-resp-label{
-  font-size:9px;font-weight:800;
+  font-size:12px;font-weight:800;
   color:var(--g300);text-transform:uppercase;
   letter-spacing:.6px;margin-right:1px;flex-shrink:0;
 }
@@ -616,7 +635,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
   display:inline-flex;align-items:center;
   background:var(--g50);border:1px solid var(--g200);
   color:var(--g400);border-radius:4px;
-  padding:1px 6px;font-size:9px;font-weight:700;
+  padding:1px 6px;font-size:12px;font-weight:700;
   white-space:nowrap;letter-spacing:.1px;
   line-height:1.4;
 }
@@ -628,7 +647,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .ec-resp-mais{
   display:inline-flex;align-items:center;justify-content:center;
   background:none;border:1px dashed var(--g300);border-radius:4px;
-  color:var(--g400);font-size:9px;font-weight:800;
+  color:var(--g400);font-size:12px;font-weight:800;
   padding:1px 6px;cursor:pointer;
   font-family:'Nunito',sans-serif;line-height:1.4;
   transition:background .12s,color .12s,border-color .12s;
@@ -646,21 +665,22 @@ input{font-family:'Nunito',sans-serif;outline:none}
 
 /* Mobile: chips menores para não estoura */
 @media(max-width:640px){
-  .ec-resp-chip{font-size:8px;padding:1px 5px}
-  .ec-resp-mais{font-size:8px;padding:1px 5px}
-  .ec-resp-label{font-size:8px}
+  .ec-resp-chip{font-size:10px;padding:1px 5px}
+  .ec-resp-mais{font-size:10px;padding:1px 5px}
+  .ec-resp-label{font-size:10px}
 }
 
 /* Botão falta explícito no card agrupado */
 .pc-falta-row{
-  display:flex;flex-wrap:wrap;gap:5px;
-  padding:0 12px 10px;border-top:1px solid var(--g100);margin-top:2px;padding-top:8px;
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-top:8px;padding-top:10px;
+  border-top:1px solid var(--g100);
 }
 .pc-falta-btn{
   display:inline-flex;align-items:center;gap:4px;
   background:#FFF3E0;border:1px solid #FFCC80;
   color:#E65100;border-radius:7px;
-  padding:5px 10px;font-size:11px;font-weight:700;
+  padding:5px 10px;font-size:14px;font-weight:700;
   cursor:pointer;font-family:'Nunito',sans-serif;
   white-space:nowrap;
   transition:background .12s;
@@ -673,10 +693,10 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .pc-role-chip{
   display:inline-flex;align-items:center;gap:4px;
   border:1.5px solid;border-radius:6px;
-  padding:3px 8px;font-size:11px;font-weight:800;
+  padding:3px 8px;font-size:14px;font-weight:800;
   cursor:default;white-space:nowrap;position:relative;
 }
-.pc-hor{font-size:10px;color:var(--g400);font-weight:600;display:block;margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;}
+.pc-hor{font-size:13px;color:var(--g400);font-weight:600;display:block;margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;}
 /* Botões admin dentro do chip — ocultos até hover */
 .pc-chip-actions{
   display:none;align-items:center;gap:2px;margin-left:2px;
@@ -688,7 +708,7 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .pc-chip-btn{
   display:inline-flex;align-items:center;justify-content:center;
   width:18px;height:18px;border:none;border-radius:4px;
-  font-size:10px;font-weight:800;cursor:pointer;padding:0;
+  font-size:13px;font-weight:800;cursor:pointer;padding:0;
   background:rgba(0,0,0,.08);color:currentColor;
   font-family:'Nunito',sans-serif;
   transition:background .1s;
@@ -705,18 +725,18 @@ input{font-family:'Nunito',sans-serif;outline:none}
 
 /* ── HISTÓRICO ── */
 .hist-block{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:12px 14px;margin-top:4px}
-.hist-title{font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.hist-item{font-size:11px;color:var(--g700);padding:5px 0;border-bottom:1px solid var(--g100);line-height:1.5}
+.hist-title{font-size:13px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.hist-item{font-size:14px;color:var(--g700);padding:5px 0;border-bottom:1px solid var(--g100);line-height:1.5}
 .hist-item:last-child{border-bottom:none}
-.hist-time{font-weight:800;color:var(--g900);font-family:'Barlow Condensed',sans-serif;font-size:13px}
+.hist-time{font-weight:800;color:var(--g900);font-family:'Barlow Condensed',sans-serif;font-size:17px}
 .hist-editor{font-weight:700;color:var(--red)}
 .hist-pessoa{font-weight:700}
-.hist-change{color:var(--g400);display:block;font-size:10px}
-.hist-motivo{color:var(--ok);font-weight:700;font-size:10px;display:block}
+.hist-change{color:var(--g400);display:block;font-size:13px}
+.hist-motivo{color:var(--ok);font-weight:700;font-size:13px;display:block}
 
 /* TOAST */
 .toast-stack{position:fixed;bottom:16px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
-.toast{padding:10px 15px;border-radius:10px;font-size:13px;font-weight:700;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.18);animation:slideUp .3s ease;max-width:280px}
+.toast{padding:10px 15px;border-radius:10px;font-size:17px;font-weight:700;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.18);animation:slideUp .3s ease;max-width:280px}
 .ts{background:var(--ok)}.te{background:var(--red)}.ti{background:var(--g700)}
 
 /* ── MOBILE ── */
@@ -735,27 +755,27 @@ input{font-family:'Nunito',sans-serif;outline:none}
 @media(max-width:640px){
   :root{--panel-w:100vw}
   .topbar-mid{display:none}
-  .topbar{height:54px;padding:0 12px}
+  .topbar{height:62px;padding:0 12px}
   .brand-sub{display:none}
   .brand-logo{height:38px;width:38px}
   /* No mobile: botões viram só ícones para caber tudo */
   #btn-horarios{display:flex}
   .tbtn-txt{display:none}
-  .tbtn-white{padding:6px 8px;gap:0;font-size:16px}
+  .tbtn-white{padding:6px 8px;gap:0;font-size:21px}
   .top-actions{gap:5px}
   .day-panel{
-    top:54px;
+    top:62px;
     left:0;
     width:100%;
     animation:slideUp .25s ease;
     z-index:500;
   }
-  .cal-cell{min-height:72px;padding:5px 5px 4px}
-  .cal-day-num{font-size:14px;width:22px;height:22px}
-  .cal-chip{font-size:9px;padding:1px 5px}
+  .cal-cell{min-height:82px;padding:5px 5px 4px}
+  .cal-day-num{font-size:18px;width:22px;height:22px}
+  .cal-chip{font-size:12px;padding:1px 5px}
   .cal-area{padding:12px 8px 32px}
   .cal-header{margin-bottom:12px}
-  .cal-title{font-size:22px}
+  .cal-title{font-size:29px}
 }
 
 /* ── MODAL TEMPERATURAS ── */
@@ -764,31 +784,31 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .temp-blue{background:#F0F7FF}
 .temp-orange{background:#FFFBF0}
 .temp-gray{background:#F7F7F7}
-.temp-bloco-titulo{font-size:14px;font-weight:800;color:var(--g900);margin-bottom:10px}
-.temp-sub-titulo{font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.temp-bloco-titulo{font-size:18px;font-weight:800;color:var(--g900);margin-bottom:10px}
+.temp-sub-titulo{font-size:13px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .temp-linha-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:7px;margin-bottom:10px}
 .temp-faixa{border-radius:8px;padding:8px 10px;text-align:center;border:1px solid transparent}
 .temp-ok{background:#E8F5E9;border-color:#A5D6A7}
 .temp-warn{background:#FFF8E1;border-color:#FFE082}
 .temp-crit{background:#FFEBEE;border-color:#FFCDD2}
 .temp-pre{background:#FFF3E0;border-color:#FFCC80}
-.temp-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;color:var(--g400)}
-.temp-valor{font-size:14px;font-weight:800;color:var(--g900);font-family:'Barlow Condensed',sans-serif}
-.temp-hint{font-size:9px;color:var(--g400);margin-top:2px}
+.temp-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;color:var(--g400)}
+.temp-valor{font-size:18px;font-weight:800;color:var(--g900);font-family:'Barlow Condensed',sans-serif}
+.temp-hint{font-size:12px;color:var(--g400);margin-top:2px}
 .temp-regras{display:flex;flex-direction:column;gap:4px}
-.temp-regra{font-size:11px;color:var(--g700);line-height:1.5;padding:2px 0}
+.temp-regra{font-size:14px;color:var(--g700);line-height:1.5;padding:2px 0}
 .temp-regra strong{font-weight:800;color:var(--g900)}
-.temp-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.temp-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:16px}
 .temp-table tr{border-bottom:1px solid var(--g100)}
 .temp-table td{padding:6px 4px;vertical-align:middle;color:var(--g700)}
 .temp-t-ok{color:#2E7D32;font-weight:800;white-space:nowrap}
 .temp-t-warn{color:#F57F17;font-weight:800;white-space:nowrap}
 .temp-t-crit{color:#C62828;font-weight:800;white-space:nowrap}
-.temp-principio{margin-top:10px;background:#E8EAF6;border-radius:8px;padding:10px 12px;font-size:12px;font-weight:700;color:#3949AB;line-height:1.5}
+.temp-principio{margin-top:10px;background:#E8EAF6;border-radius:8px;padding:10px 12px;font-size:16px;font-weight:700;color:#3949AB;line-height:1.5}
 
 /* ── MODAL MANUAL DE USO ── */
 .man-intro{
-  padding:14px 20px;font-size:13px;color:var(--g700);
+  padding:14px 20px;font-size:17px;color:var(--g700);
   background:var(--g50);border-bottom:1px solid var(--g100);
   line-height:1.6;
 }
@@ -796,23 +816,23 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .man-section{padding:14px 20px;border-bottom:1px solid var(--g100)}
 .man-section-admin{background:#FFFBF0}
 .man-section-title{
-  font-size:13px;font-weight:800;color:var(--g900);
+  font-size:17px;font-weight:800;color:var(--g900);
   margin-bottom:10px;
 }
 .man-item{
   display:flex;align-items:flex-start;gap:10px;
-  margin-bottom:8px;font-size:12px;color:var(--g700);line-height:1.5;
+  margin-bottom:8px;font-size:16px;color:var(--g700);line-height:1.5;
 }
 .man-item:last-child{margin-bottom:0}
 .man-item-icon{
   flex-shrink:0;width:22px;text-align:center;
-  font-size:13px;margin-top:0px;
+  font-size:17px;margin-top:0px;
 }
 .man-item strong{color:var(--g900);font-weight:700}
 .man-badge-row{margin-bottom:8px}
 .man-badge{
   display:inline-flex;padding:2px 9px;border-radius:20px;
-  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
 }
 .man-badge-warn{background:#FAEEDA;color:#854F0B}
 .man-logins{
@@ -826,13 +846,13 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .man-av{
   width:30px;height:30px;border-radius:50%;
   background:var(--red);color:#fff;
-  font-size:10px;font-weight:800;
+  font-size:13px;font-weight:800;
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
 }
-.man-login-nome{font-size:12px;font-weight:800;color:var(--g900)}
-.man-login-user{font-size:10px;color:var(--g400)}
-.man-note{font-size:11px;color:var(--g400);font-style:italic}
+.man-login-nome{font-size:16px;font-weight:800;color:var(--g900)}
+.man-login-user{font-size:13px;color:var(--g400)}
+.man-note{font-size:14px;color:var(--g400);font-style:italic}
 .man-regras{
   padding:14px 20px 20px;
   background:#F0FDF4;border-top:1px solid #BBF7D0;
@@ -844,19 +864,83 @@ input{font-family:'Nunito',sans-serif;outline:none}
 }
 .cache-btn{
   background:none;border:none;
-  font-size:9px;color:var(--g300);
+  font-size:12px;color:var(--g300);
   cursor:pointer;font-family:'Nunito',sans-serif;
   padding:4px 6px;border-radius:4px;
   opacity:.4;transition:opacity .2s;
 }
 .cache-btn:hover{opacity:1;background:var(--g100);color:var(--g700)}
 
+/* ── IMPRESSÃO ── */
+@media print{
+  body *{visibility:hidden}
+  #print-area,#print-area *{visibility:visible}
+  #print-area{position:fixed;top:0;left:0;width:100%;background:#fff}
+  .no-print{display:none!important}
+}
+.print-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:12px;animation:fadeIn .2s ease}
+.print-modal-card{background:#fff;border-radius:16px;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.25)}
+.print-modal-head{background:var(--red);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.print-modal-body{flex:1;overflow-y:auto;padding:0}
+.print-section{padding:16px 20px;border-bottom:1px solid var(--g100)}
+.print-section:last-child{border-bottom:none}
+.print-section-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--g900);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.print-check{display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;font-size:18px;font-weight:600;color:var(--g700)}
+.print-check input{width:18px;height:18px;cursor:pointer;accent-color:var(--red)}
+.print-actions{display:flex;gap:10px;padding:16px 20px;border-top:1px solid var(--g100);flex-shrink:0;background:#fff}
+.print-btn{flex:1;padding:12px;border:none;border-radius:10px;font-size:18px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif}
+.print-btn-main{background:var(--red);color:#fff}
+.print-btn-main:hover{background:var(--red2)}
+.print-btn-sec{background:var(--g100);color:var(--g700)}
+
+/* ── PÁGINA DE IMPRESSÃO ── */
+#print-area{display:none;font-family:'Nunito',sans-serif;color:#212121;padding:20px;background:#fff}
+#print-area.show{display:block}
+.pa-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:3px solid #EA1D2C}
+.pa-brand{font-family:'Barlow Condensed',sans-serif;font-size:31px;font-weight:700;color:#EA1D2C}
+.pa-sub{font-size:14px;color:#9E9E9E;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.pa-meta{font-size:16px;color:#616161;text-align:right}
+.pa-section{margin-bottom:20px;page-break-inside:avoid}
+.pa-section-title{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;color:#fff;background:#EA1D2C;padding:6px 12px;border-radius:6px 6px 0 0;margin-bottom:0}
+.pa-table{width:100%;border-collapse:collapse;font-size:16px}
+.pa-table th{background:#F5F5F5;padding:7px 10px;text-align:left;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#616161;border-bottom:2px solid #E0E0E0}
+.pa-table td{padding:7px 10px;border-bottom:1px solid #F0F0F0;vertical-align:top}
+.pa-table tr:last-child td{border-bottom:none}
+.pa-table tr:nth-child(even) td{background:#FAFAFA}
+.pa-nome{font-weight:800;color:#212121}
+.pa-folga{font-size:13px;color:#9E9E9E;font-weight:700}
+.pa-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:13px;font-weight:800;margin:1px}
+.pa-badge-m{background:#FFF9C4;color:#795500}
+.pa-badge-n{background:#EDE7F6;color:#311B92}
+.pa-dom-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.pa-dom-card{border:1px solid #E0E0E0;border-radius:8px;overflow:hidden}
+.pa-dom-title{background:#212121;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;padding:5px 10px}
+.pa-dom-body{padding:8px 10px;font-size:14px}
+.pa-dom-item{display:inline-block;margin:1px 2px;font-weight:600}
+.pa-dom-item.trab{color:#1B5E20}
+.pa-dom-item.folg{color:#9E9E9E}
+.pa-temp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.pa-temp-item{border-radius:6px;padding:8px;text-align:center}
+.pa-temp-item.ok{background:#E8F5E9;border:1px solid #A5D6A7}
+.pa-temp-item.warn{background:#FFF8E1;border:1px solid #FFE082}
+.pa-temp-item.crit{background:#FFEBEE;border:1px solid #FFCDD2}
+.pa-temp-label{font-size:12px;font-weight:800;text-transform:uppercase;color:#9E9E9E;margin-bottom:3px}
+.pa-temp-val{font-size:17px;font-weight:800;font-family:'Barlow Condensed',sans-serif}
+.pa-escala-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#E0E0E0;border:1px solid #E0E0E0;border-radius:6px;overflow:hidden;margin-top:4px}
+.pa-escala-wd{background:#212121;color:#fff;text-align:center;font-size:12px;font-weight:800;padding:4px 2px;text-transform:uppercase}
+.pa-escala-cell{background:#fff;padding:4px;min-height:50px;font-size:10px;vertical-align:top}
+.pa-escala-cell.empty{background:#F5F5F5}
+.pa-escala-dn{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#424242;display:block;margin-bottom:2px}
+.pa-escala-name{display:block;color:#424242;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── MODAL IMPRESSÃO CSS ── */
+
 /* ── TELAS MUITO PEQUENAS (320px) ── */
 @media(max-width:380px){
-  .cal-cell{min-height:58px;padding:4px 3px 3px}
+  .cal-cell{min-height:68px;padding:4px 3px 3px}
   .cal-chips{gap:2px}
   .cal-chip{display:none}
-  .cal-wd{font-size:9px;padding:6px 2px}
+  .cal-wd{font-size:12px;padding:6px 2px}
   .btn-folgas-txt{display:none}/* esconde texto, mantém emoji */
 }
 </style>
@@ -1393,7 +1477,7 @@ const BASE=[
   {date:'2026-04-04',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-05',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Íris'),mk('Embalando','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-14',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
-  {date:'2026-04-08',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-08',wd:'Qua',jsDay:3,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-09',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vinicius'),mk('Fritando','Vinicius')]},
   {date:'2026-04-10',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-11',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
@@ -1409,7 +1493,7 @@ const BASE=[
   {date:'2026-04-23',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
   {date:'2026-04-24',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-25',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-26',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabriela'),mk('Escorredeira','Gabriela','horário de pico'),mk('Embalando','Gabriela','no horário de pico'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Íris'),mk('Fritando','Íris'),mk('Salada','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Caixa salão','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Vitória')]},  {date:'2026-04-29',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Limpeza','Iolete')],noite:[mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly'),mk('Escorredeira','Vitória'),mk('Gaveteiro','Victor'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio')]},
+  {date:'2026-04-26',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabriela'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Íris'),mk('Fritando','Íris'),mk('Salada','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Caixa salão','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Vitória')]},  {date:'2026-04-29',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Limpeza','Iolete')],noite:[mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly'),mk('Escorredeira','Vitória'),mk('Gaveteiro','Victor'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio')]},
 ]
 
 // Mapeia data -> dia
@@ -1464,6 +1548,209 @@ function toggleResps(btn){
 }
 
 // ===== INIT =====
+// ── IMPRESSÃO ──
+function showPrintModal(){
+  document.getElementById('prtmodal')?.remove()
+  const m=document.createElement('div');m.id='prtmodal'
+  m.innerHTML=`<div class="print-modal-bg" id="prtbg">
+    <div class="print-modal-card">
+      <div class="print-modal-head">
+        <div class="modal-title">🖨️ Imprimir</div>
+        <button class="modal-close" id="prtclose">✕</button>
+      </div>
+      <div class="print-modal-body">
+        <div class="print-section">
+          <div class="print-section-title">Selecione o que imprimir</div>
+          <label class="print-check"><input type="checkbox" id="prt-escala" checked/> 📅 Escala do mês completa</label>
+          <label class="print-check"><input type="checkbox" id="prt-horarios" checked/> 🕐 Horários da equipe + folgas</label>
+          <label class="print-check"><input type="checkbox" id="prt-domingos" checked/> 🌴 Folgas de domingo do mês</label>
+          <label class="print-check"><input type="checkbox" id="prt-temp" checked/> 🌡️ Padrão de temperaturas</label>
+        </div>
+      </div>
+      <div class="print-actions">
+        <button class="print-btn print-btn-sec" id="prtcancel">Cancelar</button>
+        <button class="print-btn print-btn-main" id="prtgo">🖨️ Imprimir agora</button>
+      </div>
+    </div>
+  </div>`
+  document.body.appendChild(m)
+  document.getElementById('prtclose').onclick=()=>m.remove()
+  document.getElementById('prtcancel').onclick=()=>m.remove()
+  document.getElementById('prtbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
+  document.getElementById('prtgo').onclick=()=>{
+    const opts={
+      escala:document.getElementById('prt-escala').checked,
+      horarios:document.getElementById('prt-horarios').checked,
+      domingos:document.getElementById('prt-domingos').checked,
+      temp:document.getElementById('prt-temp').checked,
+    }
+    m.remove()
+    executarImpressao(opts)
+  }
+}
+
+function executarImpressao(opts){
+  // Remover área anterior
+  document.getElementById('print-area')?.remove()
+
+  const yr=G.viewYear,mo=G.viewMonth
+  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const mesLabel=MESES[mo-1]+' '+yr
+  const hoje=new Date().toLocaleDateString('pt-BR')
+
+  let html=`<div id="print-area" class="show">
+  <div class="pa-header">
+    <div>
+      <div class="pa-brand">Pastel da Camila</div>
+      <div class="pa-sub">Bela Vista · Osasco</div>
+    </div>
+    <div class="pa-meta">
+      <div style="font-size:16px;font-weight:800;color:#EA1D2C">${mesLabel}</div>
+      <div>Impresso em ${hoje}</div>
+    </div>
+  </div>`
+
+  // ── ESCALA DO MÊS ──
+  if(opts.escala){
+    html+=buildPrintEscala(yr,mo)
+  }
+
+  // ── HORÁRIOS ──
+  if(opts.horarios){
+    html+=buildPrintHorarios()
+  }
+
+  // ── DOMINGOS ──
+  if(opts.domingos){
+    html+=buildPrintDomingos()
+  }
+
+  // ── TEMPERATURAS ──
+  if(opts.temp){
+    html+=buildPrintTemp()
+  }
+
+  html+='</div>'
+
+  document.body.insertAdjacentHTML('beforeend',html)
+  setTimeout(()=>{
+    window.print()
+    setTimeout(()=>document.getElementById('print-area')?.remove(),1000)
+  },300)
+}
+
+function buildPrintEscala(yr,mo){
+  const firstDay=new Date(yr,mo-1,1).getDay()
+  const daysInMonth=new Date(yr,mo,0).getDate()
+  const WDS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+
+  let cells=''
+  for(let i=0;i<firstDay;i++) cells+=`<div class="pa-escala-cell empty"></div>`
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${yr}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    const day=dayMap[ds]
+    if(!day){cells+=`<div class="pa-escala-cell empty"><span class="pa-escala-dn">${d}</span></div>`;continue}
+    const pessoas=[...new Set([...day.manha,...day.noite].map(e=>e.person).filter(Boolean))].sort()
+    const nomes=pessoas.map(p=>`<span class="pa-escala-name">${esc(p)}</span>`).join('')
+    cells+=`<div class="pa-escala-cell"><span class="pa-escala-dn">${d}</span>${nomes}</div>`
+  }
+  const rem=(firstDay+daysInMonth)%7
+  if(rem>0) for(let i=0;i<7-rem;i++) cells+=`<div class="pa-escala-cell empty"></div>`
+
+  return`<div class="pa-section">
+    <div class="pa-section-title">📅 Escala do Mês</div>
+    <div class="pa-escala-grid">
+      ${WDS.map(w=>`<div class="pa-escala-wd">${w}</div>`).join('')}
+      ${cells}
+    </div>
+  </div>`
+}
+
+function buildPrintHorarios(){
+  const FOLGAS_FIXAS_MAP={
+    'Bruna':'Seg+Ter','David':'Seg+Qua','Derik':'Seg+Qua','Gabriela':'Seg+Qua',
+    'Iolete':'Ter+Qui','Isabelly':'Seg+Ter','Íris':'Seg+Qui','Julia':'Seg+Ter',
+    'Larissa':'Seg+Ter','Letícia':'Seg+Ter','Lucca':'Seg+Qui','Luis':'Seg+Ter',
+    'Suelen':'Seg+?','Táis':'Seg+Qua','Túlio':'Seg+Ter','Victor':'Seg+Ter',
+    'Vinícius':'Seg+Qua','Vitória':'Seg+Qui','Wirislaine':'Seg+Qui',
+  }
+  const FOLGAS_DOM_MAP={
+    'Bruna':['05/04','12/04','19/04','26/04'],'David':['05/04'],'Derik':['05/04','12/04'],
+    'Gabriela':['05/04'],'Isabelly':['05/04'],'Julia':['19/04'],'Larissa':['26/04'],
+    'Letícia':['12/04'],'Lucca':['19/04'],'Luis':['26/04'],'Táis':['12/04'],
+    'Victor':['26/04'],'Vinícius':['19/04','26/04'],'Vitória':['12/04'],
+    'Wirislaine':['26/04'],'Íris':['19/04'],
+  }
+  function secRows(arr){
+    return arr.map(p=>{
+      const ff=FOLGAS_FIXAS_MAP[p.nome]||'Seg+?'
+      const fd=(FOLGAS_DOM_MAP[p.nome]||[]).join(', ')
+      return`<tr>
+        <td><span class="pa-nome">${esc(p.nome)}</span><br/><span class="pa-folga">🌴 ${ff}${fd?' · Dom fora: '+fd:''}</span></td>
+        <td>${esc(p.horario)}</td>
+        <td>${esc(p.almoco)}</td>
+      </tr>`
+    }).join('')
+  }
+  return`<div class="pa-section">
+    <div class="pa-section-title">🕐 Horários da Equipe</div>
+    <table class="pa-table">
+      <thead><tr><th>Nome / Folgas</th><th>Horário</th><th>Intervalo</th></tr></thead>
+      <tbody>
+        <tr><td colspan="3" style="background:#FFF9C4;font-size:10px;font-weight:800;padding:5px 10px;color:#795500">☀️ TURNO DA MANHÃ</td></tr>
+        ${secRows(HORARIOS.manha)}
+        <tr><td colspan="3" style="background:#EDE7F6;font-size:10px;font-weight:800;padding:5px 10px;color:#311B92">🌙 TURNO DA NOITE</td></tr>
+        ${secRows(HORARIOS.noite)}
+        <tr><td colspan="3" style="background:#F5F5F5;font-size:10px;font-weight:800;padding:5px 10px;color:#616161">📋 ESTAGIÁRIOS</td></tr>
+        ${secRows(HORARIOS.estagiarios)}
+      </tbody>
+    </table>
+  </div>`
+}
+
+function buildPrintDomingos(){
+  const todos=new Set()
+  G.days.forEach(d=>[...d.manha,...d.noite].forEach(e=>{if(e.person)todos.add(e.person)}))
+  const doms=G.days.filter(d=>d.wd==='Dom')
+  const cards=doms.map(dom=>{
+    const trab=new Set([...dom.manha,...dom.noite].map(e=>e.person).filter(Boolean))
+    const folg=[...todos].filter(p=>!trab.has(p)).sort()
+    const dn=String(parseInt(dom.date.split('-')[2])).padStart(2,'0')
+    const pts=dom.date.split('-')
+    return`<div class="pa-dom-card">
+      <div class="pa-dom-title">Domingo ${dn}/${pts[1]}/${pts[0]}</div>
+      <div class="pa-dom-body">
+        <div style="margin-bottom:4px"><b style="font-size:9px;text-transform:uppercase;color:#1B5E20">Trabalhando (${trab.size})</b><br/>
+        ${[...trab].sort().map(p=>`<span class="pa-dom-item trab">✓ ${esc(p)}</span>`).join(' ')}</div>
+        <div><b style="font-size:9px;text-transform:uppercase;color:#9E9E9E">Folga (${folg.length})</b><br/>
+        ${folg.map(p=>`<span class="pa-dom-item folg">🌴 ${esc(p)}</span>`).join(' ')}</div>
+      </div>
+    </div>`
+  }).join('')
+  return`<div class="pa-section">
+    <div class="pa-section-title">🌴 Folgas de Domingo do Mês</div>
+    <div class="pa-dom-grid">${cards}</div>
+  </div>`
+}
+
+function buildPrintTemp(){
+  return`<div class="pa-section">
+    <div class="pa-section-title">🌡️ Padrão de Temperaturas</div>
+    <table class="pa-table" style="margin-bottom:10px">
+      <thead><tr><th>Equipamento</th><th>Ideal</th><th>Alerta</th><th>Crítico</th></tr></thead>
+      <tbody>
+        <tr><td><b>Geladeira</b></td><td style="color:#2E7D32;font-weight:800">0°C a 4°C</td><td style="color:#F57F17;font-weight:800">5°C a 6°C</td><td style="color:#C62828;font-weight:800">≥ 7°C</td></tr>
+        <tr><td><b>Freezer</b></td><td style="color:#2E7D32;font-weight:800">-18°C a -22°C</td><td style="color:#F57F17;font-weight:800">-15°C</td><td style="color:#C62828;font-weight:800">≥ -12°C</td></tr>
+        <tr><td><b>Tacho (fritura)</b></td><td style="color:#2E7D32;font-weight:800">175°C a 185°C</td><td style="color:#F57F17;font-weight:800">170°C a 175°C</td><td style="color:#C62828;font-weight:800">&lt;170°C ou &gt;205°C</td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:#616161;font-weight:600;background:#F5F5F5;padding:8px 12px;border-radius:6px">
+      ⏰ Conferir: <b>início do turno · pré-pico · durante o pico</b> &nbsp;·&nbsp; ⚡ Desvio → corrigir imediatamente
+    </div>
+  </div>`
+}
+
+
 function init(){
   const _now=new Date()
   G.viewYear=_now.getFullYear()
@@ -1537,6 +1824,7 @@ function buildPage(){
       <button class="tbtn-white" id="btn-temp" title="Padrão de Temperaturas">🌡️<span class="tbtn-txt"> Temp.</span></button>
       <button class="tbtn-white" id="btn-horarios" title="Horários da Equipe">🕐<span class="tbtn-txt"> Horários</span></button>
       <button class="tbtn-white" id="btn-folgas" title="Folgas de Domingo">📅<span class="tbtn-txt"> Folgas Dom</span></button>
+      <button class="tbtn-white" id="btn-print" title="Imprimir Escala">🖨️<span class="tbtn-txt"> Imprimir</span></button>
       <div style="position:relative">
         <button class="tbtn-white" id="mbtn">${topRight}</button>
         ${G.menu?buildDropdown():''}
@@ -1787,7 +2075,7 @@ function buildPersonCard(date,shift,nome,entries){
 
   // Horário
   const horHtml=hor&&hor.horario
-    ?`<span class="pc-hor">${esc(hor.horario)} · 🍽 ${esc(hor.almoco)}</span>`
+    ?`<div class="pc-hor-line"><span class="pc-hor-badge">${esc(hor.horario)}</span>${hor.almoco?`<span class="pc-almoco-badge">Almoco: ${esc(hor.almoco)}</span>`:''}</div>`
     :''
 
   // Responsabilidades (máx 2 + ver mais)
@@ -1817,8 +2105,8 @@ function buildPersonCard(date,shift,nome,entries){
     ?`<button class="ec-detalhe-btn" data-det-nome="${esc(nome)}" data-det-role="${esc(entries[0].role||'')}">📋 Ver funções</button>`
     :''
 
-  // Chips de função — quando logado, cada chip tem botões inline ocultos que aparecem no hover
-  const roleChipsHtml=entries.map(e=>{
+  const entriesOrd=[...entries].sort((a,b)=>a.role.localeCompare(b.role,'pt-BR'))
+  const roleChipsHtml=entriesOrd.map(e=>{
     const isFalta=e.status==='absent'
     const k=`${date}|${shift}|${e.id}`
     const chipStyle=isFalta
@@ -1844,9 +2132,15 @@ function buildPersonCard(date,shift,nome,entries){
       </div>`
     :''
 
+  // Avatar com iniciais
+  const initials=nome.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()
+  const allAbsent=entries.every(e=>e.status==='absent')
+  const avatarClass=allAbsent?'absent':(shift==='manha'?'manha':'noite')
+
   return `<div class="person-card">
     <div class="person-card-head">
-      <div class="ec-right" style="flex:1;min-width:0">
+      <div class="pc-avatar ${avatarClass}">${esc(initials)}</div>
+      <div class="pc-info">
         <div class="ec-name">${esc(nome)}</div>
         ${horHtml}
         ${respHtml}
@@ -1854,7 +2148,7 @@ function buildPersonCard(date,shift,nome,entries){
       ${detalheBtn}
     </div>
     <div class="person-card-roles">${roleChipsHtml}</div>
-    ${statusHtml?`<div style="padding:0 12px 6px;display:flex;flex-wrap:wrap;gap:4px">${statusHtml}</div>`:''}
+    ${statusHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${statusHtml}</div>`:''}
     ${faltaBtnsHtml}
   </div>`
 }
@@ -2016,6 +2310,7 @@ function bindAll(){
   const bmanual=document.getElementById('btn-manual');if(bmanual)bmanual.onclick=showManualModal
   const btemp=document.getElementById('btn-temp');if(btemp)btemp.onclick=showTempModal
   const bhorarios=document.getElementById('btn-horarios');if(bhorarios)bhorarios.onclick=showHorariosModal
+  const bprint=document.getElementById('btn-print');if(bprint)bprint.onclick=showPrintModal
   const bfolgas=document.getElementById('btn-folgas');if(bfolgas)bfolgas.onclick=showFolgasModal
   const btoday=document.getElementById('btn-today');if(btoday)btoday.onclick=()=>{
     const now=new Date()
@@ -2671,19 +2966,66 @@ function showManualModal(){
 // ── HORÁRIOS ──
 function showHorariosModal(){
   document.getElementById('hmodal')?.remove()
+  const FOLGAS_DOM={
+    'Bruna':['05/04', '12/04', '19/04', '26/04'],
+    'David':['05/04'],
+    'Derik':['05/04', '12/04'],
+    'Gabriela':['05/04'],
+    'Iolete':[],
+    'Isabelly':['05/04'],
+    'Julia':['19/04'],
+    'Larissa':['26/04'],
+    'Letícia':['12/04'],
+    'Lucca':['19/04'],
+    'Luis':['26/04'],
+    'Suelen':['05/04', '12/04', '19/04', '26/04'],
+    'Táis':['12/04'],
+    'Túlio':[],
+    'Victor':['26/04'],
+    'Vinicius':['19/04', '26/04'],
+    'Vitória':['12/04'],
+    'Wirislaine':['26/04'],
+    'Íris':['19/04'],
+  };
+  const FOLGAS_FIXAS={
+    'Bruna':'Seg + Ter',
+    'David':'Seg + Qua',
+    'Derik':'Seg + Qua',
+    'Gabriela':'Seg + Qua',
+    'Iolete':'Ter + Qui',
+    'Isabelly':'Seg + Ter',
+    'Íris':'Seg + Qui',
+    'Julia':'Seg + Ter',
+    'Larissa':'Seg + Ter',
+    'Letícia':'Seg + Ter',
+    'Lucca':'Seg + Qui',
+    'Luis':'Seg + Ter',
+    'Suelen':'Seg + ?',
+    'Táis':'Seg + Qua',
+    'Túlio':'Seg + Ter',
+    'Victor':'Seg + Ter',
+    'Vinícius':'Seg + Qua',
+    'Vitória':'Seg + Qui',
+    'Wirislaine':'Seg + Qui',
+  };
   function buildRows(arr){
-    return arr.map(p=>`
+    return arr.map(p=>{
+      const folga=FOLGAS_FIXAS[p.nome]||'Seg + ?'
+      const doms=(FOLGAS_DOM[p.nome]||[]).join(', ')
+      const domsStr=doms?` · Dom: ${doms}`:''
+      return`
       <tr>
-        <td><span class="hor-nome">${esc(p.nome)}</span></td>
+        <td><span class="hor-nome">${esc(p.nome)}</span><br/><span style="font-size:10px;color:var(--g400);font-weight:700">🌴 ${esc(folga)}${domsStr}</span></td>
         <td><span class="hor-time">${esc(p.horario)}</span></td>
         <td><span class="hor-almoco">🍽 ${esc(p.almoco)}</span></td>
-      </tr>`).join('')
+      </tr>`
+    }).join('')
   }
   function buildSection(label,cls,icon,arr){
     return`<div class="hor-section">
       <div class="hor-section-title ${cls}">${icon} ${label} <span style="margin-left:auto;font-size:12px;opacity:.7">${arr.length} pessoas</span></div>
       <table class="hor-table">
-        <thead><tr><th>Nome</th><th>Horário</th><th>Intervalo</th></tr></thead>
+        <thead><tr><th>Nome / Folga</th><th>Horário</th><th>Intervalo</th></tr></thead>
         <tbody>${buildRows(arr)}</tbody>
       </table>
     </div>`

@@ -739,8 +739,11 @@ input{font-family:'Nunito',sans-serif;outline:none}
   .topbar{height:54px;padding:0 12px}
   .brand-sub{display:none}
   .brand-logo{height:38px;width:38px}
-  /* Esconder botão Horários no mobile — fica no menu */
-  #btn-horarios{display:none}
+  /* No mobile: botões viram só ícones para caber tudo */
+  #btn-horarios{display:flex}
+  .tbtn-txt{display:none}
+  .tbtn-white{padding:6px 8px;gap:0;font-size:16px}
+  .top-actions{gap:5px}
   .day-panel{
     top:54px;
     left:0;
@@ -754,6 +757,58 @@ input{font-family:'Nunito',sans-serif;outline:none}
   .cal-area{padding:12px 8px 32px}
   .cal-header{margin-bottom:12px}
   .cal-title{font-size:22px}
+}
+
+/* ── MODAL MANUAL DE USO ── */
+.man-intro{
+  padding:14px 20px;font-size:13px;color:var(--g700);
+  background:var(--g50);border-bottom:1px solid var(--g100);
+  line-height:1.6;
+}
+.man-intro strong{color:var(--g900)}
+.man-section{padding:14px 20px;border-bottom:1px solid var(--g100)}
+.man-section-admin{background:#FFFBF0}
+.man-section-title{
+  font-size:13px;font-weight:800;color:var(--g900);
+  margin-bottom:10px;
+}
+.man-item{
+  display:flex;align-items:flex-start;gap:10px;
+  margin-bottom:8px;font-size:12px;color:var(--g700);line-height:1.5;
+}
+.man-item:last-child{margin-bottom:0}
+.man-item-icon{
+  flex-shrink:0;width:22px;text-align:center;
+  font-size:13px;margin-top:0px;
+}
+.man-item strong{color:var(--g900);font-weight:700}
+.man-badge-row{margin-bottom:8px}
+.man-badge{
+  display:inline-flex;padding:2px 9px;border-radius:20px;
+  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+}
+.man-badge-warn{background:#FAEEDA;color:#854F0B}
+.man-logins{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;
+}
+.man-login{
+  display:flex;align-items:center;gap:8px;
+  background:var(--g50);border:1px solid var(--g100);
+  border-radius:8px;padding:8px 10px;
+}
+.man-av{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--red);color:#fff;
+  font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.man-login-nome{font-size:12px;font-weight:800;color:var(--g900)}
+.man-login-user{font-size:10px;color:var(--g400)}
+.man-note{font-size:11px;color:var(--g400);font-style:italic}
+.man-regras{
+  padding:14px 20px 20px;
+  background:#F0FDF4;border-top:1px solid #BBF7D0;
 }
 
 /* ── BOTÃO CACHE DISCRETO ── */
@@ -1383,8 +1438,9 @@ function buildPage(){
     </div>
     <div class="topbar-mid">Escala · <b>${G._calMeta?G._calMeta.shortLabel:''}</b></div>
     <div class="top-actions">
-      <button class="tbtn-white" id="btn-horarios">🕐<span class="btn-folgas-txt"> Horários</span></button>
-      <button class="tbtn-white" id="btn-folgas">📅<span class="btn-folgas-txt"> Folgas Dom</span></button>
+      <button class="tbtn-white" id="btn-manual" title="Manual de Uso">📖<span class="tbtn-txt"> Manual</span></button>
+      <button class="tbtn-white" id="btn-horarios" title="Horários da Equipe">🕐<span class="tbtn-txt"> Horários</span></button>
+      <button class="tbtn-white" id="btn-folgas" title="Folgas de Domingo">📅<span class="tbtn-txt"> Folgas Dom</span></button>
       <div style="position:relative">
         <button class="tbtn-white" id="mbtn">${topRight}</button>
         ${G.menu?buildDropdown():''}
@@ -1850,6 +1906,7 @@ function bindAll(){
     await logoutSupabase()
     G.user=null;localStorage.removeItem(SU);G.menu=false;toast('Sessão encerrada.','info');render()
   }
+  const bmanual=document.getElementById('btn-manual');if(bmanual)bmanual.onclick=showManualModal
   const bhorarios=document.getElementById('btn-horarios');if(bhorarios)bhorarios.onclick=showHorariosModal
   const bfolgas=document.getElementById('btn-folgas');if(bfolgas)bfolgas.onclick=showFolgasModal
   const btoday=document.getElementById('btn-today');if(btoday)btoday.onclick=()=>{
@@ -1877,6 +1934,7 @@ function bindAll(){
     if(document.getElementById('dmodal'))  {document.getElementById('dmodal').remove();return}
     if(document.getElementById('det-popup')) {document.getElementById('det-popup').remove();return}
     if(document.getElementById('ajmodal')) {document.getElementById('ajmodal').remove();return}
+    if(document.getElementById('mmanual')) {document.getElementById('mmanual').remove();return}
     if(document.getElementById('hmodal'))  {document.getElementById('hmodal').remove();return}
     if(document.getElementById('lmodal'))  {document.getElementById('lmodal').remove();return}
     if(document.getElementById('fmodal'))  {document.getElementById('fmodal').remove();return}
@@ -2342,6 +2400,80 @@ function showAjusteModal(k){
     m.remove()
     rebuildPanel();rebuildCell(date)
   }
+}
+
+// ── MANUAL DE USO ──
+function showManualModal(){
+  document.getElementById('mmanual')?.remove()
+  const m=document.createElement('div');m.id='mmanual'
+  m.innerHTML=`<div class="modal-bg" id="mmbg">
+    <div class="modal-card" style="max-width:520px">
+      <div class="modal-head" style="flex-direction:column;align-items:flex-start;gap:4px;padding:20px 22px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+          <div class="modal-title">📖 Manual de Uso</div>
+          <button class="modal-close" id="mmclose">✕ Fechar</button>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:600">Pastel da Camila · Bela Vista</div>
+      </div>
+      <div class="modal-body" style="padding:0">
+
+        <div class="man-intro">
+          Aqui você acompanha a escala da equipe em tempo real.
+          <strong>Todos podem visualizar.</strong> Só quem tem login pode editar.
+        </div>
+
+        <div class="man-section">
+          <div class="man-section-title">📅 Calendário</div>
+          <div class="man-item"><span class="man-item-icon">👆</span><div><strong>Clique em qualquer data</strong> para abrir o painel com a equipe completa do dia — manhã e noite separados.</div></div>
+          <div class="man-item"><span class="man-item-icon">◀▶</span><div>Use as <strong>setas</strong> para navegar entre meses. <strong>Hoje</strong> volta para o dia atual. <strong>Ir para...</strong> permite escolher qualquer mês e ano.</div></div>
+        </div>
+
+        <div class="man-section">
+          <div class="man-section-title">👥 Painel do dia</div>
+          <div class="man-item"><span class="man-item-icon">📋</span><div>Cada pessoa aparece <strong>uma vez</strong> com todas as funções do dia em chips coloridos.</div></div>
+          <div class="man-item"><span class="man-item-icon">🔍</span><div>Botão <strong>Ver funções</strong> abre o manual operacional completo da pessoa: horário, função de hoje, responsabilidades e regras.</div></div>
+          <div class="man-item"><span class="man-item-icon">🕐</span><div>Botão <strong>Horários</strong> mostra entrada, saída e intervalo de toda a equipe.</div></div>
+          <div class="man-item"><span class="man-item-icon">🌴</span><div>Botão <strong>Folgas Dom</strong> mostra quem trabalha e quem folga em cada domingo.</div></div>
+        </div>
+
+        <div class="man-section man-section-admin">
+          <div class="man-section-title">🔐 Para quem tem login</div>
+          <div class="man-badge-row">
+            <span class="man-badge man-badge-warn">Só com login ativo</span>
+          </div>
+          <div class="man-item"><span class="man-item-icon">✏️</span><div><strong>Editar</strong> — ícone de lápis dentro do chip de função. Obrigatório informar o motivo.</div></div>
+          <div class="man-item"><span class="man-item-icon">✕</span><div><strong>Excluir</strong> — ícone de X dentro do chip. Remove a entrada da escala.</div></div>
+          <div class="man-item"><span class="man-item-icon">➕</span><div><strong>Adicionar</strong> — botão no final de cada turno para incluir alguém extra.</div></div>
+          <div class="man-item"><span class="man-item-icon">⚠</span><div><strong>Registrar falta</strong> — botão laranja abaixo das funções. Escolha justificada ou injustificada. Uma mensagem é enviada automaticamente para o WhatsApp do RH.</div></div>
+        </div>
+
+        <div class="man-section">
+          <div class="man-section-title">🔑 Logins disponíveis</div>
+          <div class="man-logins">
+            <div class="man-login"><span class="man-av">AD</span><div><div class="man-login-nome">Admin</div><div class="man-login-user">admin · senha 2026</div></div></div>
+            <div class="man-login"><span class="man-av">VI</span><div><div class="man-login-nome">Vitória</div><div class="man-login-user">vitoria · senha 2026</div></div></div>
+            <div class="man-login"><span class="man-av">VV</span><div><div class="man-login-nome">Viviane</div><div class="man-login-user">viviane · senha 2026</div></div></div>
+            <div class="man-login"><span class="man-av">GB</span><div><div class="man-login-nome">Gabriela</div><div class="man-login-user">gabriela · senha 2026</div></div></div>
+          </div>
+          <div class="man-note">O sistema não salva o login — toda vez que abrir vai pedir novamente.</div>
+        </div>
+
+        <div class="man-regras">
+          <div style="font-size:11px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Regras operacionais</div>
+          <div style="font-size:12px;color:#166534;line-height:1.8;font-weight:600">
+            ✔ Checklist obrigatório todos os dias<br>
+            ✔ Subgerência e gerência validam todos os dias<br>
+            ✔ Hoje: pode ser impresso ou digital<br>
+            ⚠ A partir de maio: somente digital
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>`
+  document.body.appendChild(m)
+  document.getElementById('mmclose').onclick=()=>m.remove()
+  document.getElementById('mmbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
 }
 
 // ── HORÁRIOS ──

@@ -652,6 +652,24 @@ input{font-family:'Nunito',sans-serif;outline:none}
   .ec-resp-label{font-size:8px}
 }
 
+/* Botão falta explícito no card agrupado */
+.pc-falta-row{
+  display:flex;flex-wrap:wrap;gap:5px;
+  padding:0 12px 10px;border-top:1px solid var(--g100);margin-top:2px;padding-top:8px;
+}
+.pc-falta-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#FFF3E0;border:1px solid #FFCC80;
+  color:#E65100;border-radius:7px;
+  padding:5px 10px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;
+  white-space:nowrap;
+  transition:background .12s;
+}
+.pc-falta-btn:hover,.pc-falta-btn:active{
+  background:#FFE0B2;border-color:#FF9800;
+}
+
 /* Chips de função no card agrupado */
 .pc-role-chip{
   display:inline-flex;align-items:center;gap:4px;
@@ -721,6 +739,8 @@ input{font-family:'Nunito',sans-serif;outline:none}
   .topbar{height:54px;padding:0 12px}
   .brand-sub{display:none}
   .brand-logo{height:38px;width:38px}
+  /* Esconder botão Horários no mobile — fica no menu */
+  #btn-horarios{display:none}
   .day-panel{
     top:54px;
     left:0;
@@ -1632,14 +1652,24 @@ function buildPersonCard(date,shift,nome,entries){
     const cor=isFalta?'var(--abs)':st.c
     const bg=isFalta?'var(--abs-bg)':st.c+'22'
     const adminBtns=logado?`<span class="pc-chip-actions">
-      <button class="pc-chip-btn" data-ed="${k}" title="Editar">✏</button>
+      <button class="pc-chip-btn" data-ed="${k}" title="Editar ${esc(e.role)}">✏</button>
       <button class="pc-chip-btn danger" data-dl="${k}" title="Excluir">✕</button>
-      ${!isFalta?`<button class="pc-chip-btn warn" data-falta="${k}" title="Falta">!</button>`:''}
+      ${!isFalta?`<button class="pc-chip-btn warn" data-falta="${k}" title="Registrar falta">⚠</button>`:''}
     </span>`:''
     return `<span class="pc-role-chip${logado?' pc-role-editable':''}" style="border-color:${cor};color:${cor};background:${bg}">
       ${esc(e.role||'—')}${isFalta?' ✕':''}${adminBtns}
     </span>`
   }).join('')
+
+  // Botão de falta por função — visível e claro quando logado
+  const faltaBtnsHtml=logado
+    ?`<div class="pc-falta-row">
+        ${entries.filter(e=>e.status!=='absent').map(e=>{
+          const k=`${date}|${shift}|${e.id}`
+          return `<button class="pc-falta-btn" data-falta="${k}">⚠ Falta — ${esc(e.role)}</button>`
+        }).join('')}
+      </div>`
+    :''
 
   return `<div class="person-card">
     <div class="person-card-head">
@@ -1651,6 +1681,7 @@ function buildPersonCard(date,shift,nome,entries){
       ${detalheBtn}
     </div>
     <div class="person-card-roles">${roleChipsHtml}</div>
+    ${faltaBtnsHtml}
   </div>`
 }
 
@@ -1974,7 +2005,7 @@ function requireAuth(fn){
 
 function showLoginModal(onSuccess){
   document.getElementById('lmodal')?.remove()
-  const useSupaAuth = !!supa
+  const useSupaAuth = false // Login local por enquanto
   const m=document.createElement('div');m.id='lmodal'
   // Campo de email (Supabase) ou usuário (fallback local)
   const inputLabel = useSupaAuth ? 'E-mail' : 'Usuário'

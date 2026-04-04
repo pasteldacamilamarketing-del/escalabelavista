@@ -878,20 +878,51 @@ input{font-family:'Nunito',sans-serif;outline:none}
   #print-area{position:fixed;top:0;left:0;width:100%;background:#fff}
   .no-print{display:none!important}
 }
-.print-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:12px;animation:fadeIn .2s ease}
-.print-modal-card{background:#fff;border-radius:16px;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,.25)}
-.print-modal-head{background:var(--red);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.print-modal-body{flex:1;overflow-y:auto;padding:0}
+@media print{
+  .pa-section{page-break-before:always}
+  .pa-section:first-of-type{page-break-before:avoid}
+}
+#print-style-tag{}
+/* ── MODAL REGISTRAR (falta + ocorrência) ── */
+.reg-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:2000;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .18s ease}
+@media(min-width:480px){.reg-bg{align-items:center}}
+.reg-card{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:460px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 48px rgba(0,0,0,.22);animation:slideUp .22s ease}
+@media(min-width:480px){.reg-card{border-radius:20px}}
+.reg-head{padding:16px 18px 14px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--g100);flex-shrink:0}
+.reg-head-nome{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--g900);line-height:1}
+.reg-head-sub{font-size:13px;color:var(--g400);font-weight:600;margin-top:3px}
+.reg-body{flex:1;overflow-y:auto;padding:14px 16px 6px;-webkit-overflow-scrolling:touch}
+.reg-section-title{font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.reg-section{margin-bottom:18px}
+/* Botões de opção */
+.reg-opts{display:flex;flex-direction:column;gap:7px}
+.reg-opt{display:flex;align-items:center;gap:12px;border:2px solid var(--g200);border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;font-family:'Nunito',sans-serif;text-align:left;transition:all .15s;width:100%}
+.reg-opt:hover{border-color:var(--g300);background:var(--g50)}
+.reg-opt.selected{border-color:var(--red);background:#FFF0F1}
+.reg-opt-ico{font-size:22px;flex-shrink:0}
+.reg-opt-label{font-size:15px;font-weight:800;color:var(--g900);line-height:1.2}
+.reg-opt-desc{font-size:12px;color:var(--g400);font-weight:600;margin-top:2px}
+/* Campo observação */
+.reg-obs-wrap{margin-top:10px;display:none}
+.reg-obs-wrap.visible{display:block}
+.reg-obs{width:100%;border:2px solid var(--g200);border-radius:10px;padding:10px 12px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--g900);resize:none;min-height:70px;transition:border-color .15s}
+.reg-obs:focus{border-color:var(--red);outline:none}
+/* Rodapé */
+.reg-footer{padding:12px 16px 16px;display:flex;gap:9px;border-top:1px solid var(--g100);flex-shrink:0;background:#fff}
+.reg-btn{flex:1;border:none;border-radius:11px;padding:12px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all .15s}
+.reg-btn-cancel{background:var(--g100);color:var(--g700)}
+.reg-btn-send{background:#25D366;color:#fff}
+.reg-btn-send:disabled{opacity:.45;cursor:not-allowed}
+/* Botão único de registrar no card */
+.pc-reg-btn{display:inline-flex;align-items:center;gap:5px;border:1.5px solid #FFCC80;border-radius:8px;background:#FFF3E0;color:#E65100;padding:6px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;white-space:nowrap}
+.pc-reg-btn:hover,.pc-reg-btn:active{background:#FFE0B2;border-color:#FF9800}
+.pc-reg-btn.all-absent{border-color:var(--abs);color:var(--abs);background:var(--abs-bg)}
+
 .print-section{padding:16px 20px;border-bottom:1px solid var(--g100)}
 .print-section:last-child{border-bottom:none}
 .print-section-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--g900);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
 .print-check{display:flex;align-items:center;gap:10px;margin-bottom:8px;cursor:pointer;font-size:18px;font-weight:600;color:var(--g700)}
 .print-check input{width:18px;height:18px;cursor:pointer;accent-color:var(--red)}
-.print-actions{display:flex;gap:10px;padding:16px 20px;border-top:1px solid var(--g100);flex-shrink:0;background:#fff}
-.print-btn{flex:1;padding:12px;border:none;border-radius:10px;font-size:18px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif}
-.print-btn-main{background:var(--red);color:#fff}
-.print-btn-main:hover{background:var(--red2)}
-.print-btn-sec{background:var(--g100);color:var(--g700)}
 
 /* ── PÁGINA DE IMPRESSÃO ── */
 #print-area{display:none;font-family:'Nunito',sans-serif;color:#212121;padding:20px;background:#fff}
@@ -933,6 +964,60 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .pa-escala-dn{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#424242;display:block;margin-bottom:2px}
 .pa-escala-name{display:block;color:#424242;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+/* ── MODAL UNIFICADO IMPRESSÃO/ZAP ── */
+.unif-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:2000;display:flex;align-items:center;justify-content:center;padding:12px;animation:fadeIn .2s ease}
+.unif-modal-card{background:#fff;border-radius:20px;width:100%;max-width:500px;max-height:94vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.unif-modal-head{background:var(--red);padding:16px 20px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0}
+.unif-modal-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;color:#fff;letter-spacing:.3px}
+.unif-modal-sub{font-size:12px;color:rgba(255,255,255,.65);font-weight:600;margin-top:2px}
+.unif-modal-body{flex:1;overflow-y:auto;padding:18px 18px 0;-webkit-overflow-scrolling:touch}
+.unif-modal-footer{padding:14px 18px 18px;display:flex;gap:10px;flex-shrink:0;border-top:1px solid var(--g100);background:#fff}
+/* Tabs modo */
+.unif-tabs{display:grid;grid-template-columns:1fr 1fr;border-radius:10px;overflow:hidden;border:2px solid var(--g200);margin-bottom:16px;flex-shrink:0}
+.unif-tab{padding:9px;border:none;background:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;color:var(--g400);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.unif-tab.active{background:var(--g900);color:#fff}
+.unif-tab:first-child{border-right:2px solid var(--g200)}
+/* Seção label */
+.unif-sec-lbl{font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+/* Período */
+.unif-period-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:16px}
+.unif-period-btn{border:2px solid var(--g200);border-radius:11px;background:#fff;padding:11px 6px;cursor:pointer;text-align:center;transition:all .15s;font-family:'Nunito',sans-serif}
+.unif-period-btn .pi{font-size:20px;display:block;margin-bottom:3px}
+.unif-period-btn .pn{font-size:13px;font-weight:800;color:var(--g900);display:block}
+.unif-period-btn .pr{font-size:10px;color:var(--g400);font-weight:600;margin-top:1px;display:block;line-height:1.3}
+.unif-period-btn.active{border-color:var(--red);background:#FFF0F1}
+.unif-period-btn.active .pn{color:var(--red)}
+.unif-period-btn:hover:not(.active){border-color:var(--g300)}
+/* Preview */
+.unif-preview{background:var(--g50);border:1.5px solid var(--g200);border-radius:10px;padding:12px;margin-bottom:16px;font-size:11.5px;font-family:'Barlow Condensed',sans-serif;color:var(--g700);line-height:1.65;white-space:pre-wrap;max-height:180px;overflow-y:auto;letter-spacing:.1px}
+/* Destino Zap */
+.unif-dest-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.unif-dest-btn{border:2px solid var(--g200);border-radius:10px;background:#fff;padding:9px 11px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--g700);transition:all .15s}
+.unif-dest-btn .di{font-size:18px;flex-shrink:0}
+.unif-dest-btn.active{border-color:#25D366;background:#F0FFF4;color:#1a7a3a}
+.unif-dest-btn:hover:not(.active){border-color:var(--g300)}
+.unif-dest-manual label{font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px}
+.unif-dest-inp{width:100%;border:2px solid var(--g200);border-radius:9px;padding:9px 11px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--g900);transition:border-color .15s}
+.unif-dest-inp:focus{border-color:var(--red);outline:none}
+.unif-dest-inp::placeholder{color:var(--g300);font-weight:600}
+/* Orientação */
+.unif-orient-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px}
+.unif-orient-btn{border:2px solid var(--g200);border-radius:10px;background:#fff;padding:9px;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--g700);transition:all .15s}
+.unif-orient-btn.active{border-color:var(--red);background:#FFF0F1;color:var(--red)}
+/* Seções */
+.unif-secoes-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:16px}
+.unif-sec-check{display:flex;align-items:center;gap:7px;padding:8px 10px;border:2px solid var(--g200);border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;color:var(--g700);transition:all .15s;background:#fff}
+.unif-sec-check input{accent-color:var(--red);width:14px;height:14px;flex-shrink:0;cursor:pointer}
+.unif-sec-check:has(input:checked){border-color:var(--red);background:#FFF0F1;color:var(--red)}
+/* Ações */
+.unif-btn{flex:1;border:none;border-radius:11px;padding:12px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .15s}
+.unif-btn-cancel{background:var(--g100);color:var(--g700)}
+.unif-btn-cancel:hover{background:var(--g200)}
+.unif-btn-print{background:var(--g900);color:#fff}
+.unif-btn-print:hover{background:#000}
+.unif-btn-zap{background:#25D366;color:#fff}
+.unif-btn-zap:hover{background:#1ebe5d}
+.unif-divider{height:1px;background:var(--g100);margin:0 0 14px}
 /* ── MODAL IMPRESSÃO CSS ── */
 
 /* ── TELAS MUITO PEQUENAS (320px) ── */
@@ -1141,6 +1226,14 @@ function buildHistoricoFromArray(arr){
 
 // ===== BASE FIXA =====
 const RH='5511945461633'
+const VIVIANE='5511945461633' // ← substituir pelo número real da Viviane
+const GRUPO_LINK='https://chat.whatsapp.com/G0erwUW5npX4ejKNcU3lT5'
+// Helper: envia mensagem para o grupo (copia texto + abre grupo)
+function enviarGrupo(texto){
+  try{navigator.clipboard.writeText(texto)}catch(e){}
+  window.open(GRUPO_LINK,'_blank')
+  setTimeout(()=>toast('📋 Texto copiado — cole no grupo!','success'),400)
+}
 const SU='pdc_u', SD='pdc_d7'  // v7 — remove aguardando e chips laranja
 // Mapeamento email → perfil (sem senhas — autenticação via Supabase Auth)
 const USER_PROFILES={
@@ -1549,54 +1642,267 @@ function toggleResps(btn){
 
 // ===== INIT =====
 // ── IMPRESSÃO ──
+// ── Estado do modal unificado ──
+const _PM={mode:'print',period:'mes',dest:'grupo',orient:'retrato'}
+
+function gerarTextoZap(period){
+  const yr=G.viewYear,mo=G.viewMonth
+  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const mesLabel=MESES[mo-1]+' '+yr
+  const hoje=new Date().toLocaleDateString('pt-BR')
+
+  if(period==='dia'){
+    // Usa selectedDate ou hoje
+    const todayStr=new Date().toISOString().split('T')[0]
+    const ds=G.selectedDate||todayStr
+    const day=dayMap[ds]
+    if(!day) return '(Sem escala para este dia)'
+    const dn=String(parseInt(ds.split('-')[2])).padStart(2,'0')+'/'+ds.split('-')[1]+'/'+ds.split('-')[0]
+    const fmtShift=(arr)=>{
+      const pessoas={}
+      arr.forEach(e=>{if(!e.person)return;if(!pessoas[e.person])pessoas[e.person]=[];pessoas[e.person].push(e.role)})
+      return Object.entries(pessoas).map(([p,rs])=>`• ${p} → ${rs.join(', ')}`).join('\n')
+    }
+    let txt=`☀️ *ESCALA DO DIA — Pastel da Camila*\n`
+    txt+=`📍 ${day.wd} ${dn}\n`
+    txt+=`📍 Bela Vista · Osasco\n\n`
+    if(day.manha.length){txt+=`*— MANHÃ —*\n${fmtShift(day.manha)}\n\n`}
+    if(day.noite.length){txt+=`*— NOITE —*\n${fmtShift(day.noite)}\n`}
+    txt+=`\n_Gerado em ${hoje}_`
+    return txt
+  }
+
+  if(period==='semana'){
+    // Pega a semana do selectedDate ou hoje
+    const base=new Date((G.selectedDate||new Date().toISOString().split('T')[0])+'T12:00:00')
+    const dom=new Date(base);dom.setDate(dom.getDate()-dom.getDay())
+    const dias=[]
+    for(let i=0;i<7;i++){const d=new Date(dom);d.setDate(d.getDate()+i);dias.push(d)}
+    const WD=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+    const fmt=(d)=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
+    const ini=fmt(dias[0]),fim=fmt(dias[6])
+    let txt=`📆 *ESCALA DA SEMANA — Pastel da Camila*\n`
+    txt+=`${ini} a ${fim} · Bela Vista · Osasco\n\n`
+    dias.forEach(d=>{
+      const ds=d.toISOString().split('T')[0]
+      const day=dayMap[ds]
+      const wd=WD[d.getDay()]
+      const df=fmt(d)
+      if(!day){txt+=`*${wd} ${df}* — Folga geral\n\n`;return}
+      const mP=[...new Set(day.manha.map(e=>e.person).filter(Boolean))]
+      const nP=[...new Set(day.noite.map(e=>e.person).filter(Boolean))]
+      txt+=`*${wd} ${df}*\n`
+      if(mP.length) txt+=`  ☀️ ${mP.join(', ')}\n`
+      if(nP.length) txt+=`  🌙 ${nP.join(', ')}\n`
+      txt+='\n'
+    })
+    txt+=`_Gerado em ${hoje}_`
+    return txt
+  }
+
+  // mês
+  const diasMes=G.days.filter(d=>d.date.startsWith(`${yr}-${String(mo).padStart(2,'0')}`))
+    .slice().sort((a,b)=>a.date.localeCompare(b.date))
+  let txt=`🗓️ *ESCALA DE ${mesLabel.toUpperCase()} — Pastel da Camila*\n`
+  txt+=`Bela Vista · Osasco\n\n`
+  diasMes.forEach(d=>{
+    const dn=String(parseInt(d.date.split('-')[2])).padStart(2,'0')+'/'+d.date.split('-')[1]
+    const mP=[...new Set(d.manha.map(e=>e.person).filter(Boolean))]
+    const nP=[...new Set(d.noite.map(e=>e.person).filter(Boolean))]
+    txt+=`*${d.wd} ${dn}*\n`
+    if(mP.length) txt+=`  ☀️ ${mP.join(', ')}\n`
+    if(nP.length) txt+=`  🌙 ${nP.join(', ')}\n`
+    txt+='\n'
+  })
+  txt+=`_Gerado em ${hoje}_`
+  return txt
+}
+
+function _pmPeriodRange(p){
+  const hoje=new Date()
+  const fmt=(d)=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
+  if(p==='dia'){
+    const ds=G.selectedDate||hoje.toISOString().split('T')[0]
+    const day=dayMap[ds]
+    if(day){
+      const dn=String(parseInt(ds.split('-')[2])).padStart(2,'0')+'/'+ds.split('-')[1]
+      return`${day.wd} ${dn}`
+    }
+    return fmt(hoje)
+  }
+  if(p==='semana'){
+    const base=new Date((G.selectedDate||hoje.toISOString().split('T')[0])+'T12:00:00')
+    const dom=new Date(base);dom.setDate(dom.getDate()-dom.getDay())
+    const sab=new Date(dom);sab.setDate(sab.getDate()+6)
+    return`${fmt(dom)} – ${fmt(sab)}`
+  }
+  const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+  return`${MESES[G.viewMonth-1]} ${G.viewYear}`
+}
+
+function _pmUpdatePreview(){
+  const el=document.getElementById('unif-preview')
+  if(el) el.textContent=gerarTextoZap(_PM.period)
+}
+
+function _pmSetMode(mode){
+  _PM.mode=mode
+  const tabP=document.getElementById('unif-tab-print')
+  const tabZ=document.getElementById('unif-tab-zap')
+  if(tabP) tabP.classList.toggle('active',mode==='print')
+  if(tabZ) tabZ.classList.toggle('active',mode==='zap')
+  const destSec=document.getElementById('unif-dest-sec')
+  const orientSec=document.getElementById('unif-orient-sec')
+  const secoesSec=document.getElementById('unif-secoes-sec')
+  if(destSec) destSec.style.display=mode==='zap'?'block':'none'
+  if(orientSec) orientSec.style.display=mode==='print'?'block':'none'
+  if(secoesSec) secoesSec.style.display=mode==='print'?'block':'none'
+  const btn=document.getElementById('unif-action-btn')
+  if(btn){
+    if(mode==='print'){btn.className='unif-btn unif-btn-print';btn.innerHTML='🖨️ Imprimir agora'}
+    else{btn.className='unif-btn unif-btn-zap';btn.innerHTML='📲 Enviar pelo WhatsApp'}
+  }
+}
+
+function _pmSetPeriod(p){
+  _PM.period=p
+  document.querySelectorAll('.unif-period-btn').forEach(b=>b.classList.remove('active'))
+  const pb=document.getElementById('unif-p-'+p)
+  if(pb) pb.classList.add('active')
+  _pmUpdatePreview()
+}
+
+function _pmSetDest(d){
+  _PM.dest=d
+  // Desmarca todos, marca o selecionado
+  CONTATOS_ESCALA.forEach(c=>document.getElementById('unif-dest-'+c.id)?.classList.toggle('active',c.id===d))
+  if(d!=='manual'){const inp=document.getElementById('unif-dest-inp');if(inp)inp.value=''}
+}
+
+function _pmSetOrient(o){
+  _PM.orient=o
+  document.getElementById('unif-ori-ret')?.classList.toggle('active',o==='retrato')
+  document.getElementById('unif-ori-pai')?.classList.toggle('active',o==='paisagem')
+}
+
+// ── Contatos predefinidos para encaminhar escala ──
+const CONTATOS_ESCALA=[
+  {id:'grupo', ico:'👥', nome:'Grupo da Loja', num:'loja',   tel:null},
+  {id:'bruna', ico:'👩', nome:'Bruna',          num:'11964251461', tel:'5511964251461'},
+  {id:'viviane',ico:'👩',nome:'Viviane',         num:'11945461633', tel:'5511945461633'},
+  {id:'camila',ico:'👩', nome:'Camila',          num:'11940366586', tel:'5511940366586'},
+  {id:'loja',  ico:'🏪', nome:'Loja',            num:'11945439775', tel:'5511945439775'},
+]
+
 function showPrintModal(){
-  document.getElementById('prtmodal')?.remove()
-  const m=document.createElement('div');m.id='prtmodal'
-  m.innerHTML=`<div class="print-modal-bg" id="prtbg">
-    <div class="print-modal-card">
-      <div class="print-modal-head">
-        <div class="modal-title">🖨️ Imprimir</div>
-        <button class="modal-close" id="prtclose">✕</button>
+  document.getElementById('unifmodal')?.remove()
+  const m=document.createElement('div');m.id='unifmodal'
+  const pr=_pmPeriodRange('dia'),sr=_pmPeriodRange('semana'),mr=_pmPeriodRange('mes')
+
+  const contatosBtns=CONTATOS_ESCALA.map(c=>`
+    <button class="unif-dest-btn" id="unif-dest-${c.id}" onclick="_pmSetDest('${c.id}')">
+      <span class="di">${c.ico}</span>
+      <div>
+        <div style="font-size:13px;font-weight:800">${c.nome}</div>
+        <div style="font-size:10px;color:#999">${c.num}</div>
       </div>
-      <div class="print-modal-body">
-        <div class="print-section">
-          <div class="print-section-title">Selecione o que imprimir</div>
-          <label class="print-check"><input type="checkbox" id="prt-escala" checked/> 📅 Escala do mês completa</label>
-          <label class="print-check"><input type="checkbox" id="prt-horarios" checked/> 🕐 Horários da equipe + folgas</label>
-          <label class="print-check"><input type="checkbox" id="prt-domingos" checked/> 🌴 Folgas de domingo do mês</label>
-          <label class="print-check"><input type="checkbox" id="prt-temp" checked/> 🌡️ Padrão de temperaturas</label>
+    </button>`).join('')
+
+  m.innerHTML=`<div class="unif-modal-bg" id="unifbg">
+    <div class="unif-modal-card">
+      <div class="unif-modal-head">
+        <div>
+          <div class="unif-modal-title">📲 Encaminhar Escala</div>
+          <div class="unif-modal-sub">Pastel da Camila · Bela Vista · Osasco</div>
+        </div>
+        <button class="modal-close" id="unifclose">✕</button>
+      </div>
+      <div class="unif-modal-body">
+        <div class="unif-sec-lbl">Período</div>
+        <div class="unif-period-grid">
+          <button class="unif-period-btn" id="unif-p-dia" onclick="_pmSetPeriod('dia')">
+            <span class="pi">📍</span><span class="pn">Hoje</span><span class="pr">${pr}</span>
+          </button>
+          <button class="unif-period-btn" id="unif-p-semana" onclick="_pmSetPeriod('semana')">
+            <span class="pi">📆</span><span class="pn">Semana</span><span class="pr">${sr}</span>
+          </button>
+          <button class="unif-period-btn active" id="unif-p-mes" onclick="_pmSetPeriod('mes')">
+            <span class="pi">🗓️</span><span class="pn">Mês</span><span class="pr">${mr}</span>
+          </button>
+        </div>
+        <div class="unif-sec-lbl">Pré-visualização</div>
+        <div class="unif-preview" id="unif-preview"></div>
+        <div class="unif-sec-lbl">Enviar para</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">
+          ${contatosBtns}
+        </div>
+        <div class="unif-dest-manual" style="margin-bottom:6px">
+          <label>Ou digitar número</label>
+          <input class="unif-dest-inp" id="unif-dest-inp" type="tel" placeholder="5511999999999" oninput="_pmSetDest('manual')"/>
         </div>
       </div>
-      <div class="print-actions">
-        <button class="print-btn print-btn-sec" id="prtcancel">Cancelar</button>
-        <button class="print-btn print-btn-main" id="prtgo">🖨️ Imprimir agora</button>
+      <div class="unif-modal-footer">
+        <button class="unif-btn unif-btn-cancel" id="unifcancel">Cancelar</button>
+        <button class="unif-btn unif-btn-zap" id="unif-action-btn" onclick="_pmDoAction()">📲 Enviar pelo WhatsApp</button>
       </div>
     </div>
   </div>`
   document.body.appendChild(m)
-  document.getElementById('prtclose').onclick=()=>m.remove()
-  document.getElementById('prtcancel').onclick=()=>m.remove()
-  document.getElementById('prtbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
-  document.getElementById('prtgo').onclick=()=>{
-    const opts={
-      escala:document.getElementById('prt-escala').checked,
-      horarios:document.getElementById('prt-horarios').checked,
-      domingos:document.getElementById('prt-domingos').checked,
-      temp:document.getElementById('prt-temp').checked,
-    }
-    m.remove()
-    executarImpressao(opts)
-  }
+  document.getElementById('unifclose').onclick=()=>m.remove()
+  document.getElementById('unifcancel').onclick=()=>m.remove()
+  document.getElementById('unifbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
+  _PM.period='mes';_PM.dest='grupo';_PM.mode='zap'
+  document.getElementById('unif-dest-grupo')?.classList.add('active')
+  _pmUpdatePreview()
 }
 
-function executarImpressao(opts){
-  // Remover área anterior
+function _pmDoAction(){
+  const texto=gerarTextoZap(_PM.period)
+  const c=CONTATOS_ESCALA.find(x=>x.id===_PM.dest)
+  if(c&&c.id==='grupo'){
+    // Grupo: wa.me com link de convite + texto pré-preenchido não funciona via link de convite
+    // Solução: copia texto e abre o grupo
+    try{navigator.clipboard.writeText(texto)}catch(e){}
+    window.open(GRUPO_LINK,'_blank')
+    document.getElementById('unifmodal')?.remove()
+    setTimeout(()=>toast('📋 Copiado — cole no grupo!','success'),400)
+    return
+  }
+  let numero=''
+  if(c&&c.tel) numero=c.tel
+  else numero=(document.getElementById('unif-dest-inp')?.value||'').replace(/\D/g,'')
+  if(!numero){toast('Escolha um destino.','error');return}
+  window.open('https://wa.me/'+numero+'?text='+encodeURIComponent(texto),'_blank')
+  document.getElementById('unifmodal')?.remove()
+  return
+}
+
+function executarImpressao(opts,orient,period){
   document.getElementById('print-area')?.remove()
+  // Injetar @page orientação
+  let styleTag=document.getElementById('print-dyn-style')
+  if(!styleTag){styleTag=document.createElement('style');styleTag.id='print-dyn-style';document.head.appendChild(styleTag)}
+  styleTag.textContent=orient==='paisagem'
+    ?'@media print{@page{size:A4 landscape;margin:12mm} #print-area{font-size:11px!important} .pa-table td,.pa-table th{padding:5px 8px!important} .pa-escala-cell{min-height:38px!important}}'
+    :'@media print{@page{size:A4 portrait;margin:15mm}}'
 
   const yr=G.viewYear,mo=G.viewMonth
   const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
   const mesLabel=MESES[mo-1]+' '+yr
   const hoje=new Date().toLocaleDateString('pt-BR')
+  // Período label
+  let periodoLabel=mesLabel
+  if(period==='dia'){
+    const ds=G.selectedDate||new Date().toISOString().split('T')[0]
+    const day=dayMap[ds]
+    periodoLabel=day?`${day.wd} ${String(parseInt(ds.split('-')[2])).padStart(2,'0')}/${ds.split('-')[1]}/${ds.split('-')[0]}`:hoje
+  } else if(period==='semana'){
+    const base=new Date((G.selectedDate||new Date().toISOString().split('T')[0])+'T12:00:00')
+    const dom=new Date(base);dom.setDate(dom.getDate()-dom.getDay())
+    const sab=new Date(dom);sab.setDate(sab.getDate()+6)
+    const f=(d)=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
+    periodoLabel=`Semana ${f(dom)} – ${f(sab)}`
+  }
 
   let html=`<div id="print-area" class="show">
   <div class="pa-header">
@@ -1605,41 +1911,25 @@ function executarImpressao(opts){
       <div class="pa-sub">Bela Vista · Osasco</div>
     </div>
     <div class="pa-meta">
-      <div style="font-size:16px;font-weight:800;color:#EA1D2C">${mesLabel}</div>
+      <div style="font-size:16px;font-weight:800;color:#EA1D2C">${periodoLabel}</div>
       <div>Impresso em ${hoje}</div>
     </div>
   </div>`
 
-  // ── ESCALA DO MÊS ──
-  if(opts.escala){
-    html+=buildPrintEscala(yr,mo)
-  }
-
-  // ── HORÁRIOS ──
-  if(opts.horarios){
-    html+=buildPrintHorarios()
-  }
-
-  // ── DOMINGOS ──
-  if(opts.domingos){
-    html+=buildPrintDomingos()
-  }
-
-  // ── TEMPERATURAS ──
-  if(opts.temp){
-    html+=buildPrintTemp()
-  }
+  if(opts.escala) html+=buildPrintEscala(yr,mo,period)
+  if(opts.horarios) html+=buildPrintHorarios()
+  if(opts.domingos) html+=buildPrintDomingos()
+  if(opts.temp) html+=buildPrintTemp()
 
   html+='</div>'
-
   document.body.insertAdjacentHTML('beforeend',html)
   setTimeout(()=>{
     window.print()
-    setTimeout(()=>document.getElementById('print-area')?.remove(),1000)
+    setTimeout(()=>{document.getElementById('print-area')?.remove();styleTag.textContent=''},1000)
   },300)
 }
 
-function buildPrintEscala(yr,mo){
+function buildPrintEscala(yr,mo,period){
   const firstDay=new Date(yr,mo-1,1).getDay()
   const daysInMonth=new Date(yr,mo,0).getDate()
   const WDS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
@@ -1824,7 +2114,7 @@ function buildPage(){
       <button class="tbtn-white" id="btn-temp" title="Padrão de Temperaturas">🌡️<span class="tbtn-txt"> Temp.</span></button>
       <button class="tbtn-white" id="btn-horarios" title="Horários da Equipe">🕐<span class="tbtn-txt"> Horários</span></button>
       <button class="tbtn-white" id="btn-folgas" title="Folgas de Domingo">📅<span class="tbtn-txt"> Folgas Dom</span></button>
-      <button class="tbtn-white" id="btn-print" title="Imprimir Escala">🖨️<span class="tbtn-txt"> Imprimir</span></button>
+      <button class="tbtn-white" id="btn-print" title="Encaminhar Escala">📲<span class="tbtn-txt"> Encaminhar</span></button>
       <div style="position:relative">
         <button class="tbtn-white" id="mbtn">${topRight}</button>
         ${G.menu?buildDropdown():''}
@@ -2115,20 +2405,20 @@ function buildPersonCard(date,shift,nome,entries){
     const adminBtns=logado?`<span class="pc-chip-actions">
       <button class="pc-chip-btn" data-ed="${k}" title="Editar ${esc(e.role)}">✏</button>
       <button class="pc-chip-btn danger" data-dl="${k}" title="Excluir">✕</button>
-      ${!isFalta?`<button class="pc-chip-btn warn" data-falta="${k}" title="Registrar falta">⚠</button>`:''}
     </span>`:''
     return `<span class="pc-role-chip${logado?' pc-role-editable':''}" style="${chipStyle}">
       ${esc(e.role||'—')}${isFalta?' ✕':''}${adminBtns}
     </span>`
   }).join('')
 
-  // Botão de falta por função — visível e claro quando logado
+  // Botão único de registrar (falta ou ocorrência) — só quando logado e há entradas ativas
+  const temAtiva=entries.some(e=>e.status!=='absent')
+  const allAbsentNow=entries.every(e=>e.status==='absent')
   const faltaBtnsHtml=logado
     ?`<div class="pc-falta-row">
-        ${entries.filter(e=>e.status!=='absent').map(e=>{
-          const k=`${date}|${shift}|${e.id}`
-          return `<button class="pc-falta-btn" data-falta="${k}">⚠ Falta — ${esc(e.role)}</button>`
-        }).join('')}
+        <button class="pc-reg-btn${allAbsentNow?' all-absent':''}" data-reg="${esc(date)}|${esc(shift)}|${esc(nome)}">
+          ⚠ ${allAbsentNow?'Ver registro':'Registrar'}
+        </button>
       </div>`
     :''
 
@@ -2344,6 +2634,7 @@ function bindAll(){
     if(document.getElementById('fmodal'))  {document.getElementById('fmodal').remove();return}
     if(document.getElementById('ftmodal')) {document.getElementById('ftmodal').remove();return}
     if(document.getElementById('pmodal'))  {document.getElementById('pmodal').remove();return}
+    if(document.getElementById('unifmodal')){document.getElementById('unifmodal').remove();return}
     if(G.selectedDate){G.selectedDate=null;render()}
   }
 
@@ -2417,7 +2708,16 @@ function bindPanel(){
     requireAuth(()=>{
       const[date,shift,id]=b.dataset.falta.split('|')
       const day=dayMap[date];const e=day&&day[shift]&&day[shift].find(x=>x.id===id);if(!e)return
-      showFaltaModal(date,shift,e)
+      showRegistrarModal(date,shift,[e])
+    })
+  })
+  document.querySelectorAll('[data-reg]').forEach(b=>b.onclick=()=>{
+    requireAuth(()=>{
+      const[date,shift,nome]=b.dataset.reg.split('|')
+      const day=dayMap[date];if(!day)return
+      const entries=(day[shift]||[]).filter(e=>e.person===nome)
+      if(!entries.length)return
+      showRegistrarModal(date,shift,entries)
     })
   })
 }
@@ -3082,144 +3382,167 @@ function showFolgasModal(){
 }
 
 // ── FALTA ──
-function showFaltaModal(date,shift,e){
+function showRegistrarModal(date,shift,entries){
   document.getElementById('ftmodal')?.remove()
-  const dn=parseInt(date.split('-')[2]);const turno=shift==='manha'?'Manhã':'Noite'
+  const dn=parseInt(date.split('-')[2])
+  const dataFmt=String(dn).padStart(2,'0')+'/'+date.split('-')[1]+'/'+date.split('-')[0]
+  const turno=shift==='manha'?'Manhã':'Noite'
+  const nome=entries[0].person
+  const funcoesAtivas=entries.filter(e=>e.status!=='absent').map(e=>e.role)
+  const funcoesStr=funcoesAtivas.join(', ')||entries.map(e=>e.role).join(', ')
+
+  const OCORRENCIAS=[
+    {id:'mal',   ico:'🤒', label:'Passou mal',        desc:'Ficou doente durante o turno'},
+    {id:'foi',   ico:'🚪', label:'Teve que ir embora', desc:'Saiu antes do fim do turno'},
+    {id:'lesao', ico:'🤕', label:'Se machucou',        desc:'Acidente ou lesão no trabalho'},
+    {id:'atraso',ico:'⏰', label:'Chegou atrasado',    desc:'Chegou após o horário previsto'},
+    {id:'cedo',  ico:'🏃', label:'Saiu mais cedo',     desc:'Encerrou o turno antes do previsto'},
+    {id:'outro', ico:'📝', label:'Outro',              desc:'Descrever no campo abaixo'},
+  ]
+
   const m=document.createElement('div');m.id='ftmodal'
-  m.innerHTML=`<div class="modal-bg" id="ftbg">
-    <div class="modal-card" style="max-width:380px">
-      <div class="modal-head" style="background:#B71C1C"><div class="modal-title">⚠ Registrar Falta</div><button class="modal-close" id="ftclose">✕</button></div>
-      <div class="modal-body">
-        <div class="falta-info"><b>${esc(e.person)}</b><br/>${esc(e.role)} · ${turno} · ${String(dn).padStart(2,'0')}/${date.split('-')[1]}/${date.split('-')[0]}</div>
-        <div class="falta-btns">
-          <button class="falta-btn just" id="ft-just">📋 Falta Justificada — Enviar ao RH</button>
-          <button class="falta-btn injust" id="ft-injust">🚨 Falta Injustificada — Enviar ao RH</button>
-          <button class="falta-btn cancel" id="ft-cancel">Cancelar</button>
+  m.innerHTML=`<div class="reg-bg" id="ftbg">
+    <div class="reg-card">
+      <div class="reg-head">
+        <div>
+          <div class="reg-head-nome">${esc(nome)}</div>
+          <div class="reg-head-sub">${esc(turno)} · ${dataFmt}${funcoesStr?` · ${esc(funcoesStr)}`:''}</div>
         </div>
+        <button class="modal-close" style="background:var(--g100);color:var(--g700)" id="ftclose">✕</button>
+      </div>
+      <div class="reg-body">
+        <div class="reg-section">
+          <div class="reg-section-title">Tipo de registro</div>
+          <div class="reg-opts">
+            <button class="reg-opt" id="ropt-just" data-tipo="just">
+              <span class="reg-opt-ico">📋</span>
+              <div><div class="reg-opt-label">Falta Justificada</div><div class="reg-opt-desc">Apresentou atestado ou justificativa</div></div>
+            </button>
+            <button class="reg-opt" id="ropt-injust" data-tipo="injust">
+              <span class="reg-opt-ico">🚨</span>
+              <div><div class="reg-opt-label">Falta Não Justificada</div><div class="reg-opt-desc">Ausência sem justificativa — gera desconto</div></div>
+            </button>
+            <button class="reg-opt" id="ropt-ocorr" data-tipo="ocorr">
+              <span class="reg-opt-ico">⚠️</span>
+              <div><div class="reg-opt-label">Ocorrência do turno</div><div class="reg-opt-desc">Pessoa estava presente mas algo aconteceu</div></div>
+            </button>
+          </div>
+        </div>
+        <div class="reg-section" id="reg-ocorr-sec" style="display:none">
+          <div class="reg-section-title">O que aconteceu?</div>
+          <div class="reg-opts" id="reg-ocorr-opts">
+            ${OCORRENCIAS.map(o=>`
+            <button class="reg-opt" id="roc-${o.id}" data-ocorr="${o.id}">
+              <span class="reg-opt-ico">${o.ico}</span>
+              <div><div class="reg-opt-label">${o.label}</div><div class="reg-opt-desc">${o.desc}</div></div>
+            </button>`).join('')}
+          </div>
+        </div>
+        <div class="reg-obs-wrap" id="reg-obs-wrap">
+          <div class="reg-section-title" style="margin-bottom:6px">Observação${document.getElementById?.('ropt-ocorr')?.classList?.contains('selected')?'':' (opcional)'}</div>
+          <textarea class="reg-obs" id="reg-obs" placeholder="Detalhes adicionais..."></textarea>
+        </div>
+      </div>
+      <div class="reg-footer">
+        <button class="reg-btn reg-btn-cancel" id="ftcancel">Cancelar</button>
+        <button class="reg-btn reg-btn-send" id="ftsend" disabled>📲 Enviar pro grupo</button>
       </div>
     </div>
   </div>`
   document.body.appendChild(m)
-  document.getElementById('ftclose').onclick=()=>m.remove()
-  document.getElementById('ft-cancel').onclick=()=>m.remove()
-  document.getElementById('ftbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
-  document.getElementById('ft-just').onclick=()=>{registrarFalta(date,shift,e,'just',dn,turno);m.remove()}
-  document.getElementById('ft-injust').onclick=()=>{registrarFalta(date,shift,e,'injust',dn,turno);m.remove()}
-}
 
+  let tipoSel=null, ocorrSel=null
 
-// ── REGRA: folga no domingo substitui o dia fixo da semana seguinte ──
-function getDiaFixoFolga(pessoa){
-  // Descobre o dia fixo de folga de cada pessoa analisando a escala
-  // Dia fixo = dia da semana (exceto segunda=1) em que ela mais frequentemente não aparece
-  const contDias={2:0,3:0,4:0,5:0,6:0,0:0} // Ter,Qua,Qui,Sex,Sáb,Dom
-  const totalDias={2:0,3:0,4:0,5:0,6:0,0:0}
-  G.days.forEach(d=>{
-    const jd=d.jsDay
-    if(jd===1)return // segunda: todos folgam, não conta
-    if(totalDias[jd]===undefined)return
-    totalDias[jd]++
-    const escalados=[...d.manha,...d.noite].map(e=>e.person)
-    if(!escalados.includes(pessoa)) contDias[jd]++
-  })
-  // Dia com maior % de ausência (exceto domingo que é folga coletiva eventual)
-  let melhorDia=null,melhorPct=0
-  Object.keys(contDias).forEach(jd=>{
-    if(parseInt(jd)===0)return // ignorar domingo no cálculo do fixo
-    const pct=totalDias[jd]>0?contDias[jd]/totalDias[jd]:0
-    if(pct>melhorPct){melhorPct=pct;melhorDia=parseInt(jd)}
-  })
-  return melhorDia // jsDay do dia fixo
-}
-
-function getNomeDia(jsDay){
-  return['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][jsDay]||'?'
-}
-
-function getDiaFixoNaSemana(dateStr, diaFixoJsDay){
-  // Retorna a data do dia fixo NA MESMA SEMANA do domingo (seg a sab seguintes)
-  const base=new Date(dateStr+'T12:00:00')
-  for(let i=1;i<=6;i++){
-    const d=new Date(base); d.setDate(d.getDate()+i)
-    if(d.getDay()===diaFixoJsDay){
-      return d.toISOString().split('T')[0]
-    }
+  function updateSendBtn(){
+    const ok=tipoSel==='just'||tipoSel==='injust'||(tipoSel==='ocorr'&&ocorrSel!==null)
+    document.getElementById('ftsend').disabled=!ok
   }
-  return null
-}
 
-function verificarFolgaDomingo(date, pessoa){
-  const day=dayMap[date]; if(!day||day.wd!=='Dom')return
-  const diaFixo=getDiaFixoFolga(pessoa)
-  if(diaFixo===null)return
-  const diaFixoNaSemana=getDiaFixoNaSemana(date, diaFixo)
-  const nomeDia=getNomeDia(diaFixo)
-  const dn=parseInt(date.split('-')[2])
-  const dataFmt=String(dn).padStart(2,'0')+'/'+date.split('-')[1]
-  const diaFixoDn=diaFixoNaSemana?parseInt(diaFixoNaSemana.split('-')[2]):null
-  const diaFixoFmt=diaFixoDn?String(diaFixoDn).padStart(2,'0')+'/'+diaFixoNaSemana.split('-')[1]:nomeDia+' da semana'
+  // Tipo
+  document.querySelectorAll('[data-tipo]').forEach(btn=>{
+    btn.onclick=()=>{
+      tipoSel=btn.dataset.tipo
+      document.querySelectorAll('[data-tipo]').forEach(b=>b.classList.remove('selected'))
+      btn.classList.add('selected')
+      const ocorrSec=document.getElementById('reg-ocorr-sec')
+      const obsSec=document.getElementById('reg-obs-wrap')
+      if(tipoSel==='ocorr'){
+        ocorrSec.style.display='block'
+        obsSec.classList.remove('visible')
+      } else {
+        ocorrSec.style.display='none'
+        obsSec.classList.add('visible')
+      }
+      updateSendBtn()
+    }
+  })
 
-  // AÇÃO REAL: marcar entradas da pessoa no dia fixo como absent
-  let removidos=0
-  if(diaFixoNaSemana && dayMap[diaFixoNaSemana]){
-    const diaFixoDay=dayMap[diaFixoNaSemana]
-    ;['manha','noite'].forEach(shift=>{
-      diaFixoDay[shift].forEach(e=>{
-        if(e.person===pessoa && e.status!=='absent'){
-          e.status='absent'
-          e.faltaTipo='folga_domingo'
-          e.faltaAt=Date.now()
-          removidos++
+  // Ocorrência
+  document.querySelectorAll('[data-ocorr]').forEach(btn=>{
+    btn.onclick=()=>{
+      ocorrSel=btn.dataset.ocorr
+      document.querySelectorAll('[data-ocorr]').forEach(b=>b.classList.remove('selected'))
+      btn.classList.add('selected')
+      const obsSec=document.getElementById('reg-obs-wrap')
+      obsSec.classList.add('visible')
+      updateSendBtn()
+    }
+  })
+
+  document.getElementById('ftclose').onclick=()=>m.remove()
+  document.getElementById('ftcancel').onclick=()=>m.remove()
+  document.getElementById('ftbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
+
+  document.getElementById('ftsend').onclick=()=>{
+    const obs=(document.getElementById('reg-obs')?.value||'').trim()
+    if(!tipoSel)return
+
+    if(tipoSel==='just'||tipoSel==='injust'){
+      // Marca falta em todas as entradas ativas da pessoa
+      const day=dayMap[date]
+      let marcou=false
+      ;(day[shift]||[]).forEach(e=>{
+        if(e.person===nome&&e.status!=='absent'){
+          e.status='absent';e.faltaTipo=tipoSel;e.faltaAt=Date.now();marcou=true
         }
       })
-    })
-    if(removidos>0){
-      save()
-      rebuildCell(diaFixoNaSemana)
-      if(G.selectedDate===diaFixoNaSemana) rebuildPanel()
-    }
-  }
+      if(marcou){save();rebuildPanel();rebuildCell(date)}
 
-  setTimeout(()=>{
-    document.getElementById('folgadomaviso')?.remove()
-    const av=document.createElement('div'); av.id='folgadomaviso'
-    av.innerHTML=`<div class="modal-bg" id="fdabg">
-      <div class="modal-card" style="max-width:400px">
-        <div class="modal-head" style="background:#E65100">
-          <div class="modal-title">📅 Folga no Domingo — aplicada</div>
-          <button class="modal-close" id="fdaclose">✕</button>
-        </div>
-        <div class="modal-body" style="padding:18px 20px">
-          <div style="background:#FFF3E0;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.7;color:#4E342E">
-            <b>${esc(pessoa)}</b> folgou domingo <b>${dataFmt}</b>.<br/><br/>
-            ✅ Folga de <b>${nomeDia} ${diaFixoFmt}</b> removida automaticamente — o domingo já foi a folga extra da semana.<br/><br/>
-            Semana seguinte volta ao ciclo normal.
-          </div>
-          <button id="fdaok" style="margin-top:4px;width:100%;background:#E65100;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">Entendido</button>
-        </div>
-      </div>
-    </div>`
-    document.body.appendChild(av)
-    document.getElementById('fdaclose').onclick=()=>av.remove()
-    document.getElementById('fdabg').onclick=ev=>{if(ev.target===ev.currentTarget)av.remove()}
-    document.getElementById('fdaok').onclick=()=>av.remove()
-  },400)
+      const tipo=tipoSel==='just'?'JUSTIFICADA':'NÃO JUSTIFICADA ⚠'
+      const emoji=tipoSel==='just'?'📋':'🚨'
+      const acao=tipoSel==='just'?'Favor registrar em folha de ponto e solicitar atestado.':'Favor registrar em folha de ponto para desconto conforme CLT.'
+      const texto=`${emoji} *Comunicado de Falta — Pastel da Camila*\n\n*Colaborador:* ${nome}\n*Função:* ${funcoesStr}\n*Turno:* ${turno}\n*Data:* ${dataFmt}\n*Tipo:* Falta ${tipo}\n${obs?`*Obs:* ${obs}\n`:''}\n${acao}`
+      enviarGrupo(texto)
+      toast(`Falta de ${nome} registrada.`,'success')
+
+    } else {
+      // Ocorrência — não marca falta, só notifica
+      const OCORR_LABELS={mal:'Passou mal',foi:'Teve que ir embora',lesao:'Se machucou',atraso:'Chegou atrasado',cedo:'Saiu mais cedo',outro:'Ocorrência'}
+      const ocorrLabel=OCORR_LABELS[ocorrSel]||'Ocorrência'
+      const texto=`⚠️ *Ocorrência de Turno — Pastel da Camila*\n\n*Colaborador:* ${nome}\n*Função:* ${funcoesStr}\n*Turno:* ${turno}\n*Data:* ${dataFmt}\n*Ocorrência:* ${ocorrLabel}${obs?`\n*Obs:* ${obs}`:''}\n\n_Viviane — verificar necessidade de cobertura ou providência._`
+      enviarGrupo(texto)
+      toast(`Ocorrência de ${nome} enviada.`,'success')
+    }
+
+    m.remove()
+  }
 }
 
+// ── Folga domingo: regra removida (cada pessoa folga Seg + 1 dia fixo, sempre) ──
 
 function registrarFalta(date,shift,entry,tipo,dn,turno){
+  // mantido para compatibilidade com chamadas legadas
   try{
     const day=dayMap[date];const e=day&&day[shift]&&day[shift].find(x=>x.id===entry.id);if(!e)return
     e.status='absent';e.faltaTipo=tipo;e.faltaAt=Date.now()
-    save()
-    rebuildPanel();rebuildCell(date)
+    save();rebuildPanel();rebuildCell(date)
     const data=String(dn).padStart(2,'0')+'/'+date.split('-')[1]+'/'+date.split('-')[0]
+    const funcoesStr=e.role||''
     const texto=tipo==='just'
-      ?`📋 *Comunicado de Falta — Pastel da Camila*\n\n*Colaborador:* ${e.person}\n*Função:* ${e.role}\n*Turno:* ${turno}\n*Data:* ${data}\n*Tipo:* Falta JUSTIFICADA\n\nFavor registrar em folha de ponto e solicitar atestado.`
-      :`🚨 *Comunicado de Falta — Pastel da Camila*\n\n*Colaborador:* ${e.person}\n*Função:* ${e.role}\n*Turno:* ${turno}\n*Data:* ${data}\n*Tipo:* Falta NÃO JUSTIFICADA ⚠\n\nFavor registrar em folha de ponto para desconto conforme CLT.`
-    window.open('https://wa.me/'+RH+'?text='+encodeURIComponent(texto),'_blank')
+      ?`📋 *Comunicado de Falta — Pastel da Camila*\n\n*Colaborador:* ${e.person}\n*Função:* ${funcoesStr}\n*Turno:* ${turno}\n*Data:* ${data}\n*Tipo:* Falta JUSTIFICADA\n\nFavor registrar em folha de ponto e solicitar atestado.`
+      :`🚨 *Comunicado de Falta — Pastel da Camila*\n\n*Colaborador:* ${e.person}\n*Função:* ${funcoesStr}\n*Turno:* ${turno}\n*Data:* ${data}\n*Tipo:* Falta NÃO JUSTIFICADA ⚠\n\nFavor registrar em folha de ponto para desconto conforme CLT.`
+    enviarGrupo(texto)
     toast('Falta de '+e.person+' registrada.','success')
-    verificarFolgaDomingo(date,e.person)
   }catch(err){toast('Erro ao registrar falta.','error')}
 }
 

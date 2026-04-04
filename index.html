@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>Pastel da Camila – Escala Abril</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet"/>
 <style>
 /*
@@ -906,14 +905,6 @@ const SUPA_URL = 'https://ddpmpykacorlmchumhjr.supabase.co'
 const SUPA_KEY = 'sb_publishable_xZwA54EKg_7QekmPvsJEVA_vcioMP0u'
 // Inicializa cliente Supabase — gracioso se SDK não carregou (offline/local)
 let supa = null
-try{
-  if(typeof supabase !== 'undefined'){
-    supa = supabase.createClient(SUPA_URL, SUPA_KEY)
-    console.log('Supabase conectado')
-  } else {
-    console.warn('Supabase SDK não carregado — modo offline')
-  }
-}catch(e){ console.warn('Supabase init error:',e.message) }
 
 // ── Auth: login com Supabase ──
 async function loginSupabase(email, password){
@@ -954,9 +945,7 @@ async function restoreSession(){
 async function loadFromSupabase(){
   if(!supa)return false
   try{
-    const timeout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),3000))
-    const query=supa.from('escala_dias').select('*').order('date')
-    const {data,error}=await Promise.race([query,timeout])
+    const {data,error}=await supa.from('escala_dias').select('*').order('date')
     if(error)throw error
     if(!data||data.length===0)return false
     // Converter formato banco → formato app
@@ -1091,9 +1080,9 @@ const ST={
 // ── HORÁRIOS (indexado por primeiro nome em lowercase para busca rápida) ──
 const HORARIOS_LIST=[
   // MANHÃ
-  {nome:'Gabi',      horario:'09:00–18:00', almoco:'11:00–12:00', turno:'manha'},
+  {nome:'Gabriela',      horario:'09:00–18:00', almoco:'11:00–12:00', turno:'manha'},
   {nome:'Íris',      horario:'09:00–18:00', almoco:'14:00–15:00', turno:'manha'},
-  {nome:'Letícia',   horario:'09:00–18:00', almoco:'14:00–15:00', turno:'manha'},
+  {nome:'Letícia',   horario:'09:00–18:00', almoco:'12:00–13:00', turno:'manha'},
   {nome:'Luis',      horario:'10:00–17:00', almoco:'14:00–15:00', turno:'manha'},
   {nome:'Iolete',    horario:'09:00–18:00', almoco:'12:00–13:00', turno:'manha'},
   {nome:'Wirislaine',horario:'09:00–18:00', almoco:'13:00–14:00', turno:'manha'},
@@ -1101,7 +1090,7 @@ const HORARIOS_LIST=[
   {nome:'Derik',    horario:'14:00–23:00', almoco:'18:00–19:00', turno:'noite'},
   {nome:'Julia',    horario:'13:00–22:00', almoco:'16:00–17:00', turno:'noite'},
   {nome:'Larissa',  horario:'13:00–22:00', almoco:'17:00–18:00', turno:'noite'},
-  {nome:'Lucca',    horario:'13:00–22:00', almoco:'18:00–19:00', turno:'noite'},
+  {nome:'Lucca',    horario:'13:00–22:00', almoco:'16:30–17:30', turno:'noite'},
   {nome:'Victor',   horario:'14:00–23:00', almoco:'18:00–19:00', turno:'noite'},
   {nome:'Vitória',  horario:'14:00–23:00', almoco:'17:30–18:30', turno:'noite'},
   {nome:'Táis',     horario:'13:00–22:00', almoco:'16:00–17:00', turno:'noite'},
@@ -1110,9 +1099,9 @@ const HORARIOS_LIST=[
   {nome:'David',    horario:'15:00–22:00', almoco:'18:00–19:00', turno:'estagiario'},
   {nome:'Isabelly', horario:'15:00–22:00', almoco:'18:00–19:00', turno:'estagiario'},
   // SEM HORÁRIO DEFINIDO (placeholder)
-  {nome:'Bruna',  horario:null, almoco:null, turno:'noite'},
-  {nome:'Túlio',  horario:null, almoco:null, turno:'noite'},
-  {nome:'Suelen', horario:null, almoco:null, turno:'manha'},
+  {nome:'Bruna',  horario:'15:00–21:00', almoco:null, turno:'noite'},
+  {nome:'Túlio',  horario:'18:00–23:00', almoco:null, turno:'noite'},
+  {nome:'Suelen', horario:'09:00–18:00', almoco:'12:00–13:00', turno:'manha'},
 ]
 // Índice rápido: lowercase -> objeto
 const HORARIOS_IDX={}
@@ -1151,14 +1140,11 @@ const FUNCOES_POR_PESSOA={
     }
   },
   'lucca':{
-    bloco:'Caixa / Noite',
-    funcaoPrincipal:'Caixa salão',
-    cobertura:'Folga: Larissa cobre o caixa',
-    funcoes:['Caixa salão','Caldo','Embalador'],
+    bloco:'Finalização / Atendimento',
+    funcoes:['Caixa Salão','Embalador'],
     detalhes:{
-      'Caixa salão':'Caixa do salão — noite inteira. Almoço 18h-19h. Cobre Letícia das 13h às 15h (almoço dela).',
-      'Caldo':'Passar caldo ao chegar (13h-14h30). Quantidade varia por dia — ver obs no card.',
-      'Embalador':'Apoio no embalamento quando necessário.'
+      'Caixa Salão':'Operar o caixa do salão. Responsável por limpeza e atendimento.',
+      'Embalador':'Apoio na embalagem quando necessário.'
     }
   },
   'isabelly':{
@@ -1201,15 +1187,12 @@ const FUNCOES_POR_PESSOA={
     }
   },
   'letícia':{
-    bloco:'Caixa / Salão',
-    funcaoPrincipal:'Caixa salão',
-    cobertura:'Folga: Gaby cobre o caixa',
-    funcoes:['Caixa salão','Escorredeira','Salão','Caldo'],
+    bloco:'Produção / Fluxo',
+    funcoes:['Salão','Escorredeira','Mesa'],
     detalhes:{
-      'Caixa salão':'Caixa do salão — manhã inteira. Almoço 14h-15h (fora do pico). Lucca cobre das 13h até ela voltar.',
-      'Escorredeira':'Operar a escorredeira durante a produção.',
       'Salão':'Atendimento e organização do salão.',
-      'Caldo':'Passar caldo pela manhã. Quantidade varia por dia — ver obs no card.'
+      'Escorredeira':'Operar a escorredeira durante produção.',
+      'Mesa':'Organizar e limpar as mesas.'
     }
   },
   'íris':{
@@ -1265,6 +1248,82 @@ const FUNCOES_POR_PESSOA={
       'Processos':'Responsável por processos operacionais.',
       'Apoio à gerência':'Suporte direto à gerência nas decisões do dia.'
     }
+  },
+
+  'derik':{
+    bloco:'Gestão Operacional',
+    funcaoPrincipal:'Gerência',
+    turno:'Integral (manhã + tarde/noite)',
+    subordinados:'Gabriela (Subgerente Manhã) · Vitória (Subgerente Tarde/Noite)',
+    funcoes:['Gerência','Gaveteiro','Fritura','Escorredeira','Embalador','Marcação','Caixa salão','Delivery','Mesa'],
+    detalhes:{
+      'Gerência':'Responsável pelo funcionamento global da loja. Supervisiona subgerência, valida execução, controla sistemas, estoque, estrutura, equipe, qualidade e riscos operacionais.',
+      'Gaveteiro':'Pode assumir o gaveteiro quando necessário.',
+      'Fritura':'Pode assumir a fritura quando necessário.',
+      'Escorredeira':'Pode assumir a escorredeira quando necessário.',
+      'Embalador':'Pode assumir embalagem quando necessário.',
+      'Marcação':'Pode assumir marcação quando necessário.',
+      'Caixa salão':'Pode assumir o caixa do salão quando necessário.',
+      'Delivery':'Pode assumir o delivery quando necessário.',
+      'Mesa':'Pode assumir a mesa quando necessário.'
+    },
+    blocos:{
+      'BLOCO 1 — INÍCIO DO TURNO':[
+        'Verificar livro de ocorrências e grupo da loja',
+        'Identificar pendências do turno anterior',
+        'Validar abertura com Gabriela: loja aberta, equipe organizada, produção inicial, cozinha e salão aptos',
+        'Conferir sistemas: Saipos, WebCardápio, iFood, impressoras, maquininhas, internet',
+        'Verificar estrutura: equipamentos operando, ambiente organizado, falhas encaminhadas'
+      ],
+      'BLOCO 2 — MEIO DO TURNO':[
+        'Controlar subgerência: nenhum setor sem responsável, nenhum colaborador sem direção',
+        'Validar sequência de chegada: massa → recheio → delivery → geladeiras → gaveteiro',
+        'Gaveteiro: cheio → freezer | vazio → produção. Pré-pico pronto até 18:30',
+        'Delivery: pedidos acompanhados, atrasos tratados, nenhum pedido parado',
+        'Insumos: papel bandeja, molho verde, maionese, salada, ketchup, mostarda, guardanapo, copos/canudos',
+        'Qualidade: nenhum produto fora do padrão, perdas registradas (pastel aberto/quebrado/encharcado, recheio azedado, bebida congelada, massa ressecada)',
+        'A cada 3h: revisão de limpeza, organização e correção imediata',
+        'Salão: limpeza de chão, mesas, brinquedão. Ar-condicionado conforme temperatura',
+        'Banheiros: limpos, com papel, sabonete e chão seco',
+        'Checklists: preenchidos no horário correto, validados, sem fraude operacional'
+      ],
+      'BLOCO 3 — FECHAMENTO':[
+        'Validar fechamento com Vitória: produção armazenada, gaveteiro e freezers conferidos',
+        'Ordem: gás desligado PRIMEIRO → recheios → massa armazenada → geladeiras conferidas',
+        'Desligar: mesas quentes, computadores, ar-condicionado, exaustor, maquininhas em carga, caixa salão',
+        'Limpeza final: louça, mesa e fogão limpos',
+        'Salada armazenada corretamente para o dia seguinte',
+        'Segurança: portas fechadas, travamento executado, chave armazenada, saída pelo delivery',
+        'Alarme ativado obrigatoriamente 🚨',
+        'Relatório: caixa salão e delivery conferidos, envio no grupo obrigatório'
+      ],
+      'BLOCO 4 — RESPONSABILIDADES CONTÍNUAS':[
+        'Supervisionar operação ponta a ponta',
+        'Validar subgerência continuamente',
+        'Controlar estoque crítico',
+        'Garantir funcionamento de sistemas e equipamentos',
+        'Registrar falhas relevantes',
+        'Manter organização da loja',
+        'Garantir rastreabilidade de tudo que acontece'
+      ]
+    },
+    indicadores:[
+      'Zero problema crítico sem ação',
+      'Zero falha relevante sem registro',
+      'Zero problema sem responsável'
+    ],
+    falhasGraves:[
+      'Erro recorrente sem correção',
+      'Falha crítica sem ação',
+      'Ruptura de insumo por falta de controle',
+      'Falha de fechamento da loja',
+      'Problema estrutural ignorado',
+      'Checklist não validado',
+      'Problema sem responsável',
+      'Prejuízo por omissão'
+    ],
+    registroOcorrencias:'Problema identificado → causa → impacto → ação tomada → responsável acionado → pendência para próximo turno',
+    diretriz:'A gerência não responde apenas pelo que executa. Responde por tudo que acontece na loja.'
   },
 }
 
@@ -1327,30 +1386,30 @@ function getFuncoes(nome){
 let _id=0
 const mk=(r,p,o)=>({id:'e'+(++_id),role:r,person:p,obs:o||'',status:'pending',confirmedAt:null,faltaTipo:null})
 const BASE=[
-  {date:'2026-04-07',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml')]},
-  {date:'2026-04-01',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória'),mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Delivery','Isabelly')]},
-  {date:'2026-04-02',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Caixa salão','Letícia'),mk('Salão','Gabi'),mk('Caldo','Gabi','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Escorredeira','Túlio'),mk('Fritando','Vinicius'),mk('Embalando','Larissa'),mk('Mesa','Julia'),mk('Caixa salão','Bruna')]},
-  {date:'2026-04-03',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml')]],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-04',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml')]],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-05',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Íris'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Caixa salão','Letícia')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-14',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml')]},
-  {date:'2026-04-08',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória'),mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Delivery','Isabelly')]},
-  {date:'2026-04-09',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Caixa salão','Letícia'),mk('Salão','Gabi'),mk('Caldo','Gabi','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Escorredeira','Túlio'),mk('Fritando','Vinicius'),mk('Embalando','Larissa'),mk('Mesa','Julia'),mk('Caixa salão','Bruna')]},
-  {date:'2026-04-10',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml')]],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-11',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml')]],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-12',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Gabi'),mk('Fritando','Wirislaine'),mk('Embalando','Gabi'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Íris')],noite:[mk('Delivery','Isabelly'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Túlio'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte / salão'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-21',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml')]},
-  {date:'2026-04-15',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória'),mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Delivery','Isabelly')]},
-  {date:'2026-04-16',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Caixa salão','Letícia'),mk('Salão','Gabi'),mk('Caldo','Gabi','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Escorredeira','Túlio'),mk('Fritando','Derik'),mk('Embalando','Larissa'),mk('Mesa','Julia'),mk('Caixa salão','Bruna')]},
-  {date:'2026-04-17',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml')]],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-18',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml')]],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-19',wd:'Dom',jsDay:0,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Gabi'),mk('Fritando','Wirislaine'),mk('Embalando','Gabi'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Caldo','Gabi'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Caixa salão','Letícia')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Fritando','Larissa'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','David'),mk('Mesa','Vinicius')]},
-  {date:'2026-04-28',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Salão','Gabi'),mk('Caldo','Gabi')],noite:[mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória'),mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Mesa','Vinicius'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml')]},
-  {date:'2026-04-22',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória'),mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Delivery','Isabelly')]},
-  {date:'2026-04-23',wd:'Qui',jsDay:4,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Embalando','Gabi'),mk('Caixa salão','Letícia'),mk('Salão','Gabi'),mk('Caldo','Gabi','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Escorredeira','Túlio'),mk('Fritando','Derik'),mk('Embalando','Larissa'),mk('Mesa','Julia'),mk('Caixa salão','Bruna')]},
-  {date:'2026-04-24',wd:'Sex',jsDay:5,manha:[mk('Delivery','Luis'),mk('Delivery','Gabi'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml')]],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-25',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabi'),mk('Delivery','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Gabi'),mk('Salada','Luis'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml')]],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Victor'),mk('Marcando','Larissa'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória'),mk('Embalando','Túlio'),mk('Caixa salão','Lucca'),mk('Caixa salão','David','suporte'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},
-  {date:'2026-04-26',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabi'),mk('Gaveteiro','Íris'),mk('Escorredeira','Gabi','horário de pico'),mk('Fritando','Íris'),mk('Embalando','Gabi','no horário de pico'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Caldo','Gabi'),mk('Salada','Íris'),mk('Caldo','Letícia','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Caixa salão','Letícia')],noite:[mk('Delivery','Isabelly'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vinicius'),mk('Escorredeira','Túlio'),mk('Embalando','Lucca'),mk('Caixa salão','David'),mk('Mesa','Julia'),mk('Caldo','Lucca','passar caldo — 40x500ml · 12x1L · 5x300ml')]},  {date:'2026-04-29',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Caixa salão','Letícia'),mk('Mesa','Íris'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml')],noite:[mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória'),mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Delivery','Isabelly')]},
+  {date:'2026-04-07',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Mesa','Vinicius'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-04-01',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-02',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vinicius'),mk('Fritando','Vinicius')]},
+  {date:'2026-04-03',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-04',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-05',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Íris'),mk('Embalando','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-14',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-04-08',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-09',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vinicius'),mk('Fritando','Vinicius')]},
+  {date:'2026-04-10',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-11',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-12',wd:'Dom',jsDay:0,manha:[mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius')]},
+  {date:'2026-04-21',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-04-15',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-16',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-04-17',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-18',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-19',wd:'Dom',jsDay:0,manha:[mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Caixa salão','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Fritando','Larissa'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-28',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-04-22',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-23',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-04-24',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-25',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-26',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabriela'),mk('Escorredeira','Gabriela','horário de pico'),mk('Embalando','Gabriela','no horário de pico'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Íris'),mk('Fritando','Íris'),mk('Salada','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Caixa salão','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Vitória')]},  {date:'2026-04-29',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Limpeza','Iolete')],noite:[mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly'),mk('Escorredeira','Vitória'),mk('Gaveteiro','Victor'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Escorredeira','Túlio')]},
 ]
 
 // Mapeia data -> dia
@@ -1405,30 +1464,16 @@ function toggleResps(btn){
 }
 
 // ===== INIT =====
-async function init(){
-  // Sem persistência de sessão — sempre começa deslogado
-
-  // Setar visualização no mês/ano atual
+function init(){
   const _now=new Date()
   G.viewYear=_now.getFullYear()
   G.viewMonth=_now.getMonth()+1
-
-  // Tentar carregar do Supabase primeiro
-  const loaded=await loadFromSupabase()
-
-  if(!loaded){
-    // Fallback: localStorage ou BASE hardcoded
-    try{
-      const d=localStorage.getItem(SD)
-      if(d){const p=JSON.parse(d);if(Array.isArray(p)&&p.length>0&&p[0].date)G.days=p;else throw 0}
-      else G.days=clone(BASE)
-    }catch(e){localStorage.removeItem(SD);G.days=clone(BASE)}
-    G.days.forEach(d=>dayMap[d.date]=d)
-    // Primeira vez: popular o banco com os dados do BASE
-    populateSupabase()
-  }
-
-  // Seleciona hoje se existir na escala
+  try{
+    const d=localStorage.getItem(SD)
+    if(d){const p=JSON.parse(d);if(Array.isArray(p)&&p.length>0&&p[0].date)G.days=p;else throw 0}
+    else G.days=clone(BASE)
+  }catch(e){localStorage.removeItem(SD);G.days=clone(BASE)}
+  G.days.forEach(d=>dayMap[d.date]=d)
   const today=new Date().toISOString().split('T')[0]
   if(dayMap[today])G.selectedDate=today
   render()
@@ -2720,6 +2765,106 @@ function showFaltaModal(date,shift,e){
   document.getElementById('ft-injust').onclick=()=>{registrarFalta(date,shift,e,'injust',dn,turno);m.remove()}
 }
 
+
+// ── REGRA: folga no domingo substitui o dia fixo da semana seguinte ──
+function getDiaFixoFolga(pessoa){
+  // Descobre o dia fixo de folga de cada pessoa analisando a escala
+  // Dia fixo = dia da semana (exceto segunda=1) em que ela mais frequentemente não aparece
+  const contDias={2:0,3:0,4:0,5:0,6:0,0:0} // Ter,Qua,Qui,Sex,Sáb,Dom
+  const totalDias={2:0,3:0,4:0,5:0,6:0,0:0}
+  G.days.forEach(d=>{
+    const jd=d.jsDay
+    if(jd===1)return // segunda: todos folgam, não conta
+    if(totalDias[jd]===undefined)return
+    totalDias[jd]++
+    const escalados=[...d.manha,...d.noite].map(e=>e.person)
+    if(!escalados.includes(pessoa)) contDias[jd]++
+  })
+  // Dia com maior % de ausência (exceto domingo que é folga coletiva eventual)
+  let melhorDia=null,melhorPct=0
+  Object.keys(contDias).forEach(jd=>{
+    if(parseInt(jd)===0)return // ignorar domingo no cálculo do fixo
+    const pct=totalDias[jd]>0?contDias[jd]/totalDias[jd]:0
+    if(pct>melhorPct){melhorPct=pct;melhorDia=parseInt(jd)}
+  })
+  return melhorDia // jsDay do dia fixo
+}
+
+function getNomeDia(jsDay){
+  return['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][jsDay]||'?'
+}
+
+function getDiaFixoNaSemana(dateStr, diaFixoJsDay){
+  // Retorna a data do dia fixo NA MESMA SEMANA do domingo (seg a sab seguintes)
+  const base=new Date(dateStr+'T12:00:00')
+  for(let i=1;i<=6;i++){
+    const d=new Date(base); d.setDate(d.getDate()+i)
+    if(d.getDay()===diaFixoJsDay){
+      return d.toISOString().split('T')[0]
+    }
+  }
+  return null
+}
+
+function verificarFolgaDomingo(date, pessoa){
+  const day=dayMap[date]; if(!day||day.wd!=='Dom')return
+  const diaFixo=getDiaFixoFolga(pessoa)
+  if(diaFixo===null)return
+  const diaFixoNaSemana=getDiaFixoNaSemana(date, diaFixo)
+  const nomeDia=getNomeDia(diaFixo)
+  const dn=parseInt(date.split('-')[2])
+  const dataFmt=String(dn).padStart(2,'0')+'/'+date.split('-')[1]
+  const diaFixoDn=diaFixoNaSemana?parseInt(diaFixoNaSemana.split('-')[2]):null
+  const diaFixoFmt=diaFixoDn?String(diaFixoDn).padStart(2,'0')+'/'+diaFixoNaSemana.split('-')[1]:nomeDia+' da semana'
+
+  // AÇÃO REAL: marcar entradas da pessoa no dia fixo como absent
+  let removidos=0
+  if(diaFixoNaSemana && dayMap[diaFixoNaSemana]){
+    const diaFixoDay=dayMap[diaFixoNaSemana]
+    ;['manha','noite'].forEach(shift=>{
+      diaFixoDay[shift].forEach(e=>{
+        if(e.person===pessoa && e.status!=='absent'){
+          e.status='absent'
+          e.faltaTipo='folga_domingo'
+          e.faltaAt=Date.now()
+          removidos++
+        }
+      })
+    })
+    if(removidos>0){
+      save()
+      rebuildCell(diaFixoNaSemana)
+      if(G.selectedDate===diaFixoNaSemana) rebuildPanel()
+    }
+  }
+
+  setTimeout(()=>{
+    document.getElementById('folgadomaviso')?.remove()
+    const av=document.createElement('div'); av.id='folgadomaviso'
+    av.innerHTML=`<div class="modal-bg" id="fdabg">
+      <div class="modal-card" style="max-width:400px">
+        <div class="modal-head" style="background:#E65100">
+          <div class="modal-title">📅 Folga no Domingo — aplicada</div>
+          <button class="modal-close" id="fdaclose">✕</button>
+        </div>
+        <div class="modal-body" style="padding:18px 20px">
+          <div style="background:#FFF3E0;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.7;color:#4E342E">
+            <b>${esc(pessoa)}</b> folgou domingo <b>${dataFmt}</b>.<br/><br/>
+            ✅ Folga de <b>${nomeDia} ${diaFixoFmt}</b> removida automaticamente — o domingo já foi a folga extra da semana.<br/><br/>
+            Semana seguinte volta ao ciclo normal.
+          </div>
+          <button id="fdaok" style="margin-top:4px;width:100%;background:#E65100;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">Entendido</button>
+        </div>
+      </div>
+    </div>`
+    document.body.appendChild(av)
+    document.getElementById('fdaclose').onclick=()=>av.remove()
+    document.getElementById('fdabg').onclick=ev=>{if(ev.target===ev.currentTarget)av.remove()}
+    document.getElementById('fdaok').onclick=()=>av.remove()
+  },400)
+}
+
+
 function registrarFalta(date,shift,entry,tipo,dn,turno){
   try{
     const day=dayMap[date];const e=day&&day[shift]&&day[shift].find(x=>x.id===entry.id);if(!e)return
@@ -2732,6 +2877,7 @@ function registrarFalta(date,shift,entry,tipo,dn,turno){
       :`🚨 *Comunicado de Falta — Pastel da Camila*\n\n*Colaborador:* ${e.person}\n*Função:* ${e.role}\n*Turno:* ${turno}\n*Data:* ${data}\n*Tipo:* Falta NÃO JUSTIFICADA ⚠\n\nFavor registrar em folha de ponto para desconto conforme CLT.`
     window.open('https://wa.me/'+RH+'?text='+encodeURIComponent(texto),'_blank')
     toast('Falta de '+e.person+' registrada.','success')
+    verificarFolgaDomingo(date,e.person)
   }catch(err){toast('Erro ao registrar falta.','error')}
 }
 

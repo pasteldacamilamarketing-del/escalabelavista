@@ -756,6 +756,19 @@ input{font-family:'Nunito',sans-serif;outline:none}
   .cal-title{font-size:22px}
 }
 
+/* ── BOTÃO CACHE DISCRETO ── */
+.cache-btn-wrap{
+  position:fixed;bottom:10px;left:10px;z-index:50;
+}
+.cache-btn{
+  background:none;border:none;
+  font-size:9px;color:var(--g300);
+  cursor:pointer;font-family:'Nunito',sans-serif;
+  padding:4px 6px;border-radius:4px;
+  opacity:.4;transition:opacity .2s;
+}
+.cache-btn:hover{opacity:1;background:var(--g100);color:var(--g700)}
+
 /* ── TELAS MUITO PEQUENAS (320px) ── */
 @media(max-width:380px){
   .cal-cell{min-height:58px;padding:4px 3px 3px}
@@ -1288,11 +1301,7 @@ function toggleResps(btn){
 
 // ===== INIT =====
 async function init(){
-  // Restaurar sessão — Supabase Auth primeiro, fallback localStorage
-  const sessionRestored = await restoreSession()
-  if(!sessionRestored){
-    try{const u=localStorage.getItem(SU);if(u)G.user=JSON.parse(u)}catch(e){localStorage.removeItem(SU)}
-  }
+  // Sem persistência de sessão — sempre começa deslogado
 
   // Setar visualização no mês/ano atual
   const _now=new Date()
@@ -1401,6 +1410,9 @@ function buildPage(){
     </div>
 
     ${panelOpen?buildDayPanel(G.selectedDate):''}
+  </div>
+  <div class="cache-btn-wrap">
+    <button class="cache-btn" onclick="if(confirm('Limpar cache e recarregar?')){localStorage.clear();location.reload()}">⚙ cache</button>
   </div>
   `
 }
@@ -2011,7 +2023,7 @@ function showLoginModal(onSuccess){
   const m=document.createElement('div');m.id='lmodal'
   // Campo de email (Supabase) ou usuário (fallback local)
   const inputLabel = useSupaAuth ? 'E-mail' : 'Usuário'
-  const inputPlaceholder = useSupaAuth ? 'seu@email.com' : 'admin ou vitoria'
+  const inputPlaceholder = useSupaAuth ? 'seu@email.com' : 'admin, vitoria, viviane ou gabriela'
   const inputType = useSupaAuth ? 'email' : 'text'
 
   m.innerHTML=`<div class="modal-bg" id="lmbg">
@@ -2023,7 +2035,7 @@ function showLoginModal(onSuccess){
       </div>
       <div class="card-body">
         <div class="l-title">Identificação necessária</div>
-        <div class="l-sub">Edição e exclusão exigem login</div>
+        <div class="l-sub">Logins: <b>admin</b> · <b>vitoria</b> · <b>viviane</b> · <b>gabriela</b><br/>Senha: <b>2026</b></div>
         <div class="field">
           <label>${inputLabel}</label>
           <input class="inp" id="mu" type="${inputType}" placeholder="${inputPlaceholder}" autocomplete="username"/>
@@ -2086,8 +2098,7 @@ function showLoginModal(onSuccess){
         if(!f){show('Usuário não encontrado.');return}
         if(p!==f.p){show('Senha incorreta.');return}
         G.user={u:f.u,role:f.role,name:f.name,av:f.av,can:f.can}
-        localStorage.setItem(SU,JSON.stringify(G.user))
-        m.remove();toast('Olá, '+G.user.name+'!','success');render()
+        m.remove();toast('Olá, '+G.user.name+'! ✓','success');render()
         if(onSuccess)onSuccess()
       },350)
     }

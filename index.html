@@ -1376,17 +1376,20 @@ function showCopyModal(texto){
 const SU='pdc_u', SD='pdc_d7'  // v7 — remove aguardando e chips laranja
 // Mapeamento email → perfil (sem senhas — autenticação via Supabase Auth)
 const USER_PROFILES={
-  'admin@pasteldacamila.com':  {role:'admin',  name:'Admin',  av:'AD',can:{edit:1,del:1,add:1}},
-  'vitoria@pasteldacamila.com':{role:'manager',name:'Vitória',av:'VI',can:{edit:1,del:1,add:1}},
+  'admin@pasteldacamila.com':   {role:'admin',  name:'Admin',   av:'AD',can:{edit:1,del:1,add:1,falta:1,ocorr:1,troca:1}},
+  'vitoria@pasteldacamila.com': {role:'manager',name:'Vitória', av:'VI',can:{edit:1,del:1,add:1,falta:1,ocorr:1,troca:1}},
+  'viviane@pasteldacamila.com': {role:'viewer', name:'Viviane', av:'VV',can:{edit:0,del:0,add:0,falta:1,ocorr:1,troca:0}},
+  'gabriela@pasteldacamila.com':{role:'viewer', name:'Gabriela',av:'GB',can:{edit:0,del:0,add:0,falta:1,ocorr:1,troca:0}},
 }
 // Fallback local (apenas para desenvolvimento sem Supabase)
 const USERS_DEV=[
   {u:'admin',   p:'2026',role:'admin',  name:'Admin',   av:'AD',can:{edit:1,del:1,add:1}},
   {u:'vitoria', p:'2026',role:'manager',name:'Vitória', av:'VI',can:{edit:1,del:1,add:1}},
-  {u:'viviane', p:'2026',role:'manager',name:'Viviane', av:'VV',can:{edit:1,del:1,add:1}},
-  {u:'gabriela',p:'2026',role:'manager',name:'Gabriela',av:'GB',can:{edit:1,del:1,add:1}},
+  {u:'viviane', p:'2026',role:'viewer',name:'Viviane', av:'VV',can:{edit:0,del:0,add:0,falta:1,ocorr:1,troca:0}},
+  {u:'gabriela',p:'2026',role:'viewer',name:'Gabriela',av:'GB',can:{edit:0,del:0,add:0,falta:1,ocorr:1,troca:0}},
 ]
-const RL={admin:'Admin',manager:'Gerente'}
+const RL={admin:'Admin',manager:'Gerente',viewer:'Subgerente'}
+// viewer: pode registrar falta/ocorrência mas NÃO editar escala, NÃO excluir, NÃO adicionar
 const ST={
   pending:  {l:'Aguardando', c:'#F39C12', bg:'#FFF8E1'},
   confirmed:{l:'Confirmado',  c:'#27AE60', bg:'#E8F5E9'},
@@ -1552,7 +1555,7 @@ const FUNCOES_POR_PESSOA={
       'Mesa':'Organizar e limpar as mesas.'
     }
   },
-  'íris':{
+  'iris':{
     bloco:'Produção / Fluxo',
     funcoes:['Mesa','Contagem de recheio','Envio da lista','Contagem de massa','Limpeza de baldes'],
     tempInfo:{
@@ -1639,6 +1642,107 @@ const FUNCOES_POR_PESSOA={
       'Salada':'⏰ Todos os dias das 14h às 15h.',
       'Limpeza do freezer':'📅 Toda quarta-feira.',
       'Temperatura geladeiras':'Conferir geladeiras e freezer no início do turno, antes e durante o pico.'
+    }
+  },
+
+
+  // ── BLOCO 5: SUBGERÊNCIA / LIMPEZA / FREELANCER ──
+
+  'iolete':{
+    bloco:'Limpeza',
+    funcaoPrincipal:'Limpeza total da loja',
+    funcoes:['Limpeza geral','Banheiros','Salão','Cozinha','Área externa'],
+    detalhes:{
+      'Limpeza geral':'Limpeza completa de todas as áreas da loja. Responsável por deixar o ambiente pronto para a operação.',
+      'Banheiros':'Limpeza, reposição de papel, sabonete líquido e verificação do piso seco.',
+      'Salão':'Limpeza de mesas, cadeiras, chão e brinquedão.',
+      'Cozinha':'Limpeza de superfícies, bancadas, equipamentos e piso.',
+      'Área externa':'Limpeza da entrada e área de acesso à loja.'
+    }
+  },
+
+  'gabriela':{
+    bloco:'Subgerência Manhã',
+    funcaoPrincipal:'Subgerente Manhã',
+    funcoes:['Subgerência','Delivery','Salão','Caldo','Embalando','Escorredeira','Mesa','Checklist do turno'],
+    checklistObrigatorio:{
+      tipo:'impresso ou digital',
+      frequencia:'Todo dia — obrigatório',
+      descricao:'Gabriela é responsável por preencher e validar o checklist do turno da manhã todos os dias. Pode ser impresso ou digital. A partir de maio: somente digital.',
+      itens:[
+        'Conferir equipe presente no turno',
+        'Validar abertura da loja',
+        'Verificar insumos: massa, recheios, salada, bebidas',
+        'Conferir kit salão: guardanapo, molho, maionese, ketchup, mostarda, copos, canudos',
+        'Pedir lista de carga ao gaveteiro antes das 11h',
+        'Verificar limpeza: salão, cozinha, banheiros',
+        'Registrar perdas do turno',
+        'Fazer passagem de turno para a noite'
+      ]
+    },
+    detalhes:{
+      'Subgerência':'Responsável pelo funcionamento do turno da manhã. Organiza equipe, valida produção, controla insumos e resolve pendências.',
+      'Delivery':'Organizar e conferir pedidos de delivery da manhã.',
+      'Salão':'Supervisionar atendimento e organização do salão.',
+      'Caldo':'Responsável pelo caldo da manhã conforme quantidades definidas.',
+      'Embalando':'Apoio à embalagem quando necessário.',
+      'Escorredeira':'Operar escorredeira quando necessário.',
+      'Mesa':'Organização e controle da mesa de produção.',
+      'Checklist do turno':'Preencher o checklist da manhã todos os dias — impresso ou digital. Obrigatório.'
+    }
+  },
+
+  'vitoria':{
+    bloco:'Subgerência Noite',
+    funcaoPrincipal:'Subgerente Noite',
+    funcoes:['Subgerência','Escorredeira','Gaveteiro','Fritando','Caixa salão','Fechamento','Checklist do turno'],
+    checklistObrigatorio:{
+      tipo:'impresso ou digital',
+      frequencia:'Todo dia — obrigatório',
+      descricao:'Vitória é responsável por preencher e validar o checklist do turno da noite todos os dias. Pode ser impresso ou digital. A partir de maio: somente digital.',
+      itens:[
+        'Conferir equipe presente no turno',
+        'Verificar livro de ocorrências ao chegar',
+        'Conferir geladeiras: temperatura, insumos, bebidas',
+        'Verificar gaveteiro: cheio vai pro freezer, vazio volta pra produção',
+        'Conferir delivery: pedidos acompanhados, sem parado',
+        'Verificar kit salão no pico',
+        'Registrar perdas do turno',
+        'Validar fechamento: gás, recheios, massa, freezers, alarme',
+        'Enviar relatório do caixa no grupo'
+      ]
+    },
+    detalhes:{
+      'Subgerência':'Responsável pelo funcionamento do turno da noite. Controla equipe, produção, delivery, salão e fechamento.',
+      'Escorredeira':'Operação da escorredeira — principalmente nas quartas.',
+      'Gaveteiro':'Controlar fluxo de gavetas quando necessário.',
+      'Fritando':'Pode assumir a fritura quando necessário.',
+      'Caixa salão':'Pode assumir o caixa quando necessário.',
+      'Fechamento':'Responsável pelo fechamento da loja: produção armazenada, equipamentos desligados, alarme ativado.',
+      'Checklist do turno':'Preencher o checklist da noite todos os dias — impresso ou digital. Obrigatório.'
+    }
+  },
+
+  'tulio':{
+    bloco:'Produção — Freelancer',
+    funcaoPrincipal:'Polivalente',
+    funcoes:['Embalador','Escorredeira','Fritando','Gaveteiro','Marcação'],
+    detalhes:{
+      'Embalador':'Embalar pastéis com atenção à apresentação e ritmo com a produção.',
+      'Escorredeira':'Operar a escorredeira durante a produção — função principal nas quintas.',
+      'Fritando':'Pode assumir a fritura quando necessário.',
+      'Gaveteiro':'Pode assumir o controle de gavetas quando necessário.',
+      'Marcação':'Marcar pastéis para produção conforme fluxo e demanda.'
+    }
+  },
+
+  'suelen':{
+    bloco:'Produção Especializada',
+    funcaoPrincipal:'Produção de Pastel',
+    funcoes:['Produção de pastel','Mesa'],
+    detalhes:{
+      'Produção de pastel':'Produção do pastel tradicional toda quinta-feira. Responsável por adiantar a produção da mesa.',
+      'Mesa':'Apoio à organização da mesa de produção quando necessário.'
     }
   },
 
@@ -1733,17 +1837,30 @@ const FUNCOES_POR_PESSOA={
 // Objeto fixo — editar aqui para atualizar a escala.
 // Chave: primeiro nome em lowercase (sem acento).
 const RESPONSABILIDADES={
-  'victor':    ['Pesagem das gavetas','Controle do gaveteiro'],
-  'leticia':   ['Ar-condicionado (manhã)','Kit salão'],
-  'lucca':     ['Ar-condicionado (noite)','Kit salão','Fechamento','Lixo'],
-  'david':     ['Kit salão','Lixo'],
+  // Subgerentes
+  'gabriela': ['Checklist manhã','Passagem de turno','Controle de insumos','Perdas manhã'],
+  'vitoria':  ['Checklist noite','Fechamento da loja','Temperatura geladeiras','Passagem de turno','Perdas noite'],
+  // Produção
+  'victor':   ['Pesagem das gavetas','Controle do gaveteiro'],
   'wirislaine':['Temperatura do tacho','Controle da fritura'],
-  'isabelly':  ['Temperatura geladeiras (delivery)'],
-  'tais':      ['Temperatura geladeiras (caixa)','Perdas'],
-  'luis':      ['Temperatura geladeiras','Lixo','Limpeza'],
-  'julia':     ['Temperatura geladeiras (noite)'],
-  'vitoria':   ['Temperatura geladeiras (subgerência)','Fechamento noite'],
-  'iris':      ['Contagem de recheio','Envio da lista'],
+  'leticia':  ['Ar-condicionado (manhã)','Kit salão','Caixa salão'],
+  'iris':     ['Contagem de recheio','Envio da lista'],
+  'tulio':    ['Polivalente — assume qualquer função da produção'],
+  'larissa':  ['Pré-pico','Embalagem'],
+  // Atendimento / Finalização
+  'lucca':    ['Ar-condicionado (noite)','Kit salão','Fechamento caixa','Lixo'],
+  'david':    ['Kit salão','Lixo'],
+  'isabelly': ['Temperatura geladeiras (delivery)','Organização delivery'],
+  'tais':     ['Caixa delivery','Registro de perdas'],
+  'julia':    ['Temperatura geladeiras (noite)','Contagem de recheio'],
+  // Suporte
+  'luis':     ['Temperatura geladeiras','Salada','Limpeza freezer'],
+  'bruna':    ['Processos operacionais','Apoio à gerência'],
+  'derik':    ['Gestão da operação','Validação de checklists','Controle de sistemas'],
+  // Limpeza
+  'iolete':   ['Limpeza total da loja','Banheiros','Salão','Cozinha'],
+  // Produção especializada
+  'suelen':   ['Produção de pastel (quinta)'],
 }
 
 // ── REGRA OPERACIONAL GLOBAL ──
@@ -1766,7 +1883,8 @@ const RESP_CRITICAS=[
   'temperatura do tacho','temperatura das geladeiras',
   'temperatura geladeiras','perdas','pesagem das gavetas',
   'ar-condicionado','kit salão','lixo','fechamento',
-  'contagem de recheio','envio da lista'
+  'contagem de recheio','envio da lista',
+  'checklist','passagem de turno','gestão da operação','limpeza total'
 ]
 // ── Verifica se uma responsabilidade é crítica (highlight visual) ──
 function isCritica(resp){
@@ -1824,6 +1942,7 @@ const BASE=[
   {date:'2026-04-25',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-26',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabriela'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Íris'),mk('Fritando','Íris'),mk('Salada','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Caixa salão','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória')]},  {date:'2026-04-29',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Limpeza','Iolete')],noite:[mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly'),mk('Escorredeira','Vitória'),mk('Gaveteiro','Victor'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml')]},
 
+  {date:'2026-04-30',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
 // ===== ESCALA MAIO 2026 (gerada automaticamente) =====
   {date:'2026-05-01',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
   {date:'2026-05-02',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},

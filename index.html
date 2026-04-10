@@ -1328,7 +1328,9 @@ const GRUPO_LINK='https://chat.whatsapp.com/G0erwUW5npX4ejKNcU3lT5'
 // Helper: envia mensagem para o grupo (copia texto + abre grupo)
 function enviarGrupo(texto){
   // Tenta clipboard — se falhar, mostra modal com texto para copiar manualmente
-  const abrirGrupo=()=>window.open(GRUPO_LINK,'_blank')
+  // Usa link do grupo salvo no localStorage (editável via ⚙️ Contatos)
+  const linkGrupo = carregarContatos().grupo || GRUPO_LINK
+  const abrirGrupo=()=>window.open(linkGrupo,'_blank')
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(texto)
       .then(()=>{
@@ -1371,9 +1373,77 @@ function showCopyModal(texto){
     try{document.execCommand('copy')}catch(e){}
     toast('✓ Copiado!','success')
   }
-  document.getElementById('copygrupo').onclick=()=>window.open(GRUPO_LINK,'_blank')
+  document.getElementById('copygrupo').onclick=()=>window.open(carregarContatos().grupo||GRUPO_LINK,'_blank')
 }
 const SU='pdc_u', SD='pdc_d7'  // v7 — remove aguardando e chips laranja
+
+// ================================================================
+// DADOS EDITÁVEIS PELA GERENTE — salvos no localStorage
+// horarios_editados : { "Nome": { horario:"09:00–18:00", almoco:"12:00–13:00" } }
+// folgas_domingo    : { "2026-04-12": { "Íris": true, "Larissa": true } }
+//                     true = está de folga nesse domingo
+// contatos          : { rh, bruna, camila, loja, grupo }
+// ================================================================
+
+function carregarHorariosEditados(){
+  try{ return JSON.parse(localStorage.getItem('horarios_editados')||'{}') }catch(e){ return {} }
+}
+function salvarHorariosEditados(obj){
+  localStorage.setItem('horarios_editados', JSON.stringify(obj))
+}
+
+function carregarFolgasDomingo(){
+  try{ return JSON.parse(localStorage.getItem('folgas_domingo')||'{}') }catch(e){ return {} }
+}
+function salvarFolgasDomingo(obj){
+  localStorage.setItem('folgas_domingo', JSON.stringify(obj))
+}
+
+function carregarContatos(){
+  const padrão={ rh:'5511945461633', bruna:'5511964251461', camila:'5511940366586', loja:'5511945439775', grupo:'https://chat.whatsapp.com/G0erwUW5npX4ejKNcU3lT5' }
+  try{ return Object.assign({}, padrão, JSON.parse(localStorage.getItem('contatos')||'{}')) }catch(e){ return padrão }
+}
+function salvarContatos(obj){
+  localStorage.setItem('contatos', JSON.stringify(obj))
+}
+
+// Retorna horário da pessoa: primeiro checa edições salvas, depois usa HORARIOS_LIST
+function getHorarioEditado(nome){
+  if(!nome) return null
+  const editados = carregarHorariosEditados()
+  // Busca pelo primeiro nome (case-insensitive)
+  const chave = Object.keys(editados).find(k => k.toLowerCase() === nome.split(' ')[0].toLowerCase() || nome.toLowerCase().startsWith(k.toLowerCase()))
+  return chave ? editados[chave] : null
+}
+
+// Verifica se pessoa está de folga num domingo específico (pelo localStorage)
+function pessoaFolgaDomingo(dateStr, nomePessoa){
+  const folgas = carregarFolgasDomingo()
+  const diaFolgas = folgas[dateStr] || {}
+  return diaFolgas[nomePessoa] === true
+}
+// Define/remove folga de domingo no localStorage e re-renderiza
+function toggleFolgaDomingo(dateStr, nomePessoa, estaFolgando){
+  const folgas = carregarFolgasDomingo()
+  if(!folgas[dateStr]) folgas[dateStr] = {}
+  if(estaFolgando){
+    // Estava de folga → vai trabalhar: salva false (override trabalha)
+    folgas[dateStr][nomePessoa] = false
+  } else {
+    // Estava trabalhando → vai folgar: salva true (override folga)
+    folgas[dateStr][nomePessoa] = true
+  }
+  salvarFolgasDomingo(folgas)
+}
+// Retorna lista de pessoas que trabalham num domingo, já aplicando as folgas salvas
+function getPessoasTrabalhandoDomingo(dom){
+  const trab = new Set([...dom.manha,...dom.noite].map(e=>e.person).filter(Boolean))
+  const folgas = carregarFolgasDomingo()
+  const diaFolgas = folgas[dom.date] || {}
+  // Remove quem foi marcado de folga
+  Object.keys(diaFolgas).forEach(p=>{ if(diaFolgas[p]) trab.delete(p) })
+  return trab
+}
 // Mapeamento email → perfil (sem senhas — autenticação via Supabase Auth)
 const USER_PROFILES={
   'admin@pasteldacamila.com':   {role:'admin',  name:'Admin',   av:'AD',can:{edit:1,del:1,add:1,falta:1,ocorr:1,troca:1}},
@@ -1409,7 +1479,6 @@ const HORARIOS_LIST=[
    horarioVariavel:true, obsHorario:'Sábado: horário de entrada variável — editar no card'},
   {nome:'Wirislaine',horario:'09:00–18:00', almoco:'13:00–14:00', turno:'manha'},
   // NOITE
-  {nome:'Derik',    horario:'14:00–23:00', almoco:'18:00–19:00', turno:'noite'},
   {nome:'Julia',    horario:'13:00–22:00', almoco:'16:00–17:00', turno:'noite'},
   {nome:'Larissa',  horario:'13:00–22:00', almoco:'17:00–18:00', turno:'noite'},
   {nome:'Lucca',    horario:'13:00–22:00', almoco:'16:30–17:30', turno:'noite'},
@@ -1423,7 +1492,7 @@ const HORARIOS_LIST=[
   // SEM HORÁRIO DEFINIDO (placeholder)
   {nome:'Bruna',  horario:'15:00–21:00', almoco:null, turno:'noite'},
   {nome:'Túlio',  horario:'18:00–23:00', almoco:null, turno:'noite'},
-  {nome:'Suelen', horario:'09:00–18:00', almoco:'12:00–13:00', turno:'manha'},
+  {nome:'Suelen', horario:'09:30–18:00', almoco:'12:00–13:00', turno:'manha'},
 ]
 // Índice rápido: lowercase -> objeto
 const HORARIOS_IDX={}
@@ -1435,16 +1504,18 @@ const HORARIOS={
   noite:   HORARIOS_LIST.filter(p=>p.turno==='noite'   && p.horario),
   estagiarios: HORARIOS_LIST.filter(p=>p.turno==='estagiario' && p.horario),
 }
-// ── HELPER: busca horário pelo primeiro nome (usa índice para O(1)) ──
+// ── HELPER: busca horário — checa edições salvas pela gerente primeiro ──
 function getHorario(nome){
   if(!nome)return null
-  // Normaliza: remove acentos, lowercase, pega só primeiro nome
   const primeiro=normStr(nome.split(/\s+/)[0])
-  if(HORARIOS_IDX[primeiro]) return HORARIOS_IDX[primeiro]
-  return HORARIOS_LIST.find(p=>{
+  const base = HORARIOS_IDX[primeiro] || HORARIOS_LIST.find(p=>{
     const pn=normStr(p.nome.split(/\s+/)[0])
     return pn===primeiro||pn.startsWith(primeiro)||primeiro.startsWith(pn)
-  })||null
+  }) || null
+  // Checar horários editados pela gerente (localStorage: horarios_editados)
+  const editado = getHorarioEditado(nome)
+  if(editado && base) return Object.assign({}, base, { horario: editado.horario||base.horario, almoco: editado.almoco||base.almoco, _editado:true })
+  return base
 }
 
 // ===== FUNÇÕES POR PESSOA (BASE OPERACIONAL) =====
@@ -1919,62 +1990,62 @@ const BASE=[
   {date:'2026-04-27',wd:'Seg',jsDay:1,manha:[mk('Limpeza','Iolete')],noite:[]},
   {date:'2026-04-07',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Mesa','Vinicius'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
   {date:'2026-04-01',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-02',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vinicius'),mk('Fritando','Vinicius')]},
+  {date:'2026-04-02',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vinicius'),mk('Fritando','Vinicius')]},
   {date:'2026-04-03',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-04',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-05',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Íris'),mk('Embalando','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-14',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-04-14',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
   {date:'2026-04-08',wd:'Qua',jsDay:3,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-09',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vinicius'),mk('Fritando','Vinicius')]},
+  {date:'2026-04-09',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vinicius'),mk('Fritando','Vinicius')]},
   {date:'2026-04-10',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-11',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius'),mk('Escorredeira','Vitória')]},
   {date:'2026-04-12',wd:'Dom',jsDay:0,manha:[mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Fritando','Vinicius')]},
-  {date:'2026-04-21',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-04-21',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
   {date:'2026-04-15',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-16',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
-  {date:'2026-04-17',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-18',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-19',wd:'Dom',jsDay:0,manha:[mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Caixa salão','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Fritando','Larissa'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-28',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-04-16',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-04-17',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-18',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-19',wd:'Dom',jsDay:0,manha:[mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Caixa salão','David'),mk('Delivery','Isabelly'),mk('Fritando','Larissa'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-28',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
   {date:'2026-04-22',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-23',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
-  {date:'2026-04-24',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-25',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-04-26',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabriela'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Íris'),mk('Fritando','Íris'),mk('Salada','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Caixa salão','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória')]},  {date:'2026-04-29',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Limpeza','Iolete')],noite:[mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly'),mk('Escorredeira','Vitória'),mk('Gaveteiro','Victor'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml')]},
+  {date:'2026-04-23',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-04-24',wd:'Sex',jsDay:5,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-25',wd:'Sáb',jsDay:6,manha:[mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-04-26',wd:'Dom',jsDay:0,manha:[mk('Delivery','Gabriela'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Limpeza','Iolete'),mk('Gaveteiro','Íris'),mk('Fritando','Íris'),mk('Salada','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Caixa salão','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória')]},  {date:'2026-04-29',wd:'Qua',jsDay:3,manha:[mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Letícia'),mk('Embalando','Íris'),mk('Fritando','Wirislaine'),mk('Salão','Letícia'),mk('Mesa','Íris'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Limpeza','Iolete')],noite:[mk('Fritando','Larissa'),mk('Embalando','Bruna'),mk('Mesa','Julia'),mk('Salão','Lucca'),mk('Delivery','Isabelly'),mk('Escorredeira','Vitória'),mk('Gaveteiro','Victor'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml')]},
 
-  {date:'2026-04-30',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-04-30',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
 // ===== ESCALA MAIO 2026 (gerada automaticamente) =====
-  {date:'2026-05-01',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-02',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-03',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Gerência','Derik'),mk('Mesa','Julia'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vitória')]},
+  {date:'2026-05-01',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-02',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-03',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Mesa','Julia'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vitória')]},
   {date:'2026-05-04',wd:'Seg',jsDay:1,manha:[mk('Limpeza','Iolete')],noite:[]},
-  {date:'2026-05-05',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-05-05',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
   {date:'2026-05-06',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-07',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
-  {date:'2026-05-08',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-09',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-10',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Delivery','Luis'),mk('Salada','Luis')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-05-07',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-05-08',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-09',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-10',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Delivery','Luis'),mk('Salada','Luis')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
   {date:'2026-05-11',wd:'Seg',jsDay:1,manha:[mk('Limpeza','Iolete')],noite:[]},
-  {date:'2026-05-12',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-05-12',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
   {date:'2026-05-13',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-14',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
-  {date:'2026-05-15',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-16',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-17',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vitória')]},
+  {date:'2026-05-14',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-05-15',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-16',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-17',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Delivery','Isabelly'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vitória')]},
   {date:'2026-05-18',wd:'Seg',jsDay:1,manha:[mk('Limpeza','Iolete')],noite:[]},
-  {date:'2026-05-19',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-05-19',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
   {date:'2026-05-20',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-21',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
-  {date:'2026-05-22',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-23',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-24',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Vitória')]},
+  {date:'2026-05-21',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-05-22',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-23',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-24',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia')],noite:[mk('Caixa salão','David','suporte / salão'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Vitória')]},
   {date:'2026-05-25',wd:'Seg',jsDay:1,manha:[mk('Limpeza','Iolete')],noite:[]},
-  {date:'2026-05-26',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Gerência','Derik'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
+  {date:'2026-05-26',wd:'Ter',jsDay:2,manha:[mk('Delivery','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Gaveteiro','Wirislaine'),mk('Escorredeira','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Escorredeira','David'),mk('Embalando','Lucca'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Gaveteiro','Vitória'),mk('Fritando','Vitória')]},
   {date:'2026-05-27',wd:'Qua',jsDay:3,manha:[mk('Limpeza','Iolete'),mk('Embalando','Íris'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Salão','Letícia'),mk('Caixa salão','Letícia'),mk('Caldo','Letícia','passar caldo — 24x500ml · 6x1L · 5x300ml'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Salão','Lucca'),mk('Caixa salão','Lucca'),mk('Caldo','Lucca','passar caldo — 32x500ml · 6x1L · 5x300ml'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-28',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','Suelen','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
-  {date:'2026-05-29',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-30',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
-  {date:'2026-05-31',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis')],noite:[mk('Gerência','Derik'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vitória')]},
+  {date:'2026-05-28',wd:'Qui',jsDay:4,manha:[mk('Embalando','Gabriela'),mk('Salão','Gabriela'),mk('Caldo','Gabriela'),mk('Gaveteiro','Letícia'),mk('Fritando','Letícia'),mk('Escorredeira','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Mesa','adiantar pastel tradicional')],noite:[mk('Salão','Bruna'),mk('Escorredeira','David'),mk('Embalando','David'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Fritando','Larissa'),mk('Embalando','Larissa'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor')]},
+  {date:'2026-05-29',wd:'Sex',jsDay:5,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-30',wd:'Sáb',jsDay:6,manha:[mk('Limpeza','Iolete'),mk('Delivery','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Escorredeira','Letícia'),mk('Caixa salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis'),mk('Gaveteiro','Wirislaine'),mk('Fritando','Wirislaine')],noite:[mk('Embalando','Bruna'),mk('Caixa salão','David','suporte'),mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Marcando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Embalando','Túlio'),mk('Gaveteiro','Victor'),mk('Escorredeira','Vitória')]},
+  {date:'2026-05-31',wd:'Dom',jsDay:0,manha:[mk('Limpeza','Iolete'),mk('Escorredeira','Gabriela'),mk('Embalando','Gabriela'),mk('Caldo','Gabriela'),mk('Mesa','Íris'),mk('Caldo','Íris'),mk('Mesa','Letícia'),mk('Salão','Letícia'),mk('Delivery','Luis'),mk('Salada','Luis')],noite:[mk('Delivery','Isabelly'),mk('Mesa','Julia'),mk('Embalando','Larissa'),mk('Caixa salão','Lucca'),mk('Delivery','Táis'),mk('Escorredeira','Túlio'),mk('Gaveteiro','Victor'),mk('Gaveteiro','Vitória')]},
 ]
 
 // Mapeia data -> dia
@@ -2172,7 +2243,7 @@ function _pmSetPeriod(p){
 function _pmSetDest(d){
   _PM.dest=d
   // Desmarca todos, marca o selecionado
-  CONTATOS_ESCALA.forEach(c=>document.getElementById('unif-dest-'+c.id)?.classList.toggle('active',c.id===d))
+  getContatosEscala().forEach(c=>document.getElementById('unif-dest-'+c.id)?.classList.toggle('active',c.id===d))
   if(d!=='manual'){const inp=document.getElementById('unif-dest-inp');if(inp)inp.value=''}
 }
 
@@ -2184,64 +2255,67 @@ function _pmSetOrient(o){
 }
 
 // ── Contatos predefinidos para encaminhar escala ──
-const CONTATOS_ESCALA=[
-  {id:'grupo', ico:'👥', nome:'Grupo da Loja', num:'loja',   tel:null},
-  {id:'bruna', ico:'👩', nome:'Bruna',          num:'11964251461', tel:'5511964251461'},
-  {id:'viviane',ico:'👩',nome:'Viviane',         num:'11945461633', tel:'5511945461633'},
-  {id:'camila',ico:'👩', nome:'Camila',          num:'11940366586', tel:'5511940366586'},
-  {id:'loja',  ico:'🏪', nome:'Loja',            num:'11945439775', tel:'5511945439775'},
-]
+// CONTATOS_ESCALA: lê do localStorage (editável pela gerente via ⚙️ Contatos)
+function getContatosEscala(){
+  const c = carregarContatos()
+  const fmt = tel => tel ? tel.replace(/^55/,'').replace(/(\d{2})(\d{5})(\d{4})/,'$1 $2-$3') : ''
+  return [
+    {id:'grupo',  ico:'👥', nome:'Grupo da Loja', num:'grupo',  tel:null,        grupoLink: c.grupo||'https://chat.whatsapp.com/G0erwUW5npX4ejKNcU3lT5'},
+    {id:'bruna',  ico:'👩', nome:'Bruna',          num:fmt(c.bruna),  tel:c.bruna||'5511964251461'},
+    {id:'viviane',ico:'👩', nome:'RH / Viviane',   num:fmt(c.rh),     tel:c.rh||'5511945461633'},
+    {id:'camila', ico:'👩', nome:'Camila',         num:fmt(c.camila), tel:c.camila||'5511940366586'},
+    {id:'loja',   ico:'🏪', nome:'Loja',           num:fmt(c.loja),   tel:c.loja||'5511945439775'},
+  ]
+}
+// Compatibilidade: CONTATOS_ESCALA como array (gerado dinamicamente)
+// Usado em _pmSetDest — substituído por getContatosEscala() nos pontos de uso
+const CONTATOS_ESCALA = [] // preenchido no showPrintModal
 
 function showPrintModal(){
   document.getElementById('unifmodal')?.remove()
   const m=document.createElement('div');m.id='unifmodal'
-  const pr=_pmPeriodRange('dia'),sr=_pmPeriodRange('semana'),mr=_pmPeriodRange('mes')
+  const hoje = new Date()
+  const todayStr = hoje.toISOString().split('T')[0]
+  const ds = G.selectedDate||todayStr
+  const day = dayMap[ds]
+  const dn = day ? String(parseInt(ds.split('-')[2])).padStart(2,'0')+'/'+ds.split('-')[1] : ''
+  const wdLabel = day ? day.wd+' '+dn : 'hoje'
+  // Usa contatos do localStorage
+  const _contatos = getContatosEscala()
 
-  const contatosBtns=CONTATOS_ESCALA.map(c=>`
-    <button class="unif-dest-btn" id="unif-dest-${c.id}" onclick="_pmSetDest('${c.id}')">
-      <span class="di">${c.ico}</span>
-      <div>
-        <div style="font-size:13px;font-weight:800">${c.nome}</div>
-        <div style="font-size:10px;color:#999">${c.num}</div>
-      </div>
-    </button>`).join('')
-
-  m.innerHTML=`<div class="unif-modal-bg" id="unifbg">
-    <div class="unif-modal-card">
-      <div class="unif-modal-head">
+  m.innerHTML=`<div class="modal-bg" id="unifbg">
+    <div class="modal-card" style="max-width:420px">
+      <div class="modal-head">
         <div>
-          <div class="unif-modal-title">📲 Encaminhar Escala</div>
-          <div class="unif-modal-sub">Pastel da Camila · Bela Vista · Osasco</div>
+          <div class="modal-title">📲 Encaminhar Escala</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px">Pastel da Camila · Bela Vista</div>
         </div>
         <button class="modal-close" id="unifclose">✕</button>
       </div>
-      <div class="unif-modal-body">
-        <div class="unif-sec-lbl">Período</div>
-        <div class="unif-period-grid">
-          <button class="unif-period-btn" id="unif-p-dia" onclick="_pmSetPeriod('dia')">
-            <span class="pi">📍</span><span class="pn">Hoje</span><span class="pr">${pr}</span>
+      <div class="modal-body" style="padding:16px 18px 4px">
+        <div style="font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Escolha o que enviar</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+          <button class="unif-enc-btn" id="enc-hoje" style="display:flex;align-items:center;gap:12px;border:2px solid var(--g200);border-radius:12px;background:#fff;padding:12px 14px;cursor:pointer;font-family:'Nunito',sans-serif;text-align:left;transition:all .15s">
+            <span style="font-size:22px;flex-shrink:0">☀️</span>
+            <div><div style="font-size:14px;font-weight:800;color:var(--g900)">Escala de hoje</div><div style="font-size:11px;color:var(--g400);margin-top:2px">Turno atual (manhã ou noite) · ${wdLabel}</div></div>
           </button>
-          <button class="unif-period-btn" id="unif-p-semana" onclick="_pmSetPeriod('semana')">
-            <span class="pi">📆</span><span class="pn">Semana</span><span class="pr">${sr}</span>
+          <button class="unif-enc-btn" id="enc-folgas" style="display:flex;align-items:center;gap:12px;border:2px solid var(--g200);border-radius:12px;background:#fff;padding:12px 14px;cursor:pointer;font-family:'Nunito',sans-serif;text-align:left;transition:all .15s">
+            <span style="font-size:22px;flex-shrink:0">🌴</span>
+            <div><div style="font-size:14px;font-weight:800;color:var(--g900)">Folgas de domingo</div><div style="font-size:11px;color:var(--g400);margin-top:2px">Todos os domingos do mês com quem folga</div></div>
           </button>
-          <button class="unif-period-btn active" id="unif-p-mes" onclick="_pmSetPeriod('mes')">
-            <span class="pi">🗓️</span><span class="pn">Mês</span><span class="pr">${mr}</span>
+          <button class="unif-enc-btn" id="enc-dia" style="display:flex;align-items:center;gap:12px;border:2px solid var(--g200);border-radius:12px;background:#fff;padding:12px 14px;cursor:pointer;font-family:'Nunito',sans-serif;text-align:left;transition:all .15s">
+            <span style="font-size:22px;flex-shrink:0">📋</span>
+            <div><div style="font-size:14px;font-weight:800;color:var(--g900)">Escala completa do dia</div><div style="font-size:11px;color:var(--g400);margin-top:2px">Manhã + noite com funções · ${wdLabel}</div></div>
           </button>
-        </div>
-        <div class="unif-sec-lbl">Pré-visualização</div>
-        <div class="unif-preview" id="unif-preview"></div>
-        <div class="unif-sec-lbl">Enviar para</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">
-          ${contatosBtns}
-        </div>
-        <div class="unif-dest-manual" style="margin-bottom:6px">
-          <label>Ou digitar número</label>
-          <input class="unif-dest-inp" id="unif-dest-inp" type="tel" placeholder="5511999999999" oninput="_pmSetDest('manual')"/>
+          <button class="unif-enc-btn" id="enc-semana" style="display:flex;align-items:center;gap:12px;border:2px solid var(--g200);border-radius:12px;background:#fff;padding:12px 14px;cursor:pointer;font-family:'Nunito',sans-serif;text-align:left;transition:all .15s">
+            <span style="font-size:22px;flex-shrink:0">📆</span>
+            <div><div style="font-size:14px;font-weight:800;color:var(--g900)">Escala da semana</div><div style="font-size:11px;color:var(--g400);margin-top:2px">Resumo dos 7 dias da semana atual</div></div>
+          </button>
         </div>
       </div>
-      <div class="unif-modal-footer">
-        <button class="unif-btn unif-btn-cancel" id="unifcancel">Cancelar</button>
-        <button class="unif-btn unif-btn-zap" id="unif-action-btn" onclick="_pmDoAction()">📲 Enviar pelo WhatsApp</button>
+      <div style="padding:12px 18px 16px;border-top:1px solid var(--g100);display:flex;gap:9px;background:#fff">
+        <button class="reg-btn reg-btn-cancel" id="unifcancel">Fechar</button>
+        <button class="reg-btn" id="enc-send-btn" style="background:#25D366;color:#fff;flex:1;opacity:.4;cursor:default" disabled>📲 Enviar pelo WhatsApp</button>
       </div>
     </div>
   </div>`
@@ -2249,217 +2323,123 @@ function showPrintModal(){
   document.getElementById('unifclose').onclick=()=>m.remove()
   document.getElementById('unifcancel').onclick=()=>m.remove()
   document.getElementById('unifbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
-  _PM.period='mes';_PM.dest='grupo';_PM.mode='zap'
-  document.getElementById('unif-dest-grupo')?.classList.add('active')
-  _pmUpdatePreview()
-}
 
-// ── Executa ação do modal: clipboard+grupo ou wa.me direto ──
-function _pmDoAction(){
-  const texto=gerarTextoZap(_PM.period)
-  const c=CONTATOS_ESCALA.find(x=>x.id===_PM.dest)
-  if(c&&c.id==='grupo'){
-    // Grupo: wa.me com link de convite + texto pré-preenchido não funciona via link de convite
-    // Solução: copia texto e abre o grupo
-    document.getElementById('unifmodal')?.remove()
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(texto)
-        .then(()=>{
-          window.open(GRUPO_LINK,'_blank')
-          setTimeout(()=>toast('📋 Texto copiado! Cole no grupo do WhatsApp.','success'),400)
-        })
-        .catch(()=>{window.open(GRUPO_LINK,'_blank');showCopyModal(texto)})
-    } else {
-      window.open(GRUPO_LINK,'_blank')
-      showCopyModal(texto)
-    }
-    return
+  let tipoEnc=null
+  function selectEnc(tipo){
+    tipoEnc=tipo
+    document.querySelectorAll('.unif-enc-btn').forEach(b=>{
+      b.style.borderColor = b.id==='enc-'+tipo ? 'var(--red)' : 'var(--g200)'
+      b.style.background  = b.id==='enc-'+tipo ? '#FFF0F1'    : '#fff'
+    })
+    const btn=document.getElementById('enc-send-btn')
+    btn.disabled=false; btn.style.opacity='1'; btn.style.cursor='pointer'
   }
-  let numero=''
-  if(c&&c.tel) numero=c.tel
-  else numero=(document.getElementById('unif-dest-inp')?.value||'').replace(/\D/g,'')
-  if(!numero){toast('Escolha um destino.','error');return}
-  window.open('https://wa.me/'+numero+'?text='+encodeURIComponent(texto),'_blank')
-  document.getElementById('unifmodal')?.remove()
-  return
+  document.getElementById('enc-hoje').onclick   = ()=>selectEnc('hoje')
+  document.getElementById('enc-folgas').onclick  = ()=>selectEnc('folgas')
+  document.getElementById('enc-dia').onclick     = ()=>selectEnc('dia')
+  document.getElementById('enc-semana').onclick  = ()=>selectEnc('semana')
+
+  document.getElementById('enc-send-btn').onclick=()=>{
+    if(!tipoEnc) return
+    m.remove()
+    const txt = _gerarTextoEnc(tipoEnc)
+    if(txt) enviarGrupo(txt)
+  }
 }
 
-// ── Monta área de impressão e chama window.print() ──
-function executarImpressao(opts,orient,period){
-  document.getElementById('print-area')?.remove()
-  // Injetar @page orientação
-  let styleTag=document.getElementById('print-dyn-style')
-  if(!styleTag){styleTag=document.createElement('style');styleTag.id='print-dyn-style';document.head.appendChild(styleTag)}
-  styleTag.textContent=orient==='paisagem'
-    ?'@media print{@page{size:A4 landscape;margin:12mm} #print-area{font-size:11px!important} .pa-table td,.pa-table th{padding:5px 8px!important} .pa-escala-cell{min-height:38px!important}}'
-    :'@media print{@page{size:A4 portrait;margin:15mm}}'
-
-  const yr=G.viewYear,mo=G.viewMonth
+// Gera texto de encaminhamento por tipo
+function _gerarTextoEnc(tipo){
+  const hoje = new Date()
+  const todayStr = hoje.toISOString().split('T')[0]
+  const ds = G.selectedDate||todayStr
+  const day = dayMap[ds]
+  const dataFmt = ds.split('-').reverse().join('/')
+  const gerado = hoje.toLocaleDateString('pt-BR')
   const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
-  const mesLabel=MESES[mo-1]+' '+yr
-  const hoje=new Date().toLocaleDateString('pt-BR')
-  // Período label
-  let periodoLabel=mesLabel
-  if(period==='dia'){
-    const ds=G.selectedDate||new Date().toISOString().split('T')[0]
-    const day=dayMap[ds]
-    periodoLabel=day?`${day.wd} ${String(parseInt(ds.split('-')[2])).padStart(2,'0')}/${ds.split('-')[1]}/${ds.split('-')[0]}`:hoje
-  } else if(period==='semana'){
-    const base=new Date((G.selectedDate||new Date().toISOString().split('T')[0])+'T12:00:00')
-    const dom=new Date(base);dom.setDate(dom.getDate()-dom.getDay())
-    const sab=new Date(dom);sab.setDate(sab.getDate()+6)
-    const f=(d)=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
-    periodoLabel=`Semana ${f(dom)} – ${f(sab)}`
+  const mesLabel = MESES[G.viewMonth-1]+' '+G.viewYear
+
+  function fmtPessoas(arr){
+    const map={}
+    arr.forEach(e=>{if(!e.person)return;if(!map[e.person])map[e.person]=[];map[e.person].push(e.role)})
+    return Object.entries(map).map(([p,rs])=>'• '+p+' → '+rs.join(', ')).join('\n')
   }
 
-  let html=`<div id="print-area" class="show">
-  <div class="pa-header">
-    <div>
-      <div class="pa-brand">Pastel da Camila</div>
-      <div class="pa-sub">Bela Vista · Osasco</div>
-    </div>
-    <div class="pa-meta">
-      <div style="font-size:16px;font-weight:800;color:#EA1D2C">${periodoLabel}</div>
-      <div>Impresso em ${hoje}</div>
-    </div>
-  </div>`
-
-  if(opts.escala) html+=buildPrintEscala(yr,mo,period)
-  if(opts.horarios) html+=buildPrintHorarios()
-  if(opts.domingos) html+=buildPrintDomingos()
-  if(opts.temp) html+=buildPrintTemp()
-
-  html+='</div>'
-  document.body.insertAdjacentHTML('beforeend',html)
-  setTimeout(()=>{
-    window.print()
-    setTimeout(()=>{document.getElementById('print-area')?.remove();styleTag.textContent=''},1000)
-  },300)
-}
-
-// ── Monta HTML da grade de escala para impressão ──
-function buildPrintEscala(yr,mo,period){
-  const firstDay=new Date(yr,mo-1,1).getDay()
-  const daysInMonth=new Date(yr,mo,0).getDate()
-  const WDS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
-
-  let cells=''
-  for(let i=0;i<firstDay;i++) cells+=`<div class="pa-escala-cell empty"></div>`
-  for(let d=1;d<=daysInMonth;d++){
-    const ds=`${yr}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-    const day=dayMap[ds]
-    if(!day){cells+=`<div class="pa-escala-cell empty"><span class="pa-escala-dn">${d}</span></div>`;continue}
-    const pessoas=[...new Set([...day.manha,...day.noite].map(e=>e.person).filter(Boolean))].sort()
-    const nomes=pessoas.map(p=>`<span class="pa-escala-name">${esc(p)}</span>`).join('')
-    cells+=`<div class="pa-escala-cell"><span class="pa-escala-dn">${d}</span>${nomes}</div>`
+  if(tipo==='hoje'){
+    if(!day){toast('Sem escala para hoje.','error');return null}
+    const hora=hoje.getHours()
+    const turnoKey = hora<14?'manha':'noite'
+    const turnoLabel = turnoKey==='manha'?'☀️ MANHÃ':'🌙 NOITE'
+    const pessoas=[...new Set((day[turnoKey]||[]).map(e=>e.person).filter(Boolean))].sort()
+    let txt='☀️ *Escala de Hoje — Pastel da Camila*\n'
+    txt+='📍 '+day.wd+' '+dataFmt+' · Bela Vista · Osasco\n\n'
+    txt+='*'+turnoLabel+'*\n'
+    txt+=pessoas.map(p=>'• '+p).join('\n')
+    txt+='\n\n_Gerado em '+gerado+'_'
+    return txt
   }
-  const rem=(firstDay+daysInMonth)%7
-  if(rem>0) for(let i=0;i<7-rem;i++) cells+=`<div class="pa-escala-cell empty"></div>`
 
-  return`<div class="pa-section">
-    <div class="pa-section-title">📅 Escala do Mês</div>
-    <div class="pa-escala-grid">
-      ${WDS.map(w=>`<div class="pa-escala-wd">${w}</div>`).join('')}
-      ${cells}
-    </div>
-  </div>`
-}
-
-// ── Monta tabela de horários + folgas para impressão ──
-function buildPrintHorarios(){
-  const FOLGAS_FIXAS_MAP={
-    'Bruna':'Seg+Ter','David':'Seg+Qua','Derik':'Seg+Qua','Gabriela':'Seg+Qua',
-    'Iolete':'Ter+Qui','Isabelly':'Seg+Ter','Íris':'Seg+Qui','Julia':'Seg+Ter',
-    'Larissa':'Seg+Ter','Letícia':'Seg+Ter','Lucca':'Seg+Qui','Luis':'Seg+Ter',
-    'Suelen':'Seg+?','Táis':'Seg+Qua','Túlio':'Seg+Ter+Qua','Victor':'Seg+Ter',
-    'Vinícius':'Seg+Qua','Vitória':'Seg+Qui','Wirislaine':'Seg+Qui',
+  if(tipo==='folgas'){
+    const prefixo=G.viewYear+'-'+String(G.viewMonth).padStart(2,'0')
+    const todos=new Set()
+    G.days.forEach(d=>[...d.manha,...d.noite].forEach(e=>{if(e.person&&e.person!=='Suelen')todos.add(e.person)}))
+    const doms=G.days.filter(d=>d.wd==='Dom'&&d.date.startsWith(prefixo))
+    if(!doms.length){toast('Nenhum domingo neste mês.','error');return null}
+    let txt='🌴 *Folgas de Domingo — '+mesLabel+'*\n'
+    txt+='📍 Pastel da Camila · Bela Vista · Osasco\n\n'
+    doms.forEach(dom=>{
+      const trabBase=new Set([...dom.manha,...dom.noite].map(e=>e.person).filter(Boolean))
+      const diaFolgas=(carregarFolgasDomingo()[dom.date])||{}
+      const trabando=[...trabBase].filter(p=>!diaFolgas[p]&&p!=='Suelen').sort()
+      const folgando=[...todos].filter(p=>diaFolgas[p]||!trabBase.has(p)).sort()
+      const dn=String(parseInt(dom.date.split('-')[2])).padStart(2,'0')
+      const mes=dom.date.split('-')[1]
+      txt+='*Dom '+dn+'/'+mes+'*\n'
+      if(trabando.length) txt+='✅ Trabalhando ('+trabando.length+'): '+trabando.join(', ')+'\n'
+      if(folgando.length) txt+='🌴 Folga ('+folgando.length+'): '+folgando.join(', ')+'\n'
+      txt+='\n'
+    })
+    txt+='_Gerado em '+gerado+'_'
+    return txt
   }
-  const FOLGAS_DOM_MAP={
-    // ABRIL 2026
-    'Bruna':['05/04','12/04','19/04','26/04'],'David':['05/04'],'Derik':['05/04','12/04'],
-    'Gabriela':['05/04'],'Isabelly':['05/04'],'Julia':['19/04'],'Larissa':['26/04'],
-    'Letícia':['12/04'],'Lucca':['19/04'],'Luis':['26/04'],'Táis':['12/04'],
-    'Victor':['26/04'],'Vinícius':['19/04','26/04'],'Vitória':['12/04'],
-    'Wirislaine':['26/04'],'Íris':['19/04'],
-    // MAIO 2026 — domingos: 03/05, 10/05, 17/05, 24/05, 31/05
-    // Rotação: cada pessoa folga 1 domingo por mês
-    // (definir com Camila antes de publicar — valores abaixo são placeholder)
-    'Bruna':['03/05','10/05','17/05','24/05'],'David':['10/05'],'Derik':['03/05','17/05'],
-    'Gabriela':['10/05'],'Isabelly':['10/05'],'Julia':['24/05'],'Larissa':['31/05'],
-    'Letícia':['17/05'],'Lucca':['24/05'],'Luis':['31/05'],'Táis':['17/05'],
-    'Victor':['31/05'],'Vitória':['17/05'],
-    'Wirislaine':['31/05'],'Íris':['24/05'],
+
+  if(tipo==='dia'){
+    if(!day){toast('Sem escala para este dia.','error');return null}
+    let txt='📋 *Escala Completa — Pastel da Camila*\n'
+    txt+='📍 '+day.wd+' '+dataFmt+' · Bela Vista · Osasco\n\n'
+    if(day.manha.length){txt+='*— ☀️ MANHÃ —*\n'+fmtPessoas(day.manha)+'\n\n'}
+    if(day.noite.length){txt+='*— 🌙 NOITE —*\n'+fmtPessoas(day.noite)+'\n'}
+    txt+='\n_Gerado em '+gerado+'_'
+    return txt
   }
-  function secRows(arr){
-    return arr.map(p=>{
-      const ff=FOLGAS_FIXAS_MAP[p.nome]||'Seg+?'
-      const fd=(FOLGAS_DOM_MAP[p.nome]||[]).join(', ')
-      return`<tr>
-        <td><span class="pa-nome">${esc(p.nome)}</span><br/><span class="pa-folga">🌴 ${ff}${fd?' · Dom fora: '+fd:''}</span></td>
-        <td>${esc(p.horario)}</td>
-        <td>${esc(p.almoco)}</td>
-      </tr>`
-    }).join('')
+
+  if(tipo==='semana'){
+    const base=new Date(ds+'T12:00:00')
+    const dom=new Date(base); dom.setDate(dom.getDate()-dom.getDay())
+    const dias=[]
+    for(let i=0;i<7;i++){const d=new Date(dom);d.setDate(d.getDate()+i);dias.push(d)}
+    const fmt=d=>String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')
+    const WD=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+    let txt='📆 *Escala da Semana — Pastel da Camila*\n'
+    txt+=fmt(dias[0])+' a '+fmt(dias[6])+' · Bela Vista · Osasco\n\n'
+    dias.forEach(d=>{
+      const dStr=d.toISOString().split('T')[0]
+      const dayD=dayMap[dStr]
+      const wd=WD[d.getDay()]
+      const df=fmt(d)
+      if(!dayD){txt+='*'+wd+' '+df+'* — Fechado\n\n';return}
+      const mP=[...new Set(dayD.manha.map(e=>e.person).filter(Boolean))]
+      const nP=[...new Set(dayD.noite.map(e=>e.person).filter(Boolean))]
+      txt+='*'+wd+' '+df+'*\n'
+      if(mP.length) txt+='  ☀️ '+mP.join(', ')+'\n'
+      if(nP.length) txt+='  🌙 '+nP.join(', ')+'\n'
+      txt+='\n'
+    })
+    txt+='_Gerado em '+gerado+'_'
+    return txt
   }
-  return`<div class="pa-section">
-    <div class="pa-section-title">🕐 Horários da Equipe</div>
-    <table class="pa-table">
-      <thead><tr><th>Nome / Folgas</th><th>Horário</th><th>Almoço</th></tr></thead>
-      <tbody>
-        <tr><td colspan="3" style="background:#FFF9C4;font-size:10px;font-weight:800;padding:5px 10px;color:#795500">☀️ TURNO DA MANHÃ</td></tr>
-        ${secRows(HORARIOS.manha)}
-        <tr><td colspan="3" style="background:#EDE7F6;font-size:10px;font-weight:800;padding:5px 10px;color:#311B92">🌙 TURNO DA NOITE</td></tr>
-        ${secRows(HORARIOS.noite)}
-        <tr><td colspan="3" style="background:#F5F5F5;font-size:10px;font-weight:800;padding:5px 10px;color:#616161">📋 ESTAGIÁRIOS</td></tr>
-        ${secRows(HORARIOS.estagiarios)}
-      </tbody>
-    </table>
-  </div>`
+  return null
 }
 
-// ── Monta cards de domingo (quem trabalha/folga) para impressão ──
-function buildPrintDomingos(){
-  const todos=new Set()
-  G.days.forEach(d=>[...d.manha,...d.noite].forEach(e=>{if(e.person)todos.add(e.person)}))
-  const doms=G.days.filter(d=>d.wd==='Dom')
-  const cards=doms.map(dom=>{
-    const trab=new Set([...dom.manha,...dom.noite].map(e=>e.person).filter(Boolean))
-    const folg=[...todos].filter(p=>!trab.has(p)).sort()
-    const dn=String(parseInt(dom.date.split('-')[2])).padStart(2,'0')
-    const pts=dom.date.split('-')
-    return`<div class="pa-dom-card">
-      <div class="pa-dom-title">Domingo ${dn}/${pts[1]}/${pts[0]}</div>
-      <div class="pa-dom-body">
-        <div style="margin-bottom:4px"><b style="font-size:9px;text-transform:uppercase;color:#1B5E20">Trabalhando (${trab.size})</b><br/>
-        ${[...trab].sort().map(p=>`<span class="pa-dom-item trab">✓ ${esc(p)}</span>`).join(' ')}</div>
-        <div><b style="font-size:9px;text-transform:uppercase;color:#9E9E9E">Folga (${folg.length})</b><br/>
-        ${folg.map(p=>`<span class="pa-dom-item folg">🌴 ${esc(p)}</span>`).join(' ')}</div>
-      </div>
-    </div>`
-  }).join('')
-  return`<div class="pa-section">
-    <div class="pa-section-title">🌴 Folgas de Domingo do Mês</div>
-    <div class="pa-dom-grid">${cards}</div>
-  </div>`
-}
-
-// ── Monta tabela de temperaturas padrão para impressão ──
-function buildPrintTemp(){
-  return`<div class="pa-section">
-    <div class="pa-section-title">🌡️ Padrão de Temperaturas</div>
-    <table class="pa-table" style="margin-bottom:10px">
-      <thead><tr><th>Equipamento</th><th>Ideal</th><th>Alerta</th><th>Crítico</th></tr></thead>
-      <tbody>
-        <tr><td><b>Geladeira</b></td><td style="color:#2E7D32;font-weight:800">0°C a 4°C</td><td style="color:#F57F17;font-weight:800">5°C a 6°C</td><td style="color:#C62828;font-weight:800">≥ 7°C</td></tr>
-        <tr><td><b>Freezer</b></td><td style="color:#2E7D32;font-weight:800">-18°C a -22°C</td><td style="color:#F57F17;font-weight:800">-15°C</td><td style="color:#C62828;font-weight:800">≥ -12°C</td></tr>
-        <tr><td><b>Tacho (fritura)</b></td><td style="color:#2E7D32;font-weight:800">175°C a 185°C</td><td style="color:#F57F17;font-weight:800">170°C a 175°C</td><td style="color:#C62828;font-weight:800">&lt;170°C ou &gt;205°C</td></tr>
-      </tbody>
-    </table>
-    <div style="font-size:11px;color:#616161;font-weight:600;background:#F5F5F5;padding:8px 12px;border-radius:6px">
-      ⏰ Conferir: <b>início do turno · pré-pico · durante o pico</b> &nbsp;·&nbsp; ⚡ Desvio → corrigir imediatamente
-    </div>
-  </div>`
-}
 
 
 // ── Inicialização: carrega localStorage, define data inicial, renderiza ──
@@ -2533,6 +2513,7 @@ function buildPage(){
     </div>
     <div class="topbar-mid">Escala · <b>${G._calMeta?G._calMeta.shortLabel:''}</b></div>
     <div class="top-actions">
+      <button class="tbtn-white" id="btn-contatos" title="Contatos">⚙️<span class="tbtn-txt"> Contatos</span></button>
       <button class="tbtn-white" id="btn-manual" title="Manual de Uso">📖<span class="tbtn-txt"> Manual</span></button>
       <button class="tbtn-white" id="btn-temp" title="Padrão de Temperaturas">🌡️<span class="tbtn-txt"> Temp.</span></button>
       <button class="tbtn-white" id="btn-horarios" title="Horários da Equipe">🕐<span class="tbtn-txt"> Horários</span></button>
@@ -2804,7 +2785,7 @@ function buildPersonCard(date,shift,nome,entries){
     const chips=vis.map(r=>`<span class="ec-resp-chip">${esc(r)}</span>`).join('')
     const maisBtn=ext.length?`<button class="ec-resp-mais" data-mais="${esc(entries[0].id)}" onclick="toggleResps(this)">+${ext.length}</button>`:''
     const extHtml=ext.length?`<div class="ec-resp-extras" id="extras-${esc(entries[0].id)}" style="display:none">${ext.map(r=>`<span class="ec-resp-chip ec-resp-extra">${esc(r)}</span>`).join('')}</div>`:''
-    respHtml=`<div class="ec-resp-wrap"><span class="ec-resp-label">Resp.</span>${chips}${maisBtn}${extHtml}</div>`
+    respHtml=`<div class="ec-resp-wrap">${chips}${maisBtn}${extHtml}</div>`
   }
 
   // Status: só mostrar quando é confirmado ou falta — aguardando some
@@ -2855,15 +2836,26 @@ function buildPersonCard(date,shift,nome,entries){
   const allAbsent=entries.every(e=>e.status==='absent')
   const avatarClass=allAbsent?'absent':(shift==='manha'?'manha':'noite')
 
+  // Botão editar horário — visível para qualquer logado
+  const editHorBtn=logado
+    ?`<button class="ec-detalhe-btn" onclick="showEditarHorarioModal('${esc(nome)}')" style="margin-left:4px" title="Editar horário">✏️ Horário</button>`
+    :''
+  // Badge indicando horário foi editado
+  const editadoBadge=hor&&hor._editado
+    ?`<span style="font-size:10px;background:#FFF3E0;border:1px solid #FFB74D;border-radius:4px;padding:1px 5px;color:#E65100;font-weight:700;margin-left:4px">editado</span>`
+    :''
+
   return `<div class="person-card">
     <div class="person-card-head">
       <div class="pc-avatar ${avatarClass}">${esc(initials)}</div>
-      <div class="pc-info">
+      <div class="pc-info" style="min-width:0;flex:1">
         <div class="ec-name">${esc(nome)}</div>
-        ${horHtml}
         ${respHtml}
       </div>
-      ${detalheBtn}
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;margin-left:8px">
+        ${detalheBtn}
+        ${logado?`<button class="ec-detalhe-btn" onclick="showEditarHorarioModal('${esc(nome)}')" title="Editar horário">✏️ Horário</button>`:''}
+      </div>
     </div>
     <div class="person-card-roles">${roleChipsHtml}</div>
     ${statusHtml?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${statusHtml}</div>`:''}
@@ -2920,9 +2912,7 @@ function buildCard(date,shift,e,editing){
     ${!isFalta?`<button class="ec-btn falta-btn" data-falta="${k}">⚠ Falta</button>`:''}
   </div>`:''
 
-  // Horário automático: busca na base fixa, não editável
-  const hor=getHorario(e.person)
-  const horHtml=hor&&hor.horario?`<div class="ec-hor">${esc(hor.horario)} · 🍽 ${esc(hor.almoco)}</div>`:''
+  // Horário removido dos cards — editável via modal ✏️ Horário
 
   // Responsabilidades: máx 2 visíveis + botão "ver mais" se houver mais
   const resps=getResponsabilidades(e.person)||[]
@@ -2963,7 +2953,6 @@ function buildCard(date,shift,e,editing){
     <span class="ec-role">${esc(e.role||'—')}</span>
     <div class="ec-right">
       <div class="ec-name">${esc(e.person||'—')}</div>
-      ${horHtml}
       ${ajusteHtml}
       ${respHtml}
       ${e.obs?`<div class="ec-obs">${esc(e.obs)}</div>`:''}
@@ -3030,6 +3019,7 @@ function bindAll(){
   }
   const dgerames=document.getElementById('dgerames');if(dgerames)dgerames.onclick=()=>{G.menu=false;render();setTimeout(showGerarMesModal,100)}
   const dperf=document.getElementById('dperf');if(dperf)dperf.onclick=()=>{G.menu=false;render();setTimeout(showPerformanceModal,100)}
+  const bcontatos=document.getElementById('btn-contatos');if(bcontatos)bcontatos.onclick=showContatosModal
   const bmanual=document.getElementById('btn-manual');if(bmanual)bmanual.onclick=showManualModal
   const btemp=document.getElementById('btn-temp');if(btemp)btemp.onclick=showTempModal
   const bhorarios=document.getElementById('btn-horarios');if(bhorarios)bhorarios.onclick=showHorariosModal
@@ -3068,6 +3058,8 @@ function bindAll(){
     if(document.getElementById('ftmodal')) {document.getElementById('ftmodal').remove();return}
     if(document.getElementById('pmodal'))  {document.getElementById('pmodal').remove();return}
     if(document.getElementById('unifmodal')){document.getElementById('unifmodal').remove();return}
+    if(document.getElementById('ctmodal'))  {document.getElementById('ctmodal').remove();return}
+    if(document.getElementById('ehormodal')){document.getElementById('ehormodal').remove();return}
     if(document.getElementById('verregmodal')){document.getElementById('verregmodal').remove();return}
     if(G.selectedDate){G.selectedDate=null;render()}
   }
@@ -3692,7 +3684,6 @@ function showHorariosModal(){
   const FOLGAS_DOM={
     'Bruna':['05/04', '12/04', '19/04', '26/04'],
     'David':['05/04'],
-    'Derik':['05/04', '12/04'],
     'Gabriela':['05/04'],
     'Iolete':[],
     'Isabelly':['05/04'],
@@ -3701,7 +3692,6 @@ function showHorariosModal(){
     'Letícia':['12/04'],
     'Lucca':['19/04'],
     'Luis':['26/04'],
-    'Suelen':['05/04', '12/04', '19/04', '26/04'],
     'Táis':['12/04'],
     'Túlio':[],
     'Victor':['26/04'],
@@ -3713,8 +3703,7 @@ function showHorariosModal(){
   const FOLGAS_FIXAS={
     'Bruna':'Seg + Ter',
     'David':'Seg + Qua',
-    'Derik':'Seg + Qua',
-    'Gabriela':'Seg + Qua',
+        'Gabriela':'Seg + Qua',
     'Iolete':'Ter + Qui',
     'Isabelly':'Seg + Ter',
     'Íris':'Seg + Qui',
@@ -3723,7 +3712,6 @@ function showHorariosModal(){
     'Letícia':'Seg + Ter',
     'Lucca':'Seg + Qui',
     'Luis':'Seg + Ter',
-    'Suelen':'Seg + ?',
     'Táis':'Seg + Qua',
     'Túlio':'Seg + Ter + Qua ⚠️ regra fixa',
     'Victor':'Seg + Ter',
@@ -3732,15 +3720,21 @@ function showHorariosModal(){
     'Wirislaine':'Seg + Qui',
   };
   function buildRows(arr){
+    const logado = G.user&&G.user.can&&(G.user.can.edit||G.user.can.add)
     return arr.map(p=>{
       const folga=FOLGAS_FIXAS[p.nome]||'Seg + ?'
       const doms=(FOLGAS_DOM[p.nome]||[]).join(', ')
       const domsStr=doms?` · Dom: ${doms}`:''
+      const hor = getHorario(p.nome)||p
+      const editBadge = hor._editado?'<span style="font-size:9px;background:#FFF3E0;border:1px solid #FFB74D;border-radius:3px;padding:1px 4px;color:#E65100;font-weight:700;margin-left:3px">editado</span>':''
+      const editBtn = logado
+        ?`<button onclick="document.getElementById('hmodal')?.remove();showEditarHorarioModal('${esc(p.nome)}')" style="background:none;border:1px solid var(--g200);border-radius:5px;padding:2px 6px;font-size:11px;font-weight:700;color:var(--g400);cursor:pointer;font-family:'Nunito',sans-serif;margin-left:4px" title="Editar horário">✏️</button>`
+        :''
       return`
       <tr>
-        <td><span class="hor-nome">${esc(p.nome)}</span><br/><span style="font-size:10px;color:var(--g400);font-weight:700">🌴 ${esc(folga)}${domsStr}</span></td>
-        <td><span class="hor-time">${esc(p.horario)}</span></td>
-        <td><span class="hor-almoco">🍽 ${esc(p.almoco)}</span></td>
+        <td><span class="hor-nome">${esc(p.nome)}</span>${editBadge}${editBtn}<br/><span style="font-size:10px;color:var(--g400);font-weight:700">🌴 ${esc(folga)}${domsStr}</span></td>
+        <td><span class="hor-time">${esc(hor.horario||p.horario)}</span></td>
+        <td><span class="hor-almoco">🍽 ${esc(hor.almoco||p.almoco||'—')}</span></td>
       </tr>`
     }).join('')
   }
@@ -3772,39 +3766,160 @@ function showHorariosModal(){
   document.getElementById('hmbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
 }
 
-// ── DETALHES DA PESSOA ──
-// ── FOLGAS ──
+// ── FOLGAS DOMINGO — EDITÁVEL PELA GERENTE ──
+// Clique no nome alterna folga/trabalho. Salvo em localStorage: folgas_domingo
 function showFolgasModal(){
   document.getElementById('fmodal')?.remove()
-  const todos=new Set()
-  G.days.forEach(d=>[...d.manha,...d.noite].forEach(e=>{if(e.person)todos.add(e.person)}))
-  const doms=G.days.filter(d=>d.wd==='Dom')
-  const linhas=doms.map(dom=>{
-    const trab=new Set([...dom.manha,...dom.noite].map(e=>e.person).filter(Boolean))
-    const folg=[...todos].filter(p=>!trab.has(p)).sort()
-    const dn=parseInt(dom.date.split('-')[2])
-    const domParts=dom.date.split('-')
-    return`<div class="folga-dom">
-      <div class="folga-dom-title">Domingo ${String(dn).padStart(2,'0')}/${domParts[1]}/${domParts[0]}</div>
-      <div class="folga-section"><div class="folga-lbl">Trabalhando (${trab.size})</div>${[...trab].sort().map(p=>`<span class="folga-pill" style="background:#E8F5E9;color:#1B5E20">✓ ${esc(p)}</span>`).join('')}</div>
-      <div class="folga-section"><div class="folga-lbl">De folga (${folg.length})</div>${folg.length?folg.map(p=>`<span class="folga-pill" style="background:var(--g100);color:var(--g700)">🌴 ${esc(p)}</span>`).join(''):'<span style="font-size:12px;color:var(--g300);font-style:italic">Todos escalados</span>'}</div>
-    </div>`
+  _renderFolgasModal()
+}
+
+function _renderFolgasModal(){
+  document.getElementById('fmodal')?.remove()
+  const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const mesLabel = MESES[G.viewMonth-1]+' '+G.viewYear
+  const PESSOAS_DOM = ['Bruna','David','Gabriela','Iolete','Isabelly','Íris',
+    'Julia','Larissa','Letícia','Lucca','Luis',
+    'Táis','Túlio','Victor','Vitória','Wirislaine']
+  const prefixo = G.viewYear+'-'+String(G.viewMonth).padStart(2,'0')
+  const doms = G.days.filter(d=>d.wd==='Dom'&&d.date.startsWith(prefixo))
+  const isLogado = G.user&&G.user.can&&(G.user.can.edit||G.user.can.add)
+
+  const instrucao = isLogado
+    ? '<div style="font-size:12px;color:#E65100;background:#FFF3E0;border-radius:7px;padding:8px 12px;margin-bottom:12px">✏️ <b>Clique no nome</b> para alternar folga ↔ trabalho.</div>'
+    : '<div style="font-size:12px;color:var(--g400);background:var(--g50);border-radius:7px;padding:8px 12px;margin-bottom:12px">Faça login para editar folgas.</div>'
+
+  const linhas = doms.map(dom=>{
+    const trabBase = new Set(
+      [...dom.manha,...dom.noite].map(e=>e.person).filter(p=>p&&PESSOAS_DOM.includes(p))
+    )
+    const diaFolgas = (carregarFolgasDomingo()[dom.date])||{}
+    const trabando = PESSOAS_DOM.filter(p=>{
+      if(diaFolgas[p]===false) return true   // forçado a trabalhar
+      if(diaFolgas[p]===true)  return false  // forçado a folgar
+      return trabBase.has(p)                 // segue escala base
+    })
+    const folgando = PESSOAS_DOM.filter(p=>{
+      if(diaFolgas[p]===false) return false  // forçado a trabalhar
+      if(diaFolgas[p]===true)  return true   // forçado a folgar
+      return !trabBase.has(p)                // segue escala base
+    })
+    const dn  = String(parseInt(dom.date.split('-')[2])).padStart(2,'0')
+    const mes = dom.date.split('-')[1]
+    const ano = dom.date.split('-')[0]
+
+    // Use data attributes — no inline onclick with quotes inside quotes
+    function pill(p, trabalhando){
+      const bg  = trabalhando ? '#E8F5E9' : 'var(--g100)'
+      const cor = trabalhando ? '#1B5E20' : 'var(--g700)'
+      const icon = trabalhando ? '✓ ' : '🌴 '
+      const cur  = isLogado ? 'pointer' : 'default'
+      // flag: trabalhando→click=folgar(false), folgando→click=trabalhar(true)
+      const flag = trabalhando ? '0' : '1'
+      return '<button class="fpill" data-date="'+dom.date+'" data-nome="'+esc(p)+'" data-flag="'+flag+'"'
+        +' style="background:'+bg+';color:'+cor+';cursor:'+cur+';border:none;border-radius:20px;padding:4px 12px;font-size:15px;font-weight:700;font-family:Nunito,sans-serif;margin:2px">'
+        +icon+esc(p)+'</button>'
+    }
+
+    return '<div class="folga-dom">'
+      +'<div class="folga-dom-title">Domingo '+dn+'/'+mes+'/'+ano+'</div>'
+      +'<div class="folga-section"><div class="folga-lbl">Trabalhando ('+trabando.length+')</div>'
+      +(trabando.length ? trabando.map(p=>pill(p,true)).join('') : '<span style="font-size:12px;color:var(--g300);font-style:italic">Todos de folga</span>')
+      +'</div>'
+      +'<div class="folga-section"><div class="folga-lbl">De folga ('+folgando.length+')</div>'
+      +(folgando.length ? folgando.map(p=>pill(p,false)).join('') : '<span style="font-size:12px;color:var(--g300);font-style:italic">Todos trabalhando</span>')
+      +'</div>'
+      +'</div>'
   }).join('')
-  const m=document.createElement('div');m.id='fmodal'
-  m.innerHTML=`<div class="modal-bg" id="fmbg">
-    <div class="modal-card" style="max-width:460px">
-      <div class="modal-head"><div class="modal-title">📅 Folgas de Domingo — Abril</div><button class="modal-close" id="fclose">✕ Fechar</button></div>
-      <div class="modal-body">${linhas||'<p style="color:var(--g300);font-style:italic">Nenhum domingo encontrado.</p>'}</div>
-    </div>
-  </div>`
+
+  const m = document.createElement('div'); m.id='fmodal'
+  m.innerHTML = '<div class="modal-bg" id="fmbg">'
+    +'<div class="modal-card" style="max-width:520px">'
+      +'<div class="modal-head">'
+        +'<div class="modal-title">📅 Folgas de Domingo — '+mesLabel+'</div>'
+        +'<button class="modal-close" id="fclose">✕</button>'
+      +'</div>'
+      +'<div class="modal-body">'
+        +instrucao
+        +(linhas||'<p style="color:var(--g300);font-style:italic">Nenhum domingo encontrado neste mês.</p>')
+      +'</div>'
+      +'<div style="padding:12px 18px 16px;border-top:1px solid var(--g100);display:flex;gap:9px;background:#fff">'
+        +'<button class="reg-btn reg-btn-cancel" id="ffechar">Fechar</button>'
+        +'<button class="reg-btn" id="fzap" style="background:#25D366;color:#fff;flex:1">📲 Enviar pelo WhatsApp</button>'
+      +'</div>'
+    +'</div>'
+  +'</div>'
   document.body.appendChild(m)
-  document.getElementById('fclose').onclick=()=>m.remove()
-  document.getElementById('fmbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
-  // Foco no modal para capturar ESC
-  m.setAttribute('tabindex','-1');m.focus()
+  document.getElementById('fclose').onclick  = ()=>m.remove()
+  document.getElementById('ffechar').onclick = ()=>m.remove()
+  document.getElementById('fmbg').onclick    = ev=>{ if(ev.target===ev.currentTarget) m.remove() }
+  document.getElementById('fzap').onclick    = ()=>{ window._enviarFolgasWhatsApp() }
+
+  // Bind pills via data attributes — safe, no quote nesting
+  if(isLogado){
+    m.querySelectorAll('.fpill').forEach(btn=>{
+      btn.onclick = ()=>{
+        const date = btn.dataset.date
+        const nome = btn.dataset.nome
+        const flag = btn.dataset.flag === '1' // true=estava folgando→vai trabalhar
+        const acao = flag ? 'vai TRABALHAR' : 'vai ficar de FOLGA'
+        if(!confirm(nome+' — confirmar?\n'+acao+' neste domingo.')) return
+        toggleFolgaDomingo(date, nome, flag)
+        toast(flag ? nome+' escalado para trabalhar.' : nome+' colocado de folga.','success')
+        _renderFolgasModal()
+      }
+    })
+  }
+
+  m.setAttribute('tabindex','-1'); m.focus()
+}
+
+
+window._toggleFolga=function(dateStr, nome, estaFolgando){
+  requireAuth(()=>{
+    const acao = estaFolgando ? 'vai TRABALHAR' : 'vai ficar de FOLGA'
+    if(!confirm(nome+' — confirmar alteração?\n'+acao+' neste domingo.')) return
+    toggleFolgaDomingo(dateStr, nome, estaFolgando)
+    toast((estaFolgando ? nome+' escalado para trabalhar.' : nome+' colocado de folga.'), 'success')
+    _renderFolgasModal()
+  })
 }
 
 // ── FALTA ──
+// Gera e envia texto de folgas de domingo para WhatsApp
+window._enviarFolgasWhatsApp = function(){
+  const PESSOAS_DOM = ['Bruna','David','Gabriela','Iolete','Isabelly','Íris','Julia','Larissa','Letícia','Lucca','Luis','Táis','Túlio','Victor','Vitória','Wirislaine']
+  const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const mesLabel = MESES[G.viewMonth-1]+' '+G.viewYear
+  const prefixo  = G.viewYear+'-'+String(G.viewMonth).padStart(2,'0')
+  const doms = G.days.filter(d=>d.wd==='Dom'&&d.date.startsWith(prefixo))
+  if(!doms.length){ toast('Nenhum domingo neste mês.','error'); return }
+  var txt = '\uD83C\uDF34 *Folgas de Domingo \u2014 '+mesLabel+'*\n'
+  txt += '\uD83D\uDCCD Pastel da Camila \u00B7 Bela Vista \u00B7 Osasco\n\n'
+  doms.forEach(function(dom){
+    var trabBase = new Set([...dom.manha,...dom.noite].map(function(e){return e.person}).filter(function(p){return p&&PESSOAS_DOM.includes(p)}))
+    var diaFolgas = (carregarFolgasDomingo()[dom.date])||{}
+    var trabando  = PESSOAS_DOM.filter(function(p){
+      if(diaFolgas[p]===false) return true
+      if(diaFolgas[p]===true)  return false
+      return trabBase.has(p)
+    })
+    var folgando  = PESSOAS_DOM.filter(function(p){
+      if(diaFolgas[p]===false) return false
+      if(diaFolgas[p]===true)  return true
+      return !trabBase.has(p)
+    })
+    var dn  = String(parseInt(dom.date.split('-')[2])).padStart(2,'0')
+    var mes = dom.date.split('-')[1]
+    txt += '*Dom '+dn+'/'+mes+'*\n'
+    if(trabando.length) txt += '\u2705 Trabalhando ('+trabando.length+'): '+trabando.join(', ')+'\n'
+    if(folgando.length) txt += '\uD83C\uDF34 Folga ('+folgando.length+'): '+folgando.join(', ')+'\n'
+    txt += '\n'
+  })
+  txt += '_Gerado em '+new Date().toLocaleDateString('pt-BR')+'_'
+  enviarGrupo(txt)
+}
+
+
 function showRegistrarModal(date,shift,entries){
   document.getElementById('ftmodal')?.remove()
   const dn=parseInt(date.split('-')[2])
@@ -3815,12 +3930,14 @@ function showRegistrarModal(date,shift,entries){
   const funcoesStr=funcoesAtivas.join(', ')||entries.map(e=>e.role).join(', ')
 
   const OCORRENCIAS=[
-    {id:'mal',   ico:'🤒', label:'Passou mal',        desc:'Ficou doente durante o turno'},
-    {id:'foi',   ico:'🚪', label:'Teve que ir embora', desc:'Saiu antes do fim do turno'},
-    {id:'lesao', ico:'🤕', label:'Se machucou',        desc:'Acidente ou lesão no trabalho'},
-    {id:'atraso',ico:'⏰', label:'Chegou atrasado',    desc:'Chegou após o horário previsto'},
-    {id:'cedo',  ico:'🏃', label:'Saiu mais cedo',     desc:'Encerrou o turno antes do previsto'},
-    {id:'outro', ico:'📝', label:'Outro',              desc:'Descrever no campo abaixo'},
+    {id:'mal',       ico:'🤒', label:'Passou mal',          desc:'Ficou doente durante o turno',               dest:'rh'},
+    {id:'foi',       ico:'🚪', label:'Teve que ir embora',   desc:'Saiu antes do fim do turno',                  dest:'rh'},
+    {id:'lesao',     ico:'🤕', label:'Se machucou',          desc:'Acidente ou lesão no trabalho',               dest:'rh'},
+    {id:'troca_hor', ico:'🔄', label:'Troca de horário',     desc:'Mudança de horário — registrar com RH',       dest:'rh'},
+    {id:'dobra',     ico:'💪', label:'Turno extra (dobra)',  desc:'Ficará além do horário / cobre outro turno',  dest:'rh'},
+    {id:'atraso',    ico:'⏰', label:'Chegou atrasado',      desc:'Chegou após o horário previsto',              dest:'bruna'},
+    {id:'cedo',      ico:'🏃', label:'Saiu mais cedo',       desc:'Encerrou o turno antes do previsto',          dest:'bruna'},
+    {id:'outro',     ico:'📝', label:'Outro',                desc:'Descrever no campo abaixo',                   dest:'bruna'},
   ]
 
   const m=document.createElement('div');m.id='ftmodal'
@@ -3939,14 +4056,26 @@ function showRegistrarModal(date,shift,entries){
       toast(`Falta de ${nome} registrada.`,'success')
 
     } else {
-      // Ocorrência — não marca falta, só notifica
-      const OCORR_LABELS={mal:'Passou mal',foi:'Teve que ir embora',lesao:'Se machucou',atraso:'Chegou atrasado',cedo:'Saiu mais cedo',outro:'Ocorrência'}
-      const ocorrLabel=OCORR_LABELS[ocorrSel]||'Ocorrência'
-      const texto=`⚠️ *Ocorrência de Turno — Pastel da Camila*\n\n*Colaborador:* ${nome}\n*Função:* ${funcoesStr}\n*Turno:* ${turno}\n*Data:* ${dataFmt}\n*Ocorrência:* ${ocorrLabel}${obs?`\n*Obs:* ${obs}`:''}\n\n_Viviane — verificar necessidade de cobertura ou providência._`
-      enviarGrupo(texto)
-      toast(`Ocorrência de ${nome} enviada.`,'success')
+      // Ocorrência — roteamento: saúde/troca/dobra → RH, operacional → Bruna
+      const OCORR_META={
+        mal:      {label:'Passou mal',          dest:'rh'},
+        foi:      {label:'Teve que ir embora',  dest:'rh'},
+        lesao:    {label:'Se machucou',          dest:'rh'},
+        troca_hor:{label:'Troca de horário',     dest:'rh'},
+        dobra:    {label:'Turno extra (dobra)',  dest:'rh'},
+        atraso:   {label:'Chegou atrasado',      dest:'bruna'},
+        cedo:     {label:'Saiu mais cedo',       dest:'bruna'},
+        outro:    {label:'Ocorrência',            dest:'bruna'}
+      }
+      const meta = OCORR_META[ocorrSel]||{label:'Ocorrência',dest:'bruna'}
+      const c = carregarContatos()
+      const destNome = meta.dest==='rh' ? 'Viviane (RH)' : 'Bruna'
+      const destTel  = meta.dest==='rh' ? (c.rh||'5511945461633') : (c.bruna||'5511964251461')
+      const emoji    = meta.dest==='rh' ? '📋' : '⚠️'
+      const txt = emoji+' *Ocorrência — Pastel da Camila*\n\n*Colaborador:* '+nome+'\n*Função:* '+funcoesStr+'\n*Turno:* '+turno+'\n*Data:* '+dataFmt+'\n*Tipo:* '+meta.label+(obs?'\n*Obs:* '+obs:'')+'\n\n_'+destNome+' — verificar e providenciar._'
+      window.open('https://wa.me/'+destTel+'?text='+encodeURIComponent(txt),'_blank')
+      toast('Ocorrência de '+nome+' enviada para '+destNome+'.','success')
     }
-
     m.remove()
   }
 }
@@ -4047,26 +4176,26 @@ const ESCALA_PADRAO={
     noite:[['Embalando','Bruna'],['Delivery','Isabelly'],['Mesa','Julia'],['Fritando','Larissa'],['Salão','Lucca'],['Caixa salão','Lucca'],['Caldo','Lucca'],['Gaveteiro','Victor'],['Escorredeira','Vitória']]
   },
   4:{
-    manha:[['Embalando','Gabriela'],['Salão','Gabriela'],['Caldo','Gabriela'],['Gaveteiro','Letícia'],['Fritando','Letícia'],['Escorredeira','Letícia'],['Delivery','Luis'],['Salada','Luis'],['Produção de pastel','Suelen']],
-    noite:[['Salão','Bruna'],['Escorredeira','David'],['Embalando','David'],['Delivery','Isabelly'],['Mesa','Julia'],['Fritando','Larissa'],['Embalando','Larissa'],['Delivery','Táis'],['Escorredeira','Túlio'],['Gaveteiro','Victor'],['Gerência','Derik']]
+    manha:[['Embalando','Gabriela'],['Salão','Gabriela'],['Caldo','Gabriela'],['Gaveteiro','Letícia'],['Fritando','Letícia'],['Escorredeira','Letícia'],['Delivery','Luis'],['Salada','Luis'],['Produção de pastel']],
+    noite:[['Salão','Bruna'],['Escorredeira','David'],['Embalando','David'],['Delivery','Isabelly'],['Mesa','Julia'],['Fritando','Larissa'],['Embalando','Larissa'],['Delivery','Táis'],['Escorredeira','Túlio'],['Gaveteiro','Victor']]
   },
   5:{
     manha:[['Delivery','Gabriela'],['Caldo','Gabriela'],['Limpeza','Iolete'],['Mesa','Íris'],['Escorredeira','Letícia'],['Caixa salão','Letícia'],['Delivery','Luis'],['Salada','Luis'],['Gaveteiro','Wirislaine'],['Fritando','Wirislaine']],
-    noite:[['Embalando','Bruna'],['Caixa salão','David'],['Gerência','Derik'],['Delivery','Isabelly'],['Mesa','Julia'],['Marcando','Larissa'],['Caixa salão','Lucca'],['Delivery','Táis'],['Embalando','Túlio'],['Gaveteiro','Victor'],['Escorredeira','Vitória']]
+    noite:[['Embalando','Bruna'],['Caixa salão','David'],['Delivery','Isabelly'],['Mesa','Julia'],['Marcando','Larissa'],['Caixa salão','Lucca'],['Delivery','Táis'],['Embalando','Túlio'],['Gaveteiro','Victor'],['Escorredeira','Vitória']]
   },
   6:{
     manha:[['Delivery','Gabriela'],['Caldo','Gabriela'],['Limpeza','Iolete'],['Mesa','Íris'],['Escorredeira','Letícia'],['Caixa salão','Letícia'],['Delivery','Luis'],['Salada','Luis'],['Gaveteiro','Wirislaine'],['Fritando','Wirislaine']],
-    noite:[['Embalando','Bruna'],['Caixa salão','David'],['Gerência','Derik'],['Delivery','Isabelly'],['Mesa','Julia'],['Marcando','Larissa'],['Caixa salão','Lucca'],['Delivery','Táis'],['Embalando','Túlio'],['Gaveteiro','Victor'],['Escorredeira','Vitória']]
+    noite:[['Embalando','Bruna'],['Caixa salão','David'],['Delivery','Isabelly'],['Mesa','Julia'],['Marcando','Larissa'],['Caixa salão','Lucca'],['Delivery','Táis'],['Embalando','Túlio'],['Gaveteiro','Victor'],['Escorredeira','Vitória']]
   },
   0:{
     manha:[['Limpeza','Iolete'],['Embalando','Gabriela'],['Salão','Gabriela'],['Caldo','Gabriela'],['Mesa','Letícia'],['Salão','Letícia'],['Delivery','Luis'],['Salada','Luis'],['Gaveteiro','Wirislaine'],['Fritando','Wirislaine']],
-    noite:[['Gerência','Derik'],['Caixa salão','David'],['Delivery','Isabelly'],['Mesa','Julia'],['Fritando','Larissa'],['Delivery','Táis'],['Embalando','Túlio'],['Gaveteiro','Victor'],['Escorredeira','Vitória']]
+    noite:[['Caixa salão','David'],['Delivery','Isabelly'],['Mesa','Julia'],['Fritando','Larissa'],['Delivery','Táis'],['Embalando','Túlio'],['Gaveteiro','Victor'],['Escorredeira','Vitória']]
   }
 }
 
 // Folgas fixas por pessoa: jsDay[] — 0=Dom,1=Seg,2=Ter,3=Qua,4=Qui,5=Sex,6=Sáb
 const FOLGAS_FIXAS_JS={
-  'Bruna':[1,2],'David':[1,3],'Derik':[1,3],'Gabriela':[1,3],
+  'Bruna':[1,2],'David':[1,3],'Gabriela':[1,3],
   'Iolete':[],'Isabelly':[1,2],'Íris':[1,4],'Julia':[1,2], // Iolete=[]: trabalha TODOS OS DIAS sem exceção
   'Larissa':[1,2],'Letícia':[1,2],'Lucca':[1,4],'Luis':[1,2],
   'Suelen':[1],'Táis':[1,3],'Túlio':[1,2,3],'Victor':[1,2], // Túlio: folga Seg+Ter+Qua (regra fixa)
@@ -4127,7 +4256,7 @@ function showGerarMesModal(){
     if(new Date(ds+'T12:00:00').getDay()===0) domingos.push(ds)
   }
   // Pessoas com direito a folga de domingo (Suelen só quinta, não tem dom)
-  const PESSOAS_DOM=['Bruna','David','Derik','Gabriela','Iolete','Isabelly','Íris','Julia','Larissa','Letícia','Lucca','Luis','Táis','Túlio','Victor','Vitória','Wirislaine']
+  const PESSOAS_DOM=['Bruna','David','Gabriela','Iolete','Isabelly','Íris','Julia','Larissa','Letícia','Lucca','Luis','Táis','Túlio','Victor','Vitória','Wirislaine']
   const domOpts=domingos.map(ds=>{
     const dn=String(parseInt(ds.split('-')[2])).padStart(2,'0')
     return`<option value="${ds}">${dn}/${ds.split('-')[1]}</option>`
@@ -4252,6 +4381,129 @@ function showPerformanceModal(){
   document.getElementById('perfbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
 }
 
+// ================================================================
+// MODAL: EDITAR HORÁRIO DA PESSOA
+// Salva em localStorage: horarios_editados { "Nome": {horario, almoco} }
+// ================================================================
+function showEditarHorarioModal(nome){
+  document.getElementById('ehormodal')?.remove()
+  const hor = getHorario(nome)||{}
+  const partes   = (hor.horario||'').split(/[–\-]/)
+  const entrada  = (partes[0]||'').trim()
+  const saida    = (partes[1]||'').trim()
+  const alPartes = (hor.almoco||'').split(/[–\-]/)
+  const almIni   = (alPartes[0]||'').trim()
+  const almFim   = (alPartes[1]||'').trim()
+
+  function row(label, id, val){
+    return '<div style="display:flex;flex-direction:column;gap:6px">'
+      +'<div style="font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px">'+label+'</div>'
+      +'<input class="inp" id="'+id+'" type="time" value="'+val+'" style="font-size:20px;font-family:Barlow Condensed,sans-serif;font-weight:700;padding:10px 12px"/>'
+      +'</div>'
+  }
+
+  const m = document.createElement('div'); m.id='ehormodal'
+  m.innerHTML = '<div class="modal-bg" id="ehorbg">'
+    +'<div class="modal-card" style="max-width:340px;width:92vw">'
+      +'<div class="modal-head">'
+        +'<div class="modal-title">✏️ Horário — '+esc(nome)+'</div>'
+        +'<button class="modal-close" id="ehorclose">✕</button>'
+      +'</div>'
+      +'<div class="modal-body" style="padding:20px 20px 8px">'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">'
+          +row('Entrada','ehor-entrada',entrada)
+          +row('Saída','ehor-saida',saida)
+        +'</div>'
+        +'<div style="font-size:12px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Almoço</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">'
+          +row('Início','ehor-almini',almIni)
+          +row('Fim','ehor-almfim',almFim)
+        +'</div>'
+        +'<div style="display:flex;gap:10px">'
+          +'<button class="l-btn" id="ehor-reset" style="background:var(--g100);color:var(--g700);flex:0 0 auto;padding:12px 16px;font-size:14px;border-radius:10px">↩ Padrão</button>'
+          +'<button class="l-btn" id="ehor-salvar" style="flex:1;border-radius:10px">✓ Salvar</button>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+  +'</div>'
+  document.body.appendChild(m)
+
+  document.getElementById('ehorclose').onclick = ()=>m.remove()
+  document.getElementById('ehorbg').onclick = ev=>{ if(ev.target===ev.currentTarget) m.remove() }
+
+  document.getElementById('ehor-salvar').onclick = ()=>{
+    const ent = document.getElementById('ehor-entrada').value.trim()
+    const sai = document.getElementById('ehor-saida').value.trim()
+    const ini = document.getElementById('ehor-almini').value.trim()
+    const fim = document.getElementById('ehor-almfim').value.trim()
+    if(!ent||!sai){ toast('Informe entrada e saída.','error'); return }
+    const editados = carregarHorariosEditados()
+    editados[nome] = { horario: ent+'–'+sai, almoco: (ini&&fim)?ini+'–'+fim:'' }
+    salvarHorariosEditados(editados)
+    m.remove()
+    toast('Horário de '+nome+' salvo! ✓','success')
+    if(G.selectedDate) rebuildPanel()
+  }
+
+  document.getElementById('ehor-reset').onclick = ()=>{
+    if(!confirm('Restaurar horário padrão de '+nome+'?')) return
+    const editados = carregarHorariosEditados()
+    delete editados[nome]
+    salvarHorariosEditados(editados)
+    m.remove()
+    toast('Horário de '+nome+' restaurado.','info')
+    if(G.selectedDate) rebuildPanel()
+  }
+}
+
+
+// ================================================================
+// MODAL: CONTATOS EDITÁVEIS
+// Salva em localStorage: contatos { rh, bruna, camila, loja, grupo }
+// ================================================================
+function showContatosModal(){
+  document.getElementById('ctmodal')?.remove()
+  const c = carregarContatos()
+  function field(id, label, type, val, ph){
+    return '<div style="margin-bottom:12px">'
+      +'<div style="font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px">'+label+'</div>'
+      +'<input class="inp" id="ct-'+id+'" type="'+type+'" value="'+esc(val)+'" placeholder="'+ph+'"/>'
+      +'</div>'
+  }
+  const m = document.createElement('div'); m.id='ctmodal'
+  m.innerHTML='<div class="modal-bg" id="ctbg">'
+    +'<div class="modal-card" style="max-width:420px">'
+      +'<div class="modal-head">'
+        +'<div class="modal-title">⚙️ Contatos</div>'
+        +'<button class="modal-close" id="ctclose">✕</button>'
+      +'</div>'
+      +'<div class="modal-body" style="padding:20px">'
+        +'<div style="font-size:12px;color:var(--g400);margin-bottom:16px;line-height:1.5">Números com código do país (ex: 5511999999999).</div>'
+        +field('rh',    'RH / Viviane',        'tel', c.rh||'',    '5511999999999')
+        +field('bruna', 'Bruna',               'tel', c.bruna||'', '5511999999999')
+        +field('camila','Camila (relatórios)',  'tel', c.camila||'','5511999999999')
+        +field('loja',  'Loja',                'tel', c.loja||'',  '5511999999999')
+        +field('grupo', 'Link do grupo WhatsApp','url',c.grupo||'', 'https://chat.whatsapp.com/...')
+        +'<button class="l-btn" id="ct-salvar" style="margin-top:4px">✓ Salvar contatos</button>'
+      +'</div>'
+    +'</div>'
+  +'</div>'
+  document.body.appendChild(m)
+  document.getElementById('ctclose').onclick = ()=>m.remove()
+  document.getElementById('ctbg').onclick = ev=>{ if(ev.target===ev.currentTarget) m.remove() }
+  document.getElementById('ct-salvar').onclick = ()=>{
+    const novo = {
+      rh:     (document.getElementById('ct-rh').value||'').trim(),
+      bruna:  (document.getElementById('ct-bruna').value||'').trim(),
+      camila: (document.getElementById('ct-camila').value||'').trim(),
+      loja:   (document.getElementById('ct-loja').value||'').trim(),
+      grupo:  (document.getElementById('ct-grupo').value||'').trim(),
+    }
+    salvarContatos(novo)
+    m.remove()
+    toast('Contatos salvos! ✓','success')
+  }
+}
 init()
 </script>
 </body>

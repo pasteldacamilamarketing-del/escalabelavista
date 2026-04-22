@@ -335,6 +335,19 @@ input{font-family:'Nunito',sans-serif;outline:none}
 .ec-detalhe-btn:hover{background:var(--red-bg);border-color:var(--red);color:var(--red)}
 .ec-detalhe-btn:active{transform:scale(.96)}
 
+/* Botões de ação no person-card (Horário, Nome, Remover) — não interferem com bindPanel */
+.pc-action-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#fff;border:1.5px solid var(--g200);border-radius:8px;
+  padding:4px 10px;font-size:13px;font-weight:700;color:var(--g700);
+  cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;
+  transition:all .12s;
+}
+.pc-action-btn:hover{background:var(--g50);border-color:var(--g300)}
+.pc-action-btn:active{transform:scale(.96)}
+.pc-action-btn.pc-action-danger{color:var(--red);background:var(--red-bg);border-color:#FFCDD2}
+.pc-action-btn.pc-action-danger:hover{background:#FFE0E0;border-color:var(--red)}
+
 /* ── POPUP DE DETALHES DA PESSOA ── */
 .detalhe-popup{
   position:fixed;inset:0;z-index:800;
@@ -2838,7 +2851,15 @@ function buildPersonCard(date,shift,nome,entries){
 
   // Botão editar horário — visível para qualquer logado
   const editHorBtn=logado
-    ?`<button class="ec-detalhe-btn" onclick="showEditarHorarioModal('${esc(nome)}')" style="margin-left:4px" title="Editar horário">✏️ Horário</button>`
+    ?`<button class="pc-action-btn" onclick="showEditarHorarioModal('${esc(nome)}')" title="Editar horário">✏️ Horário</button>`
+    :''
+  // Botão renomear pessoa — visível para admin/gerente
+  const renomearBtn=logado
+    ?`<button class="pc-action-btn" onclick="showRenomearModal('${esc(date)}','${esc(shift)}','${esc(nome)}')" title="Renomear pessoa">✏️ Nome</button>`
+    :''
+  // Botão remover pessoa inteira do turno — visível para admin/gerente
+  const removerPessoaBtn=logado
+    ?`<button class="pc-action-btn pc-action-danger" onclick="removerPessoa('${esc(date)}','${esc(shift)}','${esc(nome)}')" title="Remover ${esc(nome)} do turno">🗑️ Remover</button>`
     :''
   // Badge indicando horário foi editado
   const editadoBadge=hor&&hor._editado
@@ -2854,7 +2875,9 @@ function buildPersonCard(date,shift,nome,entries){
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;margin-left:8px">
         ${detalheBtn}
-        ${logado?`<button class="ec-detalhe-btn" onclick="showEditarHorarioModal('${esc(nome)}')" title="Editar horário">✏️ Horário</button>`:''}
+        ${logado?`<button class="pc-action-btn" onclick="showEditarHorarioModal('${esc(nome)}')" title="Editar horário">✏️ Horário</button>`:''}
+        ${renomearBtn}
+        ${removerPessoaBtn}
       </div>
     </div>
     <div class="person-card-roles">${roleChipsHtml}</div>
@@ -3094,8 +3117,8 @@ function bindPanel(){
   if(pb){
     pb.onscroll=()=>pb.classList.toggle('scrolled',pb.scrollTop>10)
   }
-  // Bind botões "Ver funções" → popup operacional completo
-  document.querySelectorAll('.ec-detalhe-btn').forEach(b=>{
+  // Bind botões "Ver funções" → popup operacional completo (só os que têm data-det-nome)
+  document.querySelectorAll('.ec-detalhe-btn[data-det-nome]').forEach(b=>{
     b.onclick=ev=>{ev.stopPropagation();showDetalhes(b.dataset.detNome,b.dataset.detRole)}
   })
   // Carregar histórico remoto do dia selecionado (sem bloquear UI)
@@ -3109,9 +3132,7 @@ function bindPanel(){
   document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
     requireAuth(()=>{
       const[date,shift]=b.dataset.add.split('|')
-      const day=dayMap[date];if(!day)return
-      day[shift].push({id:'n'+Date.now(),role:'',person:'',obs:'',status:'pending',confirmedAt:null,faltaTipo:null})
-      save();rebuildPanel();rebuildCell(date)
+      showAdicionarPessoaModal(date,shift)
     })
   })
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=ev=>{
@@ -4504,6 +4525,249 @@ function showContatosModal(){
     toast('Contatos salvos! ✓','success')
   }
 }
+
+// ================================================================
+// ADICIONAR PESSOA: modal completo com nome, funções e horário
+// ================================================================
+function showAdicionarPessoaModal(date, shift){
+  document.getElementById('addpmodal')?.remove()
+
+  // Lista de funções sugeridas por turno
+  const funcoesSug = shift==='manha'
+    ? ['Fritando','Gaveteiro','Escorredeira','Embalando','Mesa','Caixa salão','Delivery','Salada','Caldo','Limpeza','Salão']
+    : ['Fritando','Gaveteiro','Escorredeira','Embalando','Mesa','Caixa salão','Delivery','Marcando','Salão','Caixa Delivery']
+
+  const dia = dayMap[date]
+  const diaTxt = dia ? dia.wd+' '+parseInt(date.split('-')[2])+'/'+date.split('-')[1] : date
+
+  const m=document.createElement('div');m.id='addpmodal'
+  m.innerHTML=`<div class="modal-bg" id="addpbg">
+    <div class="modal-card" style="max-width:400px;width:95vw">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">➕ Adicionar pessoa</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:2px">${esc(diaTxt)} · ${shift==='manha'?'☀️ Manhã':'🌙 Noite'}</div>
+        </div>
+        <button class="modal-close" id="addpclose">✕</button>
+      </div>
+      <div class="modal-body" style="padding:18px 18px 6px">
+
+        <!-- NOME -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">Nome *</div>
+          <input class="inp" id="addp-nome" type="text" placeholder="Ex: Wirislaine" autocomplete="off" style="font-size:18px"/>
+        </div>
+
+        <!-- FUNÇÕES -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Funções *</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="addp-chips">
+            ${funcoesSug.map(f=>`<button type="button" class="addp-chip" data-func="${esc(f)}" style="border:1.5px solid var(--g200);border-radius:20px;background:#fff;padding:5px 12px;font-size:13px;font-weight:700;color:var(--g700);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .12s">${esc(f)}</button>`).join('')}
+          </div>
+          <div style="display:flex;gap:7px;align-items:center">
+            <input class="inp" id="addp-func-custom" type="text" placeholder="Outra função..." style="flex:1;font-size:15px;padding:8px 11px"/>
+            <button type="button" id="addp-func-add" style="background:var(--g900);color:#fff;border:none;border-radius:9px;padding:9px 13px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap">+ Add</button>
+          </div>
+          <div id="addp-selecionadas" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;min-height:12px"></div>
+        </div>
+
+        <!-- HORÁRIO -->
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Horário</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">
+            <div>
+              <div style="font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Entrada</div>
+              <input class="inp" id="addp-entrada" type="time" style="font-size:17px;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:8px 10px"/>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Saída</div>
+              <input class="inp" id="addp-saida" type="time" style="font-size:17px;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:8px 10px"/>
+            </div>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Almoço / Intervalo</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <div style="font-size:10px;color:var(--g300);font-weight:700;margin-bottom:4px">Início</div>
+              <input class="inp" id="addp-alm-ini" type="time" style="font-size:17px;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:8px 10px"/>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--g300);font-weight:700;margin-bottom:4px">Fim</div>
+              <input class="inp" id="addp-alm-fim" type="time" style="font-size:17px;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:8px 10px"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- OBS -->
+        <div style="margin-bottom:18px">
+          <div style="font-size:11px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">Observação</div>
+          <input class="inp" id="addp-obs" type="text" placeholder="Opcional..." style="font-size:15px"/>
+        </div>
+
+        <div style="display:flex;gap:10px;padding-bottom:4px">
+          <button class="l-btn" id="addp-cancel" style="background:var(--g100);color:var(--g700);flex:0 0 auto;padding:12px 16px;font-size:14px;border-radius:10px">Cancelar</button>
+          <button class="l-btn" id="addp-salvar" style="flex:1;border-radius:10px">✓ Adicionar à escala</button>
+        </div>
+      </div>
+    </div>
+  </div>`
+
+  document.body.appendChild(m)
+
+  // Pré-preencher horário padrão conforme turno
+  const horasPadrao = shift==='manha'
+    ? {entrada:'09:00',saida:'18:00',almIni:'12:00',almFim:'13:00'}
+    : {entrada:'13:00',saida:'22:00',almIni:'16:00',almFim:'17:00'}
+  document.getElementById('addp-entrada').value = horasPadrao.entrada
+  document.getElementById('addp-saida').value   = horasPadrao.saida
+  document.getElementById('addp-alm-ini').value = horasPadrao.almIni
+  document.getElementById('addp-alm-fim').value = horasPadrao.almFim
+
+  // Funções selecionadas (Set para evitar duplicatas)
+  const selecionadas = new Set()
+
+  function renderSelecionadas(){
+    const wrap = document.getElementById('addp-selecionadas')
+    if(!selecionadas.size){wrap.innerHTML='<span style="font-size:12px;color:var(--g300);font-weight:600">Nenhuma função selecionada</span>';return}
+    wrap.innerHTML=[...selecionadas].map(f=>`
+      <span style="display:inline-flex;align-items:center;gap:4px;background:var(--g900);color:#fff;border-radius:20px;padding:4px 10px;font-size:13px;font-weight:700">
+        ${esc(f)}
+        <button type="button" onclick="this.closest('[data-remf]').dispatchEvent(new Event('remf'))" data-remf="${esc(f)}" style="background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;cursor:pointer;padding:0;font-family:'Nunito',sans-serif">✕</button>
+      </span>`).join('')
+    wrap.querySelectorAll('[data-remf]').forEach(el=>{
+      el.addEventListener('remf',()=>{selecionadas.delete(el.dataset.remf);renderSelecionadas()})
+    })
+  }
+  renderSelecionadas()
+
+  // Chips de sugestão
+  document.querySelectorAll('.addp-chip').forEach(chip=>{
+    chip.onclick=()=>{
+      const f=chip.dataset.func
+      if(selecionadas.has(f)){selecionadas.delete(f);chip.style.background='#fff';chip.style.borderColor='var(--g200)';chip.style.color='var(--g700)'}
+      else{selecionadas.add(f);chip.style.background='var(--g900)';chip.style.borderColor='var(--g900)';chip.style.color='#fff'}
+      renderSelecionadas()
+    }
+  })
+
+  // Adicionar função customizada
+  function addCustomFunc(){
+    const inp=document.getElementById('addp-func-custom')
+    const v=inp.value.trim()
+    if(!v)return
+    selecionadas.add(v);inp.value='';renderSelecionadas()
+  }
+  document.getElementById('addp-func-add').onclick=addCustomFunc
+  document.getElementById('addp-func-custom').onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();addCustomFunc()}}
+
+  // Fechar
+  document.getElementById('addpclose').onclick=()=>m.remove()
+  document.getElementById('addp-cancel').onclick=()=>m.remove()
+  document.getElementById('addpbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
+  document.getElementById('addp-nome').focus()
+
+  // Salvar
+  document.getElementById('addp-salvar').onclick=()=>{
+    const nome=(document.getElementById('addp-nome').value||'').trim()
+    if(!nome){toast('Informe o nome da pessoa.','error');document.getElementById('addp-nome').focus();return}
+    if(!selecionadas.size){toast('Selecione ao menos uma função.','error');return}
+
+    const entrada=document.getElementById('addp-entrada').value
+    const saida  =document.getElementById('addp-saida').value
+    const almIni =document.getElementById('addp-alm-ini').value
+    const almFim =document.getElementById('addp-alm-fim').value
+    const obs    =(document.getElementById('addp-obs').value||'').trim()
+
+    const day=dayMap[date];if(!day)return
+
+    // Salvar horário no localStorage (mesma estrutura do showEditarHorarioModal)
+    if(entrada&&saida){
+      const editados=carregarHorariosEditados()
+      editados[nome]={
+        horario:entrada+'–'+saida,
+        almoco:(almIni&&almFim)?almIni+'–'+almFim:''
+      }
+      salvarHorariosEditados(editados)
+    }
+
+    // Criar uma entrada por função selecionada
+    ;[...selecionadas].forEach(func=>{
+      day[shift].push({
+        id:'n'+Date.now()+Math.random().toString(36).slice(2,6),
+        role:func,
+        person:nome,
+        obs: obs,
+        status:'pending',
+        confirmedAt:null,
+        faltaTipo:null
+      })
+    })
+
+    registrarHistorico(nome,'—',nome+' (adicionado)','nova pessoa na escala')
+    save()
+    m.remove()
+    toast(nome+' adicionado(a) com '+selecionadas.size+' função(ões) ✓','success')
+    rebuildPanel();rebuildCell(date)
+  }
+}
+
+// ================================================================
+// RENOMEAR PESSOA: atualiza todas as entradas do turno de uma vez
+// ================================================================
+function showRenomearModal(date, shift, nomeAtual){
+  document.getElementById('renmodal')?.remove()
+  const m=document.createElement('div');m.id='renmodal'
+  m.innerHTML=`<div class="modal-bg" id="renbg">
+    <div class="modal-card" style="max-width:340px;width:92vw">
+      <div class="modal-head">
+        <div class="modal-title">✏️ Renomear pessoa</div>
+        <button class="modal-close" id="renclose">✕</button>
+      </div>
+      <div class="modal-body" style="padding:20px">
+        <div style="font-size:13px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Nome atual</div>
+        <div style="font-size:20px;font-weight:800;color:var(--g900);margin-bottom:16px">${esc(nomeAtual)}</div>
+        <div style="font-size:13px;font-weight:800;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">Novo nome</div>
+        <input class="inp" id="ren-input" type="text" value="${esc(nomeAtual)}" placeholder="Digite o novo nome..." style="margin-bottom:16px"/>
+        <div style="display:flex;gap:10px">
+          <button class="l-btn" id="ren-cancel" style="background:var(--g100);color:var(--g700);flex:0 0 auto;padding:12px 16px;font-size:14px;border-radius:10px">Cancelar</button>
+          <button class="l-btn" id="ren-salvar" style="flex:1;border-radius:10px">✓ Renomear</button>
+        </div>
+      </div>
+    </div>
+  </div>`
+  document.body.appendChild(m)
+  const inp=document.getElementById('ren-input')
+  inp.focus();inp.select()
+  document.getElementById('renclose').onclick=()=>m.remove()
+  document.getElementById('ren-cancel').onclick=()=>m.remove()
+  document.getElementById('renbg').onclick=ev=>{if(ev.target===ev.currentTarget)m.remove()}
+  inp.onkeydown=ev=>{if(ev.key==='Enter')document.getElementById('ren-salvar').click()}
+  document.getElementById('ren-salvar').onclick=()=>{
+    const novoNome=inp.value.trim()
+    if(!novoNome){toast('Informe o novo nome.','error');return}
+    if(novoNome===nomeAtual){m.remove();return}
+    const day=dayMap[date];if(!day)return
+    day[shift].forEach(e=>{if(e.person===nomeAtual)e.person=novoNome})
+    registrarHistorico(nomeAtual,nomeAtual,novoNome,'renomear pessoa')
+    save()
+    m.remove()
+    toast(nomeAtual+' renomeado(a) para '+novoNome+' ✓','success')
+    rebuildPanel();rebuildCell(date)
+  }
+}
+
+// ================================================================
+// REMOVER PESSOA: apaga todas as entradas do turno de uma vez
+// ================================================================
+function removerPessoa(date, shift, nome){
+  if(!confirm('Remover '+nome+' e todas as funções deste turno?'))return
+  const day=dayMap[date];if(!day)return
+  day[shift]=day[shift].filter(e=>e.person!==nome)
+  registrarHistorico(nome,nome,'(removido)','remoção de pessoa')
+  save()
+  toast(nome+' removido(a) do turno ✓','info')
+  rebuildPanel();rebuildCell(date)
+}
+
 init()
 </script>
 </body>
